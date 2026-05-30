@@ -515,6 +515,18 @@
       
       <!-- Right Header Actions (Filters + User Info Card) -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+        <!-- Language Switcher -->
+        <div class="relative bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-xl shadow-sm w-full sm:w-auto shrink-0">
+          <select id="language-select" onchange="translatePage(this.value)" class="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+            <option value="cs" class="dark:bg-slate-900">🇨🇿 CZ</option>
+            <option value="en" class="dark:bg-slate-900">🇬🇧 EN</option>
+            <option value="de" class="dark:bg-slate-900">🇩🇪 DE</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400">
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+          </div>
+        </div>
+
         <!-- Software Info Button -->
         <button onclick="openModal('modal-software-info')" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 dark:text-slate-400 active:scale-95 transition-all flex items-center justify-center shadow-sm shrink-0" title="Informace o softwaru">
           <i data-lucide="info" class="w-4.5 h-4.5"></i>
@@ -2312,6 +2324,194 @@
     ];
 
     let currentTab = 'dashboard';
+    let currentLanguage = 'cs';
+    const textTranslations = {
+      // Sidebar & Navigation
+      "Přehled": { en: "Dashboard", de: "Übersicht" },
+      "Transakce": { en: "Transactions", de: "Transaktionen" },
+      "Rozpočty": { en: "Budgets", de: "Budgets" },
+      "Spořicí cíle": { en: "Savings Goals", de: "Sparziele" },
+      "Cíle": { en: "Goals", de: "Ziele" },
+      "Pravidelné platby": { en: "Recurring Payments", de: "Daueraufträge" },
+      "Úvěry & Hypotéky": { en: "Loans & Mortgages", de: "Kredite & Hypotheken" },
+      "Úvěry": { en: "Loans", de: "Kredite" },
+      "Kategorie": { en: "Categories", de: "Kategorien" },
+      "Záloha & Správa": { en: "Backup & Settings", de: "Backup & Verwaltung" },
+      "Záloha & přenositelnost": { en: "Backup & Portability", de: "Sicherung & Übertragbarkeit" },
+      "Synchronizace": { en: "Sync", de: "Synchronisation" },
+      "Načíst z iCloud": { en: "Load from iCloud", de: "Aus iCloud laden" },
+      "Uložit do iCloud": { en: "Save to iCloud", de: "In iCloud speichern" },
+      "Profil": { en: "Profile", de: "Profil" },
+      "Aktivní": { en: "Active", de: "Aktiv" },
+      "Více": { en: "More", de: "Mehr" },
+
+      // Header
+      "Přehled financí": { en: "Financial Overview", de: "Finanzübersicht" },
+      "Statistiky a analýza vašich příjmů a výdajů": { en: "Statistics and analysis of your income and expenses", de: "Statistiken und Analysen Ihrer Einnahmen und Ausgaben" },
+      "Období:": { en: "Period:", de: "Zeitraum:" },
+      "Tento měsíc": { en: "This month", de: "Diesen Monat" },
+      "Minulý měsíc": { en: "Last month", de: "Letzten Monat" },
+      "Tento rok": { en: "This year", de: "Dieses Jahr" },
+      "Všechna data": { en: "All data", de: "Alle Daten" },
+      "Vlastní rozsah": { en: "Custom range", de: "Vlastní rozsah" },
+      "až": { en: "to", de: "bis" },
+      
+      // Dashboard Cards
+      "Aktuální čistý zůstatek": { en: "Current Net Balance", de: "Aktueller Netto-Saldo" },
+      "Kompletní bilance účtu": { en: "Complete account balance", de: "Vollständiger Kontosaldo" },
+      "Příjmy": { en: "Income", de: "Einnahmen" },
+      "Příjmy v období": { en: "Incomes in period", de: "Einnahmen im Zeitraum" },
+      "Výdaje": { en: "Expenses", de: "Ausgaben" },
+      "Výdaje v období": { en: "Expenses in period", de: "Ausgaben im Zeitraum" },
+      "Hlídač rozpočtů": { en: "Budget Watcher", de: "Budgetwächter" },
+      "Čerpání limitů pro tento měsíc": { en: "Spending limits for this month", de: "Ausgabenlimits für diesen Monat" },
+      "Průběh spoření na vaše sny": { en: "Savings progress for your dreams", de: "Sparfortschritt für Ihre Träume" },
+      "Struktura výdajů": { en: "Expense Structure", de: "Ausgabenstruktur" },
+      "Podíl jednotlivých kategorií na výdajích": { en: "Share of individual categories in expenses", de: "Anteil einzelner Kategorien an den Ausgaben" },
+      "Celkem výdaje": { en: "Total Expenses", de: "Gesamtausgaben" },
+      "Vývoj financí v čase": { en: "Financial Trend", de: "Finanztrend" },
+      "Porovnání celkových příjmů a výdajů po měsících": { en: "Comparison of total income and expenses by month", de: "Vergleich der Einnahmen und Ausgaben nach Monaten" },
+      "Poslední aktivity": { en: "Recent Activities", de: "Kürzliche Aktivitäten" },
+      "Přehled posledních 5 zapsaných transakcí": { en: "Overview of the last 5 transactions", de: "Übersicht der letzten 5 Transaktionen" },
+      "Zobrazit všechny": { en: "Show all", de: "Alle anzeigen" },
+      "Zatím nebyly zapsány žádné transakce.": { en: "No transactions recorded yet.", de: "Noch keine Transaktionen aufgezeichnet." },
+      
+      // Tables & Labels
+      "Datum": { en: "Date", de: "Datum" },
+      "Popis": { en: "Description", de: "Beschreibung" },
+      "Kategorie": { en: "Category", de: "Kategorie" },
+      "Částka": { en: "Amount", de: "Betrag" },
+
+      // Transactions View
+      "Zapsat transakci": { en: "Add Transaction", de: "Zapisovat transakci" },
+      "Historie plateb": { en: "Payment History", de: "Historie plateb" },
+      "Nová transakce": { en: "New Transaction", de: "Neue Transaktion" },
+      "Typ transakce": { en: "Transaction Type", de: "Transaktionstyp" },
+      "Výdaj": { en: "Expense", de: "Ausgabe" },
+      "Příjem": { en: "Income", de: "Einnahme" },
+      "Částka (CZK)": { en: "Amount (CZK)", de: "Betrag (CZK)" },
+      "Popis / Poznámka": { en: "Description / Note", de: "Beschreibung / Notiz" },
+      "Opakující se platba": { en: "Recurring payment", de: "Dauerauftrag" },
+      "Jak často (interval)": { en: "Frequency (interval)", de: "Frequenz (Intervall)" },
+      "Každý týden": { en: "Every week", de: "Jede Woche" },
+      "Každý měsíc": { en: "Every month", de: "Jeden Monat" },
+      "Každý rok": { en: "Every year", de: "Jedes Jahr" },
+      "Kdy končí (nepovinné)": { en: "When it ends (optional)", de: "Enddatum (optional)" },
+      "Uložit transakci": { en: "Save Transaction", de: "Transaktion speichern" },
+      "Hledat podle popisu...": { en: "Search by description...", de: "Nach Beschreibung suchen..." },
+      "Všechny kategorie": { en: "All categories", de: "Alle Kategorien" },
+      "Nejnovější": { en: "Newest", de: "Neueste" },
+      "Nejstarší": { en: "Oldest", de: "Älteste" },
+      "Nejvyšší částka": { en: "Highest amount", de: "Höchster Betrag" },
+      "Nejnižší částka": { en: "Lowest amount", de: "Niedrigster Betrag" },
+      "Vybráno: 0 transakcí": { en: "Selected: 0 transactions", de: "Ausgewählt: 0 Transaktionen" },
+      "Smazat označené": { en: "Delete selected", de: "Ausgewählte löschen" },
+      "Zrušit výběr": { en: "Cancel selection", de: "Auswahl aufheben" },
+
+      // Software Info
+      "Informace o softwaru": { en: "Software Information", de: "Software-Informationen" },
+      "Aplikace": { en: "Application", de: "Anwendung" },
+      "Verze": { en: "Version", de: "Version" },
+      "E-mail": { en: "E-mail", de: "E-Mail" },
+      "Aktuální datum": { en: "Current date", de: "Aktuelles Datum" },
+      "Zavřít": { en: "Close", de: "Schließen" },
+
+      // Database setup
+      "Vítejte ve Fingo": { en: "Welcome to Fingo", de: "Willkommen bei Fingo" },
+      "Vyberte nebo vytvořte soubor databáze osobních financí": { en: "Select or create a personal finance database file", de: "Wählen oder erstellen Sie eine persönliche Finanzdatenbank" },
+      "Otevřít soubor databáze (.json)": { en: "Open database file (.json)", de: "Datenbankdatei öffnen (.json)" },
+      "Vytvořit novou databázi": { en: "Create new database", de: "Neue Datenbank erstellen" },
+      
+      // Default categories
+      "Bydlení": { en: "Housing", de: "Wohnen" },
+      "Potraviny": { en: "Groceries", de: "Lebensmittel" },
+      "Doprava": { en: "Transport", de: "Transport" },
+      "Zábava": { en: "Entertainment", de: "Unterhaltung" },
+      "Výplata": { en: "Salary", de: "Gehalt" },
+      "Úvěrové produkty": { en: "Credit & Loans", de: "Kredite & Darlehen" },
+      "Ostatní": { en: "Others", de: "Sonstiges" }
+    };
+
+    function translatePage(lang) {
+      currentLanguage = lang;
+      safeStorage.setItem('fingo_language', lang);
+      
+      const langSelect = document.getElementById('language-select');
+      if (langSelect) langSelect.value = lang;
+
+      function getTranslation(str) {
+        const trimmed = str.trim();
+        if (textTranslations[trimmed]) {
+          return textTranslations[trimmed][lang] || trimmed;
+        }
+        return trimmed;
+      }
+
+      // Translate text nodes
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      while (node = walker.nextNode()) {
+        const parent = node.parentElement;
+        if (parent && (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.tagName === 'OPTION')) {
+          continue;
+        }
+        
+        const text = node.nodeValue;
+        const trimmed = text.trim();
+        if (!trimmed) continue;
+        
+        if (parent) {
+          if (!parent.dataset.origText) {
+            parent.dataset.origText = trimmed;
+          }
+          
+          if (lang === 'cs') {
+            node.nodeValue = parent.dataset.origText;
+          } else {
+            const trans = getTranslation(parent.dataset.origText);
+            node.nodeValue = text.replace(parent.dataset.origText, trans);
+          }
+        }
+      }
+
+      // Translate select options
+      document.querySelectorAll('select option').forEach(opt => {
+        if (!opt.dataset.origText) {
+          opt.dataset.origText = opt.textContent.trim();
+        }
+        if (lang === 'cs') {
+          opt.textContent = opt.dataset.origText;
+        } else {
+          opt.textContent = getTranslation(opt.dataset.origText);
+        }
+      });
+
+      // Translate placeholders
+      document.querySelectorAll('[placeholder]').forEach(el => {
+        if (!el.dataset.origPlaceholder) {
+          el.dataset.origPlaceholder = el.getAttribute('placeholder').trim();
+        }
+        if (lang === 'cs') {
+          el.setAttribute('placeholder', el.dataset.origPlaceholder);
+        } else {
+          el.setAttribute('placeholder', getTranslation(el.dataset.origPlaceholder));
+        }
+      });
+      
+      // Translate titles
+      document.querySelectorAll('[title]').forEach(el => {
+        if (!el.dataset.origTitle) {
+          el.dataset.origTitle = el.getAttribute('title').trim();
+        }
+        if (lang === 'cs') {
+          el.setAttribute('title', el.dataset.origTitle);
+        } else {
+          el.setAttribute('title', getTranslation(el.dataset.origTitle));
+        }
+      });
+      
+      updateHeaderDateTime();
+    }
     
     let previousSelectCategoryValues = {};
     let quickCategoryTargetSelectId = null;
@@ -2394,7 +2594,9 @@
 
     // Helper to format currency in CZK
     function formatCurrency(amount) {
-      return Number(amount || 0).toLocaleString('cs-CZ', { style: 'currency', currency: 'CZK', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const locale = locales[currentLanguage] || 'cs-CZ';
+      return Number(amount || 0).toLocaleString(locale, { style: 'currency', currency: 'CZK', minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     // Safe date parser to handle browser differences and timezone offsets
@@ -2913,7 +3115,8 @@
       
       safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
       
-      document.getElementById('sidebar-db-display').innerText = `Soubor: ${name}`;
+      const filePrefix = currentLanguage === 'cs' ? 'Soubor: ' : (currentLanguage === 'en' ? 'File: ' : 'Datei: ');
+      document.getElementById('sidebar-db-display').innerText = `${filePrefix}${name}`;
       document.getElementById('sidebar-profile-name').innerText = name;
       document.getElementById('header-db-badge').innerText = name;
       document.getElementById('settings-db-name').innerText = name;
@@ -3754,9 +3957,13 @@
       document.getElementById('stat-total-expense').innerText = formatCurrency(expense);
       
       const periodSelect = document.getElementById('global-period-select');
-      const selectedPeriodText = periodSelect.options[periodSelect.selectedIndex].text.toLowerCase();
-      document.getElementById('stat-income-desc').innerText = `Příjmy – ${selectedPeriodText}`;
-      document.getElementById('stat-expense-desc').innerText = `Výdaje – ${selectedPeriodText}`;
+      const selectedPeriodText = periodSelect.options[periodSelect.selectedIndex].text;
+      
+      const incomeDescPrefix = currentLanguage === 'cs' ? 'Příjmy – ' : (currentLanguage === 'en' ? 'Income – ' : 'Einnahmen – ');
+      const expenseDescPrefix = currentLanguage === 'cs' ? 'Výdaje – ' : (currentLanguage === 'en' ? 'Expenses – ' : 'Ausgaben – ');
+      
+      document.getElementById('stat-income-desc').innerText = `${incomeDescPrefix}${selectedPeriodText}`;
+      document.getElementById('stat-expense-desc').innerText = `${expenseDescPrefix}${selectedPeriodText}`;
       
       renderDashboardRecent();
       buildCharts(filtered);
@@ -3796,6 +4003,10 @@
       
       updateDashboardWidgets();
       updateSyncWidget();
+      
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     function renderDashboardRecent() {
@@ -6259,7 +6470,9 @@
     function updateHeaderDateTime() {
       const now = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const formatted = now.toLocaleDateString('cs-CZ', options);
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const locale = locales[currentLanguage] || 'cs-CZ';
+      const formatted = now.toLocaleDateString(locale, options);
       const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
       
       const dateEl = document.getElementById('header-current-date');
@@ -6279,6 +6492,11 @@
       buildIconPicker();
       buildQuickIconPicker();
       updateHeaderDateTime();
+      
+      // Load saved language
+      const savedLang = safeStorage.getItem('fingo_language') || 'cs';
+      translatePage(savedLang);
+      
       checkDatabaseStartup();
       
       // Auto-refresh when tab is focused (desktop mode with connected file handle)
