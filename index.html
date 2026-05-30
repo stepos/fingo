@@ -1714,6 +1714,18 @@
                 Aktivovat / Vytvořit nový Gist
               </button>
               
+              <!-- Manual Sync Group -->
+              <div id="settings-github-manual-sync-group" class="hidden grid grid-cols-2 gap-3">
+                <button onclick="handleGitHubSyncManualPull()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-100">
+                  <i data-lucide="cloud-download" class="w-4.5 h-4.5"></i>
+                  Stáhnout z cloudu
+                </button>
+                <button onclick="handleGitHubSyncManualPush()" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                  <i data-lucide="cloud-upload" class="w-4.5 h-4.5"></i>
+                  Odeslat do cloudu
+                </button>
+              </div>
+              
               <button id="settings-github-disconnect-btn" class="hidden w-full py-3 bg-white border border-slate-200 hover:bg-slate-50 text-rose-600 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm" onclick="handleGitHubSyncDisconnect()">
                 <i data-lucide="cloud-off" class="w-4 h-4 text-rose-500"></i>
                 Odpojit cloud synchronizaci
@@ -3618,6 +3630,23 @@
         }
       }
 
+      // Toggle settings action buttons visibility
+      const connectBtn = document.getElementById('settings-github-connect-btn');
+      const manualGroup = document.getElementById('settings-github-manual-sync-group');
+      const disconnectBtn = document.getElementById('settings-github-disconnect-btn');
+
+      if (status === 'synced' || status === 'syncing' || status === 'error') {
+        if (githubToken && githubGistId && dbConfig.storageType === 'github') {
+          if (connectBtn) connectBtn.classList.add('hidden');
+          if (manualGroup) manualGroup.classList.remove('hidden');
+          if (disconnectBtn) disconnectBtn.classList.remove('hidden');
+        }
+      } else {
+        if (connectBtn) connectBtn.classList.remove('hidden');
+        if (manualGroup) manualGroup.classList.add('hidden');
+        if (disconnectBtn) disconnectBtn.classList.add('hidden');
+      }
+
       lucide.createIcons();
     }
 
@@ -3832,6 +3861,26 @@
         return;
       }
       showToast("Synchronizuji s GitHub Cloud...");
+      saveToGitHubGist();
+    }
+
+    function handleGitHubSyncManualPull() {
+      triggerHapticFeedback();
+      if (!githubToken || !githubGistId) {
+        showToast("GitHub cloud není připojen.", "error");
+        return;
+      }
+      showToast("Stahuji nejnovější data z cloudu...");
+      loadFromGitHubGist(githubToken, githubGistId);
+    }
+
+    function handleGitHubSyncManualPush() {
+      triggerHapticFeedback();
+      if (!githubToken || !githubGistId) {
+        showToast("GitHub cloud není připojen.", "error");
+        return;
+      }
+      showToast("Odesílám aktuální data do cloudu...");
       saveToGitHubGist();
     }
 
