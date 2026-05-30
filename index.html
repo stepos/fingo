@@ -855,7 +855,7 @@
                 <div class="relative">
                   <input type="number" id="trans-amount" step="any" min="0.01" required placeholder="0,00" class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-lg">
                   <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-sm font-bold text-slate-400">
-                    Kč
+                    <span class="currency-suffix">Kč</span>
                   </div>
                 </div>
               </div>
@@ -1048,7 +1048,7 @@
                 <div class="relative">
                   <input type="number" id="budget-amount" min="100" required placeholder="0" class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-lg">
                   <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-sm font-bold text-slate-400">
-                    Kč
+                    <span class="currency-suffix">Kč</span>
                   </div>
                 </div>
               </div>
@@ -1235,7 +1235,7 @@
                 <div class="relative">
                   <input type="number" id="rec-amount" step="any" min="0.01" required placeholder="0,00" class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-lg">
                   <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-sm font-bold text-slate-400">
-                    Kč
+                    <span class="currency-suffix">Kč</span>
                   </div>
                 </div>
               </div>
@@ -1895,7 +1895,7 @@
           <div class="relative">
             <input type="number" id="edit-trans-amount" step="any" min="0.01" required class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-lg">
             <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-sm font-bold text-slate-400">
-              Kč
+              <span class="currency-suffix">Kč</span>
             </div>
           </div>
         </div>
@@ -2222,11 +2222,11 @@
         </div>
         <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
           <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">E-mail</span>
-          <span class="font-bold text-slate-800 dark:text-slate-200">kutlaks@gmail.com</span>
+          <a href="mailto:kutlaks@gmail.com?subject=FinGo" class="font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline transition-colors">kutlaks@gmail.com</a>
         </div>
         <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
-          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Aktuální datum</span>
-          <span id="modal-current-date" class="font-bold text-slate-800 dark:text-slate-200"></span>
+          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Datum vydání</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">30. 05. 2026</span>
         </div>
       </div>
 
@@ -2389,7 +2389,7 @@
       "Typ transakce": { en: "Transaction Type", de: "Transaktionstyp" },
       "Výdaj": { en: "Expense", de: "Ausgabe" },
       "Příjem": { en: "Income", de: "Einnahme" },
-      "Částka (CZK)": { en: "Amount (CZK)", de: "Betrag (CZK)" },
+      "Částka (CZK)": { en: "Amount (USD)", de: "Betrag (EUR)" },
       "Popis / Poznámka": { en: "Description / Note", de: "Beschreibung / Notiz" },
       "Opakující se platba": { en: "Recurring payment", de: "Dauerauftrag" },
       "Jak často (interval)": { en: "Frequency (interval)", de: "Frequenz (Intervall)" },
@@ -2413,7 +2413,7 @@
       "Aplikace": { en: "Application", de: "Anwendung" },
       "Verze": { en: "Version", de: "Version" },
       "E-mail": { en: "E-mail", de: "E-Mail" },
-      "Aktuální datum": { en: "Current date", de: "Aktuelles Datum" },
+      "Datum vydání": { en: "Release date", de: "Veröffentlichungsdatum" },
       "Zavřít": { en: "Close", de: "Schließen" },
 
       // Database setup
@@ -2429,8 +2429,94 @@
       "Zábava": { en: "Entertainment", de: "Unterhaltung" },
       "Výplata": { en: "Salary", de: "Gehalt" },
       "Úvěrové produkty": { en: "Credit & Loans", de: "Kredite & Darlehen" },
-      "Ostatní": { en: "Others", de: "Sonstiges" }
+      "Ostatní": { en: "Others", de: "Sonstiges" },
+      
+      // Currency translations for labels
+      "Měsíční limit (CZK)": { en: "Monthly limit (USD)", de: "Monatliches Limit (EUR)" },
+      "Cílová částka (Kč)": { en: "Target Amount (USD)", de: "Zielbetrag (EUR)" },
+      "Počáteční vklad (Kč)": { en: "Initial Deposit (USD)", de: "Anfangseinzahlung (EUR)" },
+      "Celková výše úvěru (Kč)": { en: "Total Loan Amount (USD)", de: "Gesamtkreditbetrag (EUR)" },
+      "Celková výže úvěru (Kč)": { en: "Total Loan Amount (USD)", de: "Gesamtkreditbetrag (EUR)" },
+      "Aktuální zbývající jistina (Kč)": { en: "Current Remaining Principal (USD)", de: "Aktuelle Restschuld (EUR)" },
+      "Zaúčtovaná splátka (Kč)": { en: "Recorded Payment (USD)", de: "Verbuchte Rate (EUR)" },
+      "Snížení zbývající jistiny dluhu (Kč)": { en: "Remaining Principal Reduction (USD)", de: "Minderung der Restschuld (EUR)" },
+      "Částka (Kč)": { en: "Amount (USD)", de: "Betrag (EUR)" },
+      "Kč": { en: "$", de: "€" },
+
+      // Dynamic rendering translations
+      "Systém": { en: "System", de: "System" },
+      "transakcí": { en: "transactions", de: "Transaktionen" },
+      "Bez popisu": { en: "No description", de: "Keine Beschreibung" },
+      "Čerpáno:": { en: "Spent:", de: "Verbraucht:" },
+      "z ": { en: "of ", de: "von " },
+      "Zbývá:": { en: "Remaining:", de: "Verbleibend:" },
+      "Smazat rozpočet": { en: "Delete budget", de: "Budget löschen" },
+      "Žádné rozpočty nejsou nastaveny": { en: "No budgets are set", de: "Keine Budgets eingestellt" },
+      "Nastavte svůj první limit pomocí formuláře": { en: "Set your first limit using the form", de: "Richten Sie Ihr erstes Limit über das Formular ein" },
+      "Cíl byl smazán.": { en: "Goal deleted.", de: "Ziel gelöscht." },
+      "Upravit cíl": { en: "Edit Goal", de: "Ziel bearbeiten" },
+      "Uložit změny": { en: "Save Changes", de: "Änderungen speichern" },
+      "Nový spořicí cíl": { en: "New Savings Goal", de: "Neues Sparziel" },
+      "Vytvořit cíl": { en: "Create Goal", de: "Ziel erstellen" },
+      "Aktuálně naspořeno:": { en: "Currently saved:", de: "Derzeit gespart:" },
+      "z": { en: "of", de: "von" },
+      "Zobrazit dalších": { en: "Show next", de: "Weitere anzeigen" },
+      "cílů": { en: "goals", de: "Ziele" },
+      "rozpočtů": { en: "budgets", de: "Budgets" },
+      "Měsíčně": { en: "Monthly", de: "Monatlich" },
+      "Týdně": { en: "Weekly", de: "Wöchentlich" },
+      "Ročně": { en: "Yearly", de: "Jährlich" },
+      "Trvale": { en: "Permanently", de: "Dauerhaft" },
+      "Příští:": { en: "Next:", de: "Nächste:" },
+      "Konec:": { en: "End:", de: "Ende:" },
+      "Bez kategorie": { en: "Uncategorized", de: "Unkategorisiert" },
+      "Nemáte žádné evidované úvěry": { en: "You have no recorded loans", de: "Sie haben keine erfassten Kredite" },
+      "Zadejte své úvěrové produkty nebo hypotéky pomocí formuláře vlevo.": { en: "Enter your loan products or mortgages using the form on the left.", de: "Tragen Sie Ihre Kreditprodukte oder Hypotheken über das Formular links ein." },
+      "Měsíční splátka": { en: "Monthly payment", de: "Monatliche Rate" },
+      "Sazba (% p.a.)": { en: "Rate (% p.a.)", de: "Zinssatz (% p.a.)" },
+      "Začátek:": { en: "Start:", de: "Beginn:" },
+      "Datum konce:": { en: "End Date:", de: "Enddatum:" },
+      "Splačeno": { en: "Paid", de: "Gezahlt" },
+      "zbývá": { en: "remaining", de: "verbleibend" },
+      "Půjčeno:": { en: "Borrowed:", de: "Geliehen:" },
+      "Splačeno:": { en: "Repaid:", de: "Zurückgezahlt:" },
+      "Zapsat splátku": { en: "Record Payment", de: "Rate verbuchen" },
+      "Úvěr": { en: "Loan", de: "Kredit" },
+      "Hypotéka": { en: "Mortgage", de: "Hypothek" },
+      "Autoúvěr": { en: "Car loan", de: "Autokredit" },
+      "Spotřebitelský úvěr": { en: "Consumer loan", de: "Konsumentenkredit" },
+      "Celkový dluh:": { en: "Total Debt:", de: "Gesamtschuld:" },
+      "Celkem uhrazeno:": { en: "Total Paid:", de: "Gesamt gezahlt:" },
+      
+      // Goals-specific labels
+      "Cíl": { en: "Goal", de: "Ziel" },
+      "Cílové datum:": { en: "Target Date:", de: "Zieltermin:" },
+      "Naspořeno": { en: "Saved", de: "Gespart" },
+      "Upravit naspořenou částku": { en: "Adjust Saved Amount", de: "Gesparten Betrag anpassen" },
+      "Cíl byl upraven.": { en: "Goal updated.", de: "Ziel bearbeitet." },
+      "Cíl byl vytvořen.": { en: "Goal created.", de: "Ziel erstellt." },
+      "Nový cíl": { en: "New Goal", de: "Neues Ziel" },
+      "Přehled cílů": { en: "Goals Overview", de: "Ziele-Übersicht" },
+      "Aktivní spořicí cíle": { en: "Active Savings Goals", de: "Aktive Sparziele" },
+      "Sledujte postup u jednotlivých cílů a spořte průběžně": { en: "Track progress for individual goals and save continuously", de: "Verfolgen Sie den Fortschritt einzelner Ziele und sparen Sie kontinuierlich" },
+      "Žádné spořicí cíle": { en: "No savings goals", de: "Keine Sparziele" },
+      "Založte nový cíl pomocí formuláře": { en: "Create a new goal using the form", de: "Erstellen Sie ein neues Ziel über das Formular" },
+      
+      // Category reassignment and manager labels
+      "Ponechat bez kategorie": { en: "Leave uncategorized", de: "Unkategorisiert lassen" },
+      "Přesunout do:": { en: "Move to:", de: "Verschieben nach:" },
+      "Upravit kategorii": { en: "Edit Category", de: "Kategorie bearbeiten" },
+      "Smazat kategorii": { en: "Delete Category", de: "Kategorie löschen" }
     };
+
+    // Global translation helper
+    function __(str) {
+      const trimmed = (str || '').trim();
+      if (textTranslations[trimmed]) {
+        return textTranslations[trimmed][currentLanguage] || trimmed;
+      }
+      return trimmed;
+    }
 
     function translatePage(lang) {
       currentLanguage = lang;
@@ -2508,6 +2594,13 @@
         } else {
           el.setAttribute('title', getTranslation(el.dataset.origTitle));
         }
+      });
+
+      // Translate currency suffixes in forms
+      const currencySymbols = { cs: 'Kč', en: '$', de: '€' };
+      const symbol = currencySymbols[lang] || 'Kč';
+      document.querySelectorAll('.currency-suffix').forEach(el => {
+        el.textContent = symbol;
       });
       
       updateHeaderDateTime();
@@ -2592,11 +2685,13 @@
       return d.toISOString().split('T')[0];
     }
 
-    // Helper to format currency in CZK
+    // Helper to format currency dynamically
     function formatCurrency(amount) {
       const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const currencies = { cs: 'CZK', en: 'USD', de: 'EUR' };
       const locale = locales[currentLanguage] || 'cs-CZ';
-      return Number(amount || 0).toLocaleString(locale, { style: 'currency', currency: 'CZK', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const currency = currencies[currentLanguage] || 'CZK';
+      return Number(amount || 0).toLocaleString(locale, { style: 'currency', currency: currency, minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     // Safe date parser to handle browser differences and timezone offsets
@@ -2623,12 +2718,14 @@
       return parsed;
     }
 
-    // Helper to format date string to Czech format
+    // Helper to format date string to dynamic format
     function formatDateString(dateStr) {
       if (!dateStr) return '';
       const d = parseDateSafe(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('cs-CZ');
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const locale = locales[currentLanguage] || 'cs-CZ';
+      return d.toLocaleDateString(locale);
     }
 
     // Populate category select elements dynamically
@@ -3765,6 +3862,9 @@
       }
       
       lucide.createIcons();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     function selectMobileMoreTab(tabName) {
@@ -4320,7 +4420,11 @@
                 },
                 color: textColor,
                 callback: function(value) {
-                  return value.toLocaleString('cs-CZ') + ' Kč';
+                  const currencies = { cs: ' Kč', en: ' $', de: ' €' };
+                  const symbol = currencies[currentLanguage] || ' Kč';
+                  const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+                  const locale = locales[currentLanguage] || 'cs-CZ';
+                  return value.toLocaleString(locale) + symbol;
                 }
               }
             }
@@ -4554,16 +4658,16 @@
           <td class="py-3.5">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${cat.name}
+              ${__(cat.name)}
             </span>
           </td>
           <td class="${amountClass} text-right">${amountSign}${formatCurrency(t.amount)}</td>
           <td class="py-3.5 text-right pr-2">
             <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-              <button onclick="promptEditTransaction('${t.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all" title="Upravit">
+              <button onclick="promptEditTransaction('${t.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Upravit')}">
                 <i data-lucide="edit-2" class="w-4 h-4"></i>
               </button>
-              <button onclick="promptDeleteTransaction('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all" title="Smazat">
+              <button onclick="promptDeleteTransaction('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Smazat')}">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -4584,7 +4688,7 @@
               <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
                 <span>${formatDateString(t.date)}</span>
                 <span>•</span>
-                <span style="color: ${cat.color}">${cat.name}</span>
+                <span style="color: ${cat.color}">${__(cat.name)}</span>
               </div>
             </div>
           </div>
@@ -4592,10 +4696,10 @@
           <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
             <span class="${amountClass} text-sm">${amountSign}${formatCurrency(t.amount)}</span>
             <div class="flex items-center gap-2">
-              <button onclick="promptEditTransaction('${t.id}')" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg transition-all" title="Upravit">
+              <button onclick="promptEditTransaction('${t.id}')" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg transition-all" title="${__('Upravit')}">
                 <i data-lucide="edit-2" class="w-4 h-4"></i>
               </button>
-              <button onclick="promptDeleteTransaction('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="Smazat">
+              <button onclick="promptDeleteTransaction('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -4606,6 +4710,9 @@
       
       lucide.createIcons();
       updateBulkActionBar();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     let transactionIdToDelete = null;
@@ -4868,24 +4975,24 @@
         const typeSign = r.type === 'income' ? '+' : '-';
         const typeClass = r.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
         
-        const endText = r.endDate ? formatDateString(r.endDate) : 'Trvale';
+        const endText = r.endDate ? formatDateString(r.endDate) : __('Trvale');
         
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/50 transition-colors group';
         tr.innerHTML = `
           <td class="py-3.5 font-semibold text-slate-800">${r.name}</td>
-          <td class="py-3.5 text-slate-500 text-xs font-semibold uppercase tracking-wider">${freqText}</td>
+          <td class="py-3.5 text-slate-500 text-xs font-semibold uppercase tracking-wider">${__(freqText)}</td>
           <td class="py-3.5">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${cat.name}
+              ${__(cat.name)}
             </span>
           </td>
           <td class="py-3.5 font-medium text-slate-500 text-xs">${formatDateString(r.nextDueDate)}</td>
           <td class="py-3.5 font-medium text-slate-500 text-xs">${endText}</td>
           <td class="${typeClass} text-right">${typeSign}${formatCurrency(r.amount)}</td>
           <td class="py-3.5 text-right pr-2">
-            <button onclick="deleteRecurring('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all opacity-60 group-hover:opacity-100" title="Smazat">
+            <button onclick="deleteRecurring('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all opacity-60 group-hover:opacity-100" title="${__('Smazat')}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </td>
@@ -4902,17 +5009,17 @@
             <div>
               <p class="font-bold text-slate-800 text-sm leading-none">${r.name}</p>
               <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-wide">
-                <span class="text-indigo-600">${freqText}</span>
+                <span class="text-indigo-600">${__(freqText)}</span>
                 <span>•</span>
-                <span>Příští: ${formatDateString(r.nextDueDate)}</span>
-                ${r.endDate ? `<span>•</span> <span>Konec: ${formatDateString(r.endDate)}</span>` : ''}
+                <span>${__('Příští:')} ${formatDateString(r.nextDueDate)}</span>
+                ${r.endDate ? `<span>•</span> <span>${__('Konec:')} ${formatDateString(r.endDate)}</span>` : ''}
               </div>
             </div>
           </div>
           
           <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
             <span class="${typeClass} text-sm">${typeSign}${formatCurrency(r.amount)}</span>
-            <button onclick="deleteRecurring('${r.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="Smazat">
+            <button onclick="deleteRecurring('${r.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -4921,6 +5028,9 @@
       });
       
       lucide.createIcons();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     function deleteRecurring(id) {
@@ -5066,10 +5176,10 @@
         
         let actionBtnHtml = `
           <div class="flex items-center gap-1 shrink-0">
-            <button onclick="startCategoryEdit('${c.id}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-indigo-100 dark:active:bg-indigo-950/50 rounded-lg transition-all" title="Upravit kategorii">
+            <button onclick="startCategoryEdit('${c.id}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-indigo-100 dark:active:bg-indigo-950/50 rounded-lg transition-all" title="${__('Upravit kategorii')}">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
             </button>
-            <button onclick="promptDeleteCategory('${c.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-rose-100 dark:active:bg-rose-950/50 rounded-lg transition-all" title="Smazat kategorii">
+            <button onclick="promptDeleteCategory('${c.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-rose-100 dark:active:bg-rose-950/50 rounded-lg transition-all" title="${__('Smazat kategorii')}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -5082,10 +5192,10 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-1.5">
-                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${c.name}</p>
-                ${isDefault ? `<span class="text-[8px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/80 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0">Systém</span>` : ''}
+                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${__(c.name)}</p>
+                ${isDefault ? `<span class="text-[8px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/80 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0">${__('Systém')}</span>` : ''}
               </div>
-              <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">${count} transakcí</span>
+              <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">${count} ${__('transakcí')}</span>
             </div>
           </div>
           <div class="shrink-0 ml-2">
@@ -5096,6 +5206,9 @@
       });
       
       lucide.createIcons();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     let categoryIdToDelete = null;
@@ -5110,7 +5223,7 @@
       if (!catToDelete) return;
 
       // Update desc
-      document.getElementById('delete-cat-desc').textContent = `Opravdu chcete smazat kategorii "${catToDelete.name}"?`;
+      document.getElementById('delete-cat-desc').textContent = currentLanguage === 'cs' ? `Opravdu chcete smazat kategorii "${catToDelete.name}"?` : (currentLanguage === 'en' ? `Are you sure you want to delete category "${__(catToDelete.name)}"?` : `Möchten Sie die Kategorie "${__(catToDelete.name)}" wirklich löschen?`);
 
       // Filter affected transactions
       const affectedTransactions = state.transactions.filter(t => t.category === id);
@@ -5127,12 +5240,12 @@
           const item = document.createElement('div');
           item.className = 'flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800 last:border-0 gap-2';
           
-          const formattedDate = new Date(t.date).toLocaleDateString('cs-CZ');
+          const formattedDate = formatDateString(t.date);
           const amountSign = t.type === 'income' ? '+' : '-';
           const amountClass = t.type === 'income' ? 'text-emerald-600' : 'text-rose-600';
           
           item.innerHTML = `
-            <span class="truncate pr-2">${formattedDate} - ${escapeHtml(t.description || 'Bez popisu')}</span>
+            <span class="truncate pr-2">${formattedDate} - ${escapeHtml(t.description || __('Bez popisu'))}</span>
             <span class="shrink-0 font-bold ${amountClass}">${amountSign} ${formatCurrency(t.amount)}</span>
           `;
           transList.appendChild(item);
@@ -5143,13 +5256,13 @@
         
         const noneOpt = document.createElement('option');
         noneOpt.value = '__none__';
-        noneOpt.textContent = 'Ponechat bez kategorie';
+        noneOpt.textContent = __('Ponechat bez kategorie');
         reassignSelect.appendChild(noneOpt);
 
         state.categories.filter(c => c.id !== id).forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.id;
-          opt.textContent = `Přesunout do: ${c.name}`;
+          opt.textContent = `${__('Přesunout do:')} ${__(c.name)}`;
           reassignSelect.appendChild(opt);
         });
       } else {
@@ -5330,34 +5443,42 @@
         }
       }
       
-      const formattedEndDate = `${endDate.getDate()}. ${endDate.getMonth() + 1}. ${endDate.getFullYear()}`;
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const locale = locales[currentLanguage] || 'cs-CZ';
+      const formattedEndDate = endDate.toLocaleDateString(locale);
       
       let remainingTimeText = '';
       if (isExpired) {
-        remainingTimeText = 'Splaceno / Ukončeno';
+        remainingTimeText = currentLanguage === 'cs' ? 'Splaceno / Ukončeno' : (currentLanguage === 'en' ? 'Paid / Completed' : 'Bezahlt / Beendet');
       } else {
         const parts = [];
         if (remainingYears > 0) {
-          if (remainingYears === 1) {
-            parts.push('1 rok');
-          } else if (remainingYears >= 2 && remainingYears <= 4) {
-            parts.push(`${remainingYears} roky`);
-          } else {
-            parts.push(`${remainingYears} let`);
+          if (currentLanguage === 'cs') {
+            if (remainingYears === 1) parts.push('1 rok');
+            else if (remainingYears >= 2 && remainingYears <= 4) parts.push(`${remainingYears} roky`);
+            else parts.push(`${remainingYears} let`);
+          } else if (currentLanguage === 'en') {
+            parts.push(remainingYears === 1 ? '1 year' : `${remainingYears} years`);
+          } else if (currentLanguage === 'de') {
+            parts.push(remainingYears === 1 ? '1 Jahr' : `${remainingYears} Jahre`);
           }
         }
         if (remainingMonths > 0) {
-          if (remainingMonths === 1) {
-            parts.push('1 měsíc');
-          } else if (remainingMonths >= 2 && remainingMonths <= 4) {
-            parts.push(`${remainingMonths} měsíce`);
-          } else {
-            parts.push(`${remainingMonths} měsíců`);
+          if (currentLanguage === 'cs') {
+            if (remainingMonths === 1) parts.push('1 měsíc');
+            else if (remainingMonths >= 2 && remainingMonths <= 4) parts.push(`${remainingMonths} měsíce`);
+            else parts.push(`${remainingMonths} měsíců`);
+          } else if (currentLanguage === 'en') {
+            parts.push(remainingMonths === 1 ? '1 month' : `${remainingMonths} months`);
+          } else if (currentLanguage === 'de') {
+            parts.push(remainingMonths === 1 ? '1 Monat' : `${remainingMonths} Monate`);
           }
         }
-        remainingTimeText = parts.join(' a ');
+        const joiners = { cs: ' a ', en: ' and ', de: ' und ' };
+        const joiner = joiners[currentLanguage] || ' a ';
+        remainingTimeText = parts.join(joiner);
         if (!remainingTimeText) {
-          remainingTimeText = 'Méně než měsíc';
+          remainingTimeText = currentLanguage === 'cs' ? 'Méně než měsíc' : (currentLanguage === 'en' ? 'Less than a month' : 'Weniger als ein Monat');
         }
       }
       
@@ -5385,11 +5506,11 @@
             <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
               <i data-lucide="landmark" class="w-6 h-6"></i>
             </div>
-            <p class="text-sm font-bold text-slate-600">Nemáte žádné evidované úvěry</p>
-            <p class="text-xs text-slate-400 mt-1 font-medium max-w-xs">Zadejte své úvěrové produkty nebo hypotéky pomocí formuláře vlevo.</p>
+            <p class="text-sm font-bold text-slate-600">${__('Nemáte žádné evidované úvěry')}</p>
+            <p class="text-xs text-slate-400 mt-1 font-medium max-w-xs">${__('Zadejte své úvěrové produkty nebo hypotéky pomocí formuláře vlevo.')}</p>
           </div>
         `;
-        document.getElementById('loans-total-debt-badge').innerText = `Celkový dluh: 0,00 Kč`;
+        document.getElementById('loans-total-debt-badge').innerText = `${__('Celkový dluh:')} ${formatCurrency(0)}`;
         lucide.createIcons();
         return;
       }
@@ -5435,15 +5556,15 @@
                   </div>
                   <div>
                     <h4 class="font-bold text-slate-800 text-sm leading-snug">${loan.name}</h4>
-                    <span class="inline-block px-2 py-0.5 mt-0.5 border text-[9px] font-bold uppercase rounded-md ${bgBadge}">${typeLabel}</span>
+                    <span class="inline-block px-2 py-0.5 mt-0.5 border text-[9px] font-bold uppercase rounded-md ${bgBadge}">${__(typeLabel)}</span>
                   </div>
                 </div>
                 
                 <div class="flex items-center gap-1.5 text-slate-400">
-                  <button onclick="openEditLoan('${loan.id}')" class="p-1 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors" title="Upravit">
+                  <button onclick="openEditLoan('${loan.id}')" class="p-1 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors" title="${__('Upravit')}">
                     <i data-lucide="edit" class="w-4 h-4"></i>
                   </button>
-                  <button onclick="deleteLoan('${loan.id}')" class="p-1 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-colors" title="Smazat">
+                  <button onclick="deleteLoan('${loan.id}')" class="p-1 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-colors" title="${__('Smazat')}">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
@@ -5452,11 +5573,11 @@
               <!-- Core details -->
               <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-4 mb-4">
                 <div>
-                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Měsíční splátka</span>
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">${__('Měsíční splátka')}</span>
                   <span class="text-base font-bold text-slate-800">${formatCurrency(loan.monthlyPayment)}</span>
                 </div>
                 <div>
-                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Sazba (% p.a.)</span>
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">${__('Sazba (% p.a.)')}</span>
                   <span class="text-base font-bold text-slate-800">${loan.interestRate} %</span>
                 </div>
               </div>
@@ -5464,15 +5585,15 @@
               <!-- Duration details -->
               <div class="space-y-2 border-b border-slate-100 pb-4 mb-4 text-xs">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">Začátek:</span>
-                  <span class="font-semibold text-slate-700">${new Date(loan.startDate).toLocaleDateString('cs-CZ')}</span>
+                  <span class="font-medium text-slate-400">${__('Začátek:')}</span>
+                  <span class="font-semibold text-slate-700">${formatDateString(loan.startDate)}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">Datum konce:</span>
+                  <span class="font-medium text-slate-400">${__('Datum konce:')}</span>
                   <span class="font-semibold text-slate-700">${details.formattedEndDate}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">Zbývá:</span>
+                  <span class="font-medium text-slate-400">${__('Zbývá:')}</span>
                   <span class="font-bold text-indigo-600">${details.remainingTimeText}</span>
                 </div>
               </div>
@@ -5480,15 +5601,15 @@
               <!-- Progress bar -->
               <div class="mb-4">
                 <div class="flex justify-between items-center text-xs mb-1.5 font-bold">
-                  <span class="text-emerald-500">Splačeno ${progressPercent.toFixed(1)}%</span>
-                  <span class="text-slate-500">${formatCurrency(remaining)} zbývá</span>
+                  <span class="text-emerald-500">${__('Splačeno')} ${progressPercent.toFixed(1)}%</span>
+                  <span class="text-slate-500">${formatCurrency(remaining)} ${__('zbývá')}</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-2">
                   <div class="bg-emerald-400 h-2 rounded-full transition-all duration-500" style="width: ${progressPercent}%"></div>
                 </div>
                 <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1 font-medium">
-                  <span>Půjčeno: ${formatCurrency(total)}</span>
-                  <span>Splačeno: ${formatCurrency(paid)}</span>
+                  <span>${__('Půjčeno:')} ${formatCurrency(total)}</span>
+                  <span>${__('Splačeno:')} ${formatCurrency(paid)}</span>
                 </div>
               </div>
               
@@ -5502,7 +5623,7 @@
             <!-- Pay Button -->
             <button onclick="openLoanPaymentModal('${loan.id}')" class="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm border border-indigo-100/50">
               <i data-lucide="hand-coins" class="w-4 h-4"></i>
-              Zapsat splátku
+              ${__('Zapsat splátku')}
             </button>
           </div>
         `;
@@ -5510,7 +5631,7 @@
         grid.insertAdjacentHTML('beforeend', cardHtml);
       });
       
-      document.getElementById('loans-total-debt-badge').innerText = `Celkový dluh: ${formatCurrency(totalDebt)}`;
+      document.getElementById('loans-total-debt-badge').innerText = `${__('Celkový dluh:')} ${formatCurrency(totalDebt)}`;
       
       // Render Detailed Loans History
       const historyTableBody = document.getElementById('loans-history-table-body');
@@ -5532,7 +5653,7 @@
         
         if (loanTrans.length === 0) {
           if (historyEmptyEl) historyEmptyEl.classList.remove('hidden');
-          if (totalPaidOverallEl) totalPaidOverallEl.innerText = `Celkem uhrazeno: 0,00 Kč`;
+          if (totalPaidOverallEl) totalPaidOverallEl.innerText = `${__('Celkem uhrazeno:')} ${formatCurrency(0)}`;
         } else {
           if (historyEmptyEl) historyEmptyEl.classList.add('hidden');
           
@@ -5548,7 +5669,7 @@
               <td class="py-3">
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wide">
                   <i data-lucide="landmark" class="w-3 h-3"></i>
-                  Úvěry
+                  ${__('Úvěry')}
                 </span>
               </td>
               <td class="py-3 text-right font-bold text-rose-600">-${formatCurrency(t.amount)}</td>
@@ -5564,7 +5685,7 @@
                 <div class="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
                   <span>${formatDateString(t.date)}</span>
                   <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase font-bold text-[8px]">
-                    Úvěry
+                    ${__('Úvěry')}
                   </span>
                 </div>
               </div>
@@ -5573,7 +5694,7 @@
             historyMobileList.appendChild(card);
           });
           
-          if (totalPaidOverallEl) totalPaidOverallEl.innerText = `Celkem uhrazeno: ${formatCurrency(totalPaid)}`;
+          if (totalPaidOverallEl) totalPaidOverallEl.innerText = `${__('Celkem uhrazeno:')} ${formatCurrency(totalPaid)}`;
         }
       }
       
@@ -5964,18 +6085,18 @@
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background-color: ${cat.color}">
                   <i data-lucide="${cat.icon || 'tag'}" class="w-4 h-4"></i>
                 </div>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm">${cat.name}</h4>
+                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm">${__(cat.name)}</h4>
               </div>
-              <button onclick="deleteBudget('${b.categoryId}')" class="text-slate-400 hover:text-rose-600 transition-colors" title="Smazat rozpočet">
+              <button onclick="deleteBudget('${b.categoryId}')" class="text-slate-400 hover:text-rose-600 transition-colors" title="${__('Smazat rozpočet')}">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
             
             <div class="flex justify-between items-baseline mb-2">
-              <span class="text-xs text-slate-400 dark:text-slate-500 font-semibold">Čerpáno:</span>
+              <span class="text-xs text-slate-400 dark:text-slate-500 font-semibold">${__('Čerpáno:')}</span>
               <div class="text-right">
                 <span class="text-base font-bold text-slate-800 dark:text-slate-200">${formatCurrency(spent)}</span>
-                <span class="text-xs text-slate-400 dark:text-slate-500">z ${formatCurrency(b.amount)}</span>
+                <span class="text-xs text-slate-400 dark:text-slate-500">${__('z')} ${formatCurrency(b.amount)}</span>
               </div>
             </div>
             
@@ -5985,7 +6106,7 @@
           </div>
           
           <div class="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-700/50 text-xs">
-            <span class="text-slate-500 dark:text-slate-400 font-medium">Zbývá:</span>
+            <span class="text-slate-500 dark:text-slate-400 font-medium">${__('Zbývá:')}</span>
             <span class="font-bold ${remaining === 0 ? 'text-rose-500' : 'text-emerald-500'}">${formatCurrency(remaining)}</span>
           </div>
         `;
@@ -5993,6 +6114,9 @@
       });
       
       lucide.createIcons();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
     }
 
     function switchBudgetSubTab(subTab) {
@@ -6242,6 +6366,94 @@
       }
     }
 
+    function renderGoalsView() {
+      const grid = document.getElementById('goals-grid');
+      const emptyEl = document.getElementById('goals-empty');
+      if (!grid || !emptyEl) return;
+      
+      grid.innerHTML = '';
+      const goals = state.savingsGoals || [];
+      
+      if (goals.length === 0) {
+        emptyEl.classList.remove('hidden');
+        grid.classList.add('hidden');
+        return;
+      }
+      
+      emptyEl.classList.add('hidden');
+      grid.classList.remove('hidden');
+      
+      goals.forEach(g => {
+        const percent = g.targetAmount > 0 ? (g.currentAmount / g.targetAmount) * 100 : 0;
+        const percentRound = Math.min(100, Math.round(percent));
+        
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-5 shadow-card hover:shadow-premium transition-all flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-650 flex items-center justify-center border border-slate-100">
+                  <i data-lucide="${g.icon || 'target'}" class="w-5 h-5 text-indigo-500"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-slate-800 text-sm leading-snug">${g.name}</h4>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">${__('Cíl')}</span>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-1.5 text-slate-400">
+                <button onclick="editGoal('${g.id}')" class="p-1 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors" title="${__('Upravit')}">
+                  <i data-lucide="edit" class="w-4 h-4"></i>
+                </button>
+                <button onclick="deleteGoal('${g.id}')" class="p-1 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-colors" title="${__('Smazat')}">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Dates and details -->
+            <div class="space-y-2 border-b border-slate-100 pb-4 mb-4 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-slate-400">${__('Cílové datum:')}</span>
+                <span class="font-semibold text-slate-700">${formatDateString(g.targetDate)}</span>
+              </div>
+            </div>
+            
+            <!-- Progress bar -->
+            <div class="mb-4">
+              <div class="flex justify-between items-center text-xs mb-1.5 font-bold">
+                <span class="text-emerald-500">${__('Naspořeno')} ${percentRound}%</span>
+                <span class="text-slate-750 font-semibold">${formatCurrency(g.currentAmount)} / ${formatCurrency(g.targetAmount)}</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2">
+                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: ${percentRound}%"></div>
+              </div>
+            </div>
+            
+            ${g.notes ? `
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed mb-4">
+                ${g.notes}
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- Deposit Button -->
+          <button onclick="openGoalDepositModal('${g.id}')" class="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm border border-indigo-100/50">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            ${__('Upravit naspořenou částku')}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+      
+      lucide.createIcons();
+      if (currentLanguage !== 'cs') {
+        translatePage(currentLanguage);
+      }
+    }
+
     // ================= DASHBOARD WIDGETS LOGIC =================
     function updateDashboardWidgets() {
       const container = document.getElementById('dashboard-budgets-goals-container');
@@ -6478,11 +6690,6 @@
       const dateEl = document.getElementById('header-current-date');
       if (dateEl) {
         dateEl.innerText = capitalized;
-      }
-      
-      const modalDateEl = document.getElementById('modal-current-date');
-      if (modalDateEl) {
-        modalDateEl.innerText = capitalized;
       }
     }
 
