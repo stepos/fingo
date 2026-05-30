@@ -340,16 +340,10 @@
       
       <!-- Right Header Actions (Filters + User Info Card) -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
-        <!-- User Info & Date Block (Desktop & Mobile) -->
-        <div class="flex items-center gap-3 text-xs bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 px-4 py-2.5 rounded-xl shadow-sm w-full sm:w-auto shrink-0">
-          <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
-          </div>
-          <div class="flex flex-col min-w-0">
-            <span id="header-current-date" class="font-bold text-slate-800 dark:text-slate-200 leading-tight"></span>
-            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold leading-tight mt-0.5">kutlaks@gmail.com</span>
-          </div>
-        </div>
+        <!-- Software Info Button -->
+        <button onclick="openModal('modal-software-info')" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 dark:text-slate-400 active:scale-95 transition-all flex items-center justify-center shadow-sm shrink-0" title="Informace o softwaru">
+          <i data-lucide="info" class="w-4.5 h-4.5"></i>
+        </button>
 
         <!-- Global Date Filter -->
         <div id="global-filter-container" class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
@@ -2021,6 +2015,42 @@
     </div>
   </div>
 
+  <!-- 10. SOFTWARE INFO MODAL -->
+  <div id="modal-software-info" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop-enter" onclick="closeModal('modal-software-info')"></div>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800/80 max-w-sm w-full p-6 md:p-8 relative z-10 modal-content-enter">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
+        <i data-lucide="info" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-black text-slate-900 dark:text-slate-100 mb-2">Informace o softwaru</h3>
+      
+      <div class="space-y-4 my-6 text-xs text-slate-600 dark:text-slate-400">
+        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
+          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Aplikace</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">Fingo</span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
+          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Verze</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">1.4.2</span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
+          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">E-mail</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">kutlaks@gmail.com</span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
+          <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Aktuální datum</span>
+          <span id="modal-current-date" class="font-bold text-slate-800 dark:text-slate-200"></span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end">
+        <button onclick="closeModal('modal-software-info')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-all active:scale-95">
+          Zavřít
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ========================================== JAVASCRIPT ========================================== -->
   <script>
@@ -2097,6 +2127,7 @@
 
     const isFileAccessSupported = 'showOpenFilePicker' in window;
     let activeFileHandle = null;
+    let lastFileModifiedTime = 0;
     let hasUnsavedChanges = false;
 
     const iconChoices = [
@@ -2821,6 +2852,7 @@
         });
         
         const file = await handle.getFile();
+        lastFileModifiedTime = file.lastModified;
         const text = await file.text();
         const parsed = JSON.parse(text);
         
@@ -2871,6 +2903,7 @@
           
           // Finish opening database setup
           const file = await activeFileHandle.getFile();
+          lastFileModifiedTime = file.lastModified;
           const text = await file.text();
           
           // Populate state
@@ -2911,6 +2944,14 @@
             const writable = await activeFileHandle.createWritable();
             await writable.write(JSON.stringify(state, null, 2));
             await writable.close();
+            
+            try {
+              const file = await activeFileHandle.getFile();
+              lastFileModifiedTime = file.lastModified;
+            } catch(e) {
+              console.warn("Failed to update lastFileModifiedTime after write", e);
+            }
+            
             showToast("Změny automaticky uloženy do souboru.");
             return;
           } catch(err) {
@@ -5969,6 +6010,7 @@
                 
                 if (permission === 'granted') {
                   const file = await savedHandle.getFile();
+                  lastFileModifiedTime = file.lastModified;
                   const text = await file.text();
                   const parsed = JSON.parse(text);
                   
@@ -6003,14 +6045,59 @@
       }
     }
 
+    async function checkForExternalFileChanges() {
+      if (dbConfig.storageType === 'file' && isFileAccessSupported && activeFileHandle) {
+        try {
+          const permission = await activeFileHandle.queryPermission({ mode: 'readwrite' });
+          if (permission === 'granted') {
+            const file = await activeFileHandle.getFile();
+            if (lastFileModifiedTime && file.lastModified > lastFileModifiedTime) {
+              console.log("External file change detected, reloading data...");
+              const text = await file.text();
+              const parsed = JSON.parse(text);
+              
+              if (typeof parsed === 'object' && Array.isArray(parsed.transactions) && Array.isArray(parsed.categories)) {
+                state.transactions = parsed.transactions || [];
+                state.recurring = parsed.recurring || [];
+                state.categories = parsed.categories || [];
+                state.loans = parsed.loans || [];
+                state.budgets = parsed.budgets || [];
+                state.savingsGoals = parsed.savingsGoals || [];
+                
+                lastFileModifiedTime = file.lastModified;
+                
+                // Refresh UI components
+                updateDashboardAndData();
+                if (currentTab === 'transactions') filterHistory();
+                if (currentTab === 'categories') renderCategoriesView();
+                if (currentTab === 'recurring') renderRecurringList();
+                if (currentTab === 'loans') renderLoans();
+                
+                showToast("Data byla automaticky aktualizována podle změn na disku.");
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to check for external file changes", e);
+        }
+      }
+    }
+
     function updateHeaderDateTime() {
-      const dateEl = document.getElementById('header-current-date');
-      if (!dateEl) return;
-      
       const now = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const formatted = now.toLocaleDateString('cs-CZ', options);
-      dateEl.innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      
+      const dateEl = document.getElementById('header-current-date');
+      if (dateEl) {
+        dateEl.innerText = capitalized;
+      }
+      
+      const modalDateEl = document.getElementById('modal-current-date');
+      if (modalDateEl) {
+        modalDateEl.innerText = capitalized;
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -6020,6 +6107,9 @@
       buildQuickIconPicker();
       updateHeaderDateTime();
       checkDatabaseStartup();
+      
+      // Auto-refresh when tab is focused (desktop mode with connected file handle)
+      window.addEventListener('focus', checkForExternalFileChanges);
     });
   </script>
   <!-- ================= PRINTABLE PDF REPORT CONTAINER ================= -->
