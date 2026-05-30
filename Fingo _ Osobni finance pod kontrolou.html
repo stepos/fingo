@@ -202,6 +202,181 @@
       background-color: #1e293b !important;
       color: #f1f5f9 !important;
     }
+
+    /* Premium Mobile Redesign Styles (iOS native PWA look-and-feel) */
+    @media (max-width: 768px) {
+      /* Floating Capsule Navigation Bar */
+      .mobile-floating-nav {
+        position: fixed !important;
+        bottom: 16px !important;
+        left: 16px !important;
+        right: 16px !important;
+        height: 68px !important;
+        background: rgba(255, 255, 255, 0.82) !important;
+        backdrop-filter: blur(24px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        z-index: 49 !important;
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        padding: 0 8px !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      
+      html.dark .mobile-floating-nav {
+        background: rgba(15, 23, 42, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+      }
+
+      /* Navigation Button Active State Indicator */
+      .nav-btn-mobile {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        color: #94a3b8 !important;
+        transition: all 0.2s ease;
+        flex: 1;
+        height: 100%;
+        border-radius: 16px;
+      }
+      
+      .nav-btn-mobile.active-mobile {
+        color: #4f46e5 !important;
+        font-weight: 700 !important;
+      }
+      
+      html.dark .nav-btn-mobile.active-mobile {
+        color: #818cf8 !important;
+      }
+
+      .nav-btn-mobile.active-mobile i {
+        transform: translateY(-2px) scale(1.08);
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .nav-btn-mobile.active-mobile::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #4f46e5;
+        box-shadow: 0 0 8px #4f46e5;
+      }
+      
+      html.dark .nav-btn-mobile.active-mobile::after {
+        background-color: #818cf8;
+        box-shadow: 0 0 8px #818cf8;
+      }
+
+      /* Premium iOS-style Card Gradients */
+      .balance-card-premium {
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e2a72 60%, #3f39a5 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 12px 24px -8px rgba(79, 70, 229, 0.35) !important;
+        border-radius: 24px !important;
+      }
+      
+      .income-card-premium {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+        border: 1px solid rgba(74, 222, 128, 0.25) !important;
+        box-shadow: 0 8px 20px -8px rgba(34, 197, 94, 0.15) !important;
+        border-radius: 20px !important;
+      }
+      
+      html.dark .income-card-premium {
+        background: linear-gradient(135deg, #022c22 0%, #064e3b 100%) !important;
+        border: 1px solid rgba(5, 150, 105, 0.25) !important;
+      }
+      
+      .expense-card-premium {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+        border: 1px solid rgba(248, 113, 113, 0.25) !important;
+        box-shadow: 0 8px 20px -8px rgba(239, 68, 68, 0.15) !important;
+        border-radius: 20px !important;
+      }
+      
+      html.dark .expense-card-premium {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%) !important;
+        border: 1px solid rgba(220, 38, 38, 0.25) !important;
+      }
+
+      /* Premium iOS-style List Item for Transactions */
+      .mobile-transaction-card {
+        background: #ffffff;
+        border: 1px solid rgba(241, 245, 249, 0.9);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+        border-radius: 18px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+      }
+      
+      .mobile-transaction-card:active {
+        transform: scale(0.98);
+        background-color: #f8fafc;
+      }
+      
+      html.dark .mobile-transaction-card {
+        background: #1e293b;
+        border: 1px solid rgba(51, 65, 85, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      
+      html.dark .mobile-transaction-card:active {
+        background-color: #334155;
+      }
+      
+      .mobile-category-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* Bottom sheet animations for modals on mobile */
+      div[id^="modal-"] > div:not(.absolute) {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        transform: translateY(100%);
+        border-top-left-radius: 32px !important;
+        border-top-right-radius: 32px !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+        box-shadow: 0 -15px 30px -10px rgba(0, 0, 0, 0.15) !important;
+        animation: slideUpSheet 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+      }
+      
+      @keyframes slideUpSheet {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      
+      /* Make main container offset from bottom floating nav bar */
+      main {
+        padding-bottom: 108px !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col md:flex-row antialiased">
@@ -292,30 +467,30 @@
   </aside>
 
   <!-- ================= BOTTOM NAVIGATION (MOBILE) ================= -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200/65 flex justify-around items-center z-40 px-4 shadow-[0_-5px_20px_-10px_rgba(0,0,0,0.05)] pb-safe-bottom h-[calc(4rem+env(safe-area-inset-bottom,0px))]">
-    <button onclick="switchTab('dashboard')" id="nav-mobile-dashboard" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="layout-dashboard" class="w-[22px] h-[22px]"></i>
-      <span>Přehled</span>
+  <nav class="md:hidden mobile-floating-nav">
+    <button onclick="switchTab('dashboard')" id="nav-mobile-dashboard" class="nav-btn-mobile active-mobile">
+      <i data-lucide="layout-dashboard" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Přehled</span>
     </button>
-    <button onclick="switchTab('transactions')" id="nav-mobile-transactions" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="arrow-left-right" class="w-[22px] h-[22px]"></i>
-      <span>Transakce</span>
+    <button onclick="switchTab('transactions')" id="nav-mobile-transactions" class="nav-btn-mobile">
+      <i data-lucide="arrow-left-right" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Transakce</span>
     </button>
-    <button onclick="switchTab('budgets')" id="nav-mobile-budgets" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="pie-chart" class="w-[22px] h-[22px]"></i>
-      <span>Rozpočty</span>
+    <button onclick="switchTab('budgets')" id="nav-mobile-budgets" class="nav-btn-mobile">
+      <i data-lucide="pie-chart" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Rozpočty</span>
     </button>
-    <button onclick="switchTab('goals')" id="nav-mobile-goals" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="target" class="w-[22px] h-[22px]"></i>
-      <span>Cíle</span>
+    <button onclick="switchTab('goals')" id="nav-mobile-goals" class="nav-btn-mobile">
+      <i data-lucide="target" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Cíle</span>
     </button>
-    <button onclick="switchTab('loans')" id="nav-mobile-loans" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="landmark" class="w-[22px] h-[22px]"></i>
-      <span>Úvěry</span>
+    <button onclick="switchTab('loans')" id="nav-mobile-loans" class="nav-btn-mobile">
+      <i data-lucide="landmark" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Úvěry</span>
     </button>
-    <button onclick="openModal('modal-more-menu')" id="nav-mobile-more" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all flex-1 py-1.5 text-slate-400">
-      <i data-lucide="more-horizontal" class="w-[22px] h-[22px]"></i>
-      <span>Více</span>
+    <button onclick="openModal('modal-more-menu')" id="nav-mobile-more" class="nav-btn-mobile">
+      <i data-lucide="more-horizontal" class="w-[20px] h-[20px]"></i>
+      <span class="text-[9px] font-bold tracking-wide uppercase mt-1">Více</span>
     </button>
   </nav>
 
@@ -397,44 +572,44 @@
       </div>
 
       <!-- Balance Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
         <!-- Total Balance Card -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 md:p-6 shadow-premium relative overflow-hidden">
+        <div class="col-span-2 sm:col-span-1 balance-card-premium text-white p-5 md:p-6 relative overflow-hidden">
           <div class="absolute -right-8 -bottom-8 opacity-10 text-white">
             <i data-lucide="piggy-bank" class="w-36 h-36"></i>
           </div>
           <p class="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Aktuální čistý zůstatek</p>
           <h3 id="stat-total-balance" class="text-3xl md:text-4xl font-black tracking-tight">0,00 Kč</h3>
           <div class="mt-4 flex items-center gap-2 text-[10px] md:text-xs text-slate-400">
-            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-700/50">
-              <i data-lucide="info" class="w-3.5 h-3.5 text-slate-300"></i>
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/35">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-slate-200"></i>
             </span>
             <span>Kompletní bilance účtu</span>
           </div>
         </div>
         
         <!-- Income Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all">
+        <div class="income-card-premium p-5 md:p-6 shadow-card hover:shadow-premium transition-all">
           <div class="flex items-center justify-between mb-3 md:mb-4">
-            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Příjmy</span>
-            <span class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+            <span class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Příjmy</span>
+            <span class="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center">
               <i data-lucide="trending-up" class="w-4 h-4"></i>
             </span>
           </div>
-          <h3 id="stat-total-income" class="text-2xl font-bold text-slate-900">0,00 Kč</h3>
-          <p id="stat-income-desc" class="text-[10px] md:text-xs text-slate-500 mt-2 font-medium">Příjmy v celém sledovaném období</p>
+          <h3 id="stat-total-income" class="text-2xl font-bold text-slate-900 dark:text-slate-100">0,00 Kč</h3>
+          <p id="stat-income-desc" class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">Příjmy v období</p>
         </div>
         
         <!-- Expense Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all">
+        <div class="expense-card-premium p-5 md:p-6 shadow-card hover:shadow-premium transition-all">
           <div class="flex items-center justify-between mb-3 md:mb-4">
-            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Výdaje</span>
-            <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+            <span class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Výdaje</span>
+            <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center">
               <i data-lucide="trending-down" class="w-4 h-4"></i>
             </span>
           </div>
-          <h3 id="stat-total-expense" class="text-2xl font-bold text-slate-900">0,00 Kč</h3>
-          <p id="stat-expense-desc" class="text-[10px] md:text-xs text-slate-500 mt-2 font-medium">Výdaje v celém sledovaném období</p>
+          <h3 id="stat-total-expense" class="text-2xl font-bold text-slate-900 dark:text-slate-100">0,00 Kč</h3>
+          <p id="stat-expense-desc" class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">Výdaje v období</p>
         </div>
       </div>
 
@@ -3308,11 +3483,9 @@
         const id = btn.id || '';
         const isMoreSubTab = tabName === 'recurring' || tabName === 'categories' || tabName === 'settings';
         if (id.includes(tabName) || (id.includes('more') && isMoreSubTab)) {
-          btn.classList.add('text-indigo-600');
-          btn.classList.remove('text-slate-400');
+          btn.classList.add('active-mobile');
         } else {
-          btn.classList.remove('text-indigo-600');
-          btn.classList.add('text-slate-400');
+          btn.classList.remove('active-mobile');
         }
       });
       
@@ -3665,22 +3838,22 @@
         desktopContainer.appendChild(tr);
         
         const mobileCard = document.createElement('div');
-        mobileCard.className = 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl hover:bg-slate-100/50 transition-all border border-slate-100';
+        mobileCard.className = 'mobile-transaction-card';
         mobileCard.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background-color: ${cat.color}15; color: ${cat.color}">
-              <i data-lucide="${cat.icon}" class="w-4.5 h-4.5"></i>
+          <div class="flex items-center gap-3.5">
+            <div class="mobile-category-badge" style="background-color: ${cat.color}12; color: ${cat.color}">
+              <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
             </div>
             <div>
-              <p class="font-bold text-slate-800 text-xs leading-tight">${t.description || '-'}</p>
-              <div class="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wide">
+              <p class="font-bold text-slate-800 dark:text-slate-100 text-[13px] leading-snug">${t.description || '-'}</p>
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 tracking-wide">
                 <span>${formatDateString(t.date)}</span>
                 <span>•</span>
-                <span style="color: ${cat.color}">${cat.name}</span>
+                <span class="font-bold" style="color: ${cat.color}">${cat.name}</span>
               </div>
             </div>
           </div>
-          <span class="${amountClass} text-xs shrink-0">${amountSign}${formatCurrency(t.amount)}</span>
+          <span class="${amountClass} text-sm font-extrabold shrink-0">${amountSign}${formatCurrency(t.amount)}</span>
         `;
         mobileContainer.appendChild(mobileCard);
       });
