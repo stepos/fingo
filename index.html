@@ -2406,8 +2406,13 @@
 
     // GitHub Sync State
     let githubToken = localStorage.getItem('fingo_github_token') || '';
-    let githubGistId = localStorage.getItem('fingo_github_gist_id') || '';
+    let githubGistId = '';
     let isGithubSyncing = false;
+
+    function getGitHubGistIdKey(dbName) {
+      const cleanName = (dbName || '').trim();
+      return cleanName ? `fingo_github_gist_id_${cleanName}` : 'fingo_github_gist_id';
+    }
 
     // State tracks transactions, recurring payments, categories, and loans
     let state = {
@@ -3364,6 +3369,9 @@
       dbConfig.name = name;
       dbConfig.storageType = storageType;
       
+      // Update Gist ID association for this database name
+      githubGistId = localStorage.getItem(getGitHubGistIdKey(name)) || '';
+      
       safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
       
       const filePrefix = currentLanguage === 'cs' ? 'Soubor: ' : (currentLanguage === 'en' ? 'File: ' : 'Datei: ');
@@ -3653,11 +3661,12 @@
     async function createGitHubGist(token) {
       updateGitHubSyncStatusUI('syncing', 'Zakládám Gist...');
       try {
+        const dbName = dbConfig.name || 'finance.json';
         const payload = {
-          description: 'Fingo Database - Secret Backup',
+          description: `Fingo Database - ${dbName}`,
           public: false,
           files: {
-            'fingo_database.json': {
+            [dbName]: {
               content: JSON.stringify(state, null, 2)
             }
           }
@@ -3678,6 +3687,9 @@
         githubToken = token;
         githubGistId = data.id;
         localStorage.setItem('fingo_github_token', token);
+        localStorage.setItem(getGitHubGistIdKey(dbName), data.id);
+        
+        // Update standard fallback Gist ID in localStorage for compatibility
         localStorage.setItem('fingo_github_gist_id', data.id);
         
         // Show in settings fields
@@ -3687,7 +3699,7 @@
         if (gField) gField.value = data.id;
 
         showToast("Záloha byla úspěšně vytvořena na GitHub Gist.");
-        selectAndOpenDatabase('fingo_database.json', 'github');
+        selectAndOpenDatabase(dbName, 'github');
         updateGitHubSyncStatusUI('synced');
         
         // Toggle disconnect button visibility in settings
@@ -3709,9 +3721,10 @@
       updateGitHubSyncStatusUI('syncing', 'Ukládám...');
 
       try {
+        const dbName = dbConfig.name || 'finance.json';
         const payload = {
           files: {
-            'fingo_database.json': {
+            [dbName]: {
               content: JSON.stringify(state, null, 2)
             }
           }
@@ -3752,11 +3765,16 @@
         }
 
         const data = await res.json();
-        const file = data.files['fingo_database.json'];
+        
+        // Find the first JSON file in Gist
+        const filesList = Object.values(data.files);
+        const file = filesList.find(f => f.filename.endsWith('.json')) || filesList[0];
+        
         if (!file || !file.content) {
-          throw new Error('Gist neobsahuje soubor fingo_database.json');
+          throw new Error('Gist neobsahuje platný soubor databáze .json');
         }
 
+        const dbName = file.filename || 'finance.json';
         const parsed = JSON.parse(file.content);
         state.transactions = parsed.transactions || [];
         state.recurring = parsed.recurring || [];
@@ -3768,10 +3786,13 @@
         githubToken = token;
         githubGistId = gistId;
         localStorage.setItem('fingo_github_token', token);
+        localStorage.setItem(getGitHubGistIdKey(dbName), gistId);
+        
+        // Update standard fallback Gist ID in localStorage for compatibility
         localStorage.setItem('fingo_github_gist_id', gistId);
         
         // Cache locally for offline usage
-        safeStorage.setItem(`fingo_db_data_fingo_database.json`, JSON.stringify(state));
+        safeStorage.setItem(`fingo_db_data_${dbName}`, JSON.stringify(state));
 
         // Show in settings fields
         const tField = document.getElementById('settings-github-token');
@@ -3779,9 +3800,9 @@
         if (tField) tField.value = token;
         if (gField) gField.value = gistId;
 
-        selectAndOpenDatabase('fingo_database.json', 'github');
+        selectAndOpenDatabase(dbName, 'github');
         updateGitHubSyncStatusUI('synced');
-        showToast("Data byla úspěšně stažena z GitHub Gistu.");
+        showToast(`Data "${dbName}" byla stažena z GitHub Gistu.`);
 
         // Toggle disconnect button visibility in settings
         const discBtn = document.getElementById('settings-github-disconnect-btn');
@@ -3830,14 +3851,12 @@
 
     function handleGitHubSyncDisconnect() {
       triggerHapticFeedback();
-      githubToken = '';
+      const dbName = dbConfig.name || 'finance.json';
+      localStorage.removeItem(getGitHubGistIdKey(dbName));
       githubGistId = '';
-      localStorage.removeItem('fingo_github_token');
-      localStorage.removeItem('fingo_github_gist_id');
-
+      
       const tokenInput = document.getElementById('settings-github-token');
       const gistInput = document.getElementById('settings-github-gist-id');
-      if (tokenInput) tokenInput.value = '';
       if (gistInput) gistInput.value = '';
 
       updateGitHubSyncStatusUI('inactive');
@@ -3852,16 +3871,6 @@
       dbConfig.name = 'finance.json';
       safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
       selectAndOpenDatabase('finance.json', 'fallback');
-    }
-
-    function handleGitHubSyncManual() {
-      triggerHapticFeedback();
-      if (!githubToken || !githubGistId) {
-        showToast("GitHub cloud není připojen.", "error");
-        return;
-      }
-      showToast("Synchronizuji s GitHub Cloud...");
-      saveToGitHubGist();
     }
 
     function handleGitHubSyncManualPull() {
