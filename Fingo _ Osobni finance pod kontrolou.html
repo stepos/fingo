@@ -684,7 +684,11 @@
               <p class="text-xs text-slate-400 font-medium">Splátky úvěrů a hypoték</p>
             </div>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 md:gap-8 flex-1">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8 flex-1">
+            <div>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Celková výše dluhu</span>
+              <span id="dashboard-loans-total-debt" class="text-sm md:text-base font-black text-rose-600">0,00 Kč</span>
+            </div>
             <div>
               <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Měsíčně celkem</span>
               <span id="dashboard-loans-monthly-total" class="text-sm md:text-base font-bold text-slate-800">0,00 Kč</span>
@@ -1280,10 +1284,11 @@
           <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card sticky top-8">
             <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
               <i data-lucide="calendar-plus" class="w-5 h-5 text-indigo-500"></i>
-              Nový trvalý příkaz
+              <span id="rec-form-title">Nový trvalý příkaz</span>
             </h3>
             
             <form id="recurring-form" onsubmit="handleRecurringSubmit(event)" class="space-y-4">
+              <input type="hidden" id="edit-rec-id" value="">
               <!-- Name -->
               <div>
                 <label for="rec-name" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Název platby</label>
@@ -1356,10 +1361,22 @@
                 <span class="text-[10px] text-slate-400 mt-1 block">(Nechte prázdné pro trvalou platbu)</span>
               </div>
               
-              <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2 mt-2">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                Vytvořit příkaz
-              </button>
+              <div class="flex items-center gap-2 pt-2" id="rec-form-actions-create">
+                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  Vytvořit příkaz
+                </button>
+              </div>
+              
+              <div class="flex items-center gap-2 pt-2 hidden" id="rec-form-actions-edit">
+                <button type="button" onclick="cancelRecurringEdit()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all text-center">
+                  Zrušit
+                </button>
+                <button type="submit" class="flex-[2] py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                  <i data-lucide="save" class="w-4 h-4"></i>
+                  Uložit změny
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -2695,7 +2712,13 @@
       "Ponechat bez kategorie": { en: "Leave uncategorized", de: "Unkategorisiert lassen" },
       "Přesunout do:": { en: "Move to:", de: "Verschieben nach:" },
       "Upravit kategorii": { en: "Edit Category", de: "Kategorie bearbeiten" },
-      "Smazat kategorii": { en: "Delete Category", de: "Kategorie löschen" }
+      "Smazat kategorii": { en: "Delete Category", de: "Kategorie löschen" },
+      "Nový trvalý příkaz": { en: "New Recurring Payment", de: "Neuer Dauerauftrag" },
+      "Upravit trvalý příkaz": { en: "Edit Recurring Payment", de: "Dauerauftrag bearbeiten" },
+      "Vytvořit příkaz": { en: "Create Payment", de: "Dauerauftrag erstellen" },
+      "Uložit změny": { en: "Save Changes", de: "Änderungen speichern" },
+      "Upravit": { en: "Edit", de: "Bearbeiten" },
+      "Smazat": { en: "Delete", de: "Löschen" }
     };
 
     // Global translation helper
@@ -4896,6 +4919,7 @@
               const totalPaid = Math.max(0, totalOriginal - totalRemaining);
               const progressPercent = totalOriginal > 0 ? Math.min(100, (totalPaid / totalOriginal) * 100) : 0;
               
+              document.getElementById('dashboard-loans-total-debt').innerText = formatCurrency(totalRemaining);
               document.getElementById('dashboard-loans-monthly-total').innerText = formatCurrency(totalMonthly);
               document.getElementById('dashboard-loans-paid-this-month').innerText = formatCurrency(totalPaidThisMonth);
               document.getElementById('dashboard-loans-waiting-this-month').innerText = formatCurrency(totalWaitingThisMonth);
@@ -5752,6 +5776,7 @@
     function handleRecurringSubmit(event) {
       event.preventDefault();
       
+      const editId = document.getElementById('edit-rec-id').value;
       const name = document.getElementById('rec-name').value.trim();
       const type = document.getElementById('rec-type').value;
       const amount = Number(document.getElementById('rec-amount').value);
@@ -5767,33 +5792,102 @@
       
       const nextDueDate = getNextOccurrenceOfDay(bookingDay);
       
-      const newRecurring = {
-        id: 'r-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-        name,
-        type,
-        amount,
-        frequency,
-        category,
-        bookingDay,
-        nextDueDate,
-        endDate
-      };
-      
-      state.recurring.push(newRecurring);
-      saveState();
-      
-      document.getElementById('rec-name').value = '';
-      document.getElementById('rec-amount').value = '';
-      document.getElementById('rec-end-date').value = '';
-      setTodayDateInputs();
-      
-      showToast("Pravidelná platba byla úspěšně vytvořena");
+      if (editId) {
+        // Edit mode
+        const existingIndex = state.recurring.findIndex(r => r.id === editId);
+        if (existingIndex > -1) {
+          state.recurring[existingIndex] = {
+            ...state.recurring[existingIndex],
+            name,
+            type,
+            amount,
+            frequency,
+            category,
+            bookingDay,
+            nextDueDate,
+            endDate
+          };
+          saveState();
+          cancelRecurringEdit();
+          showToast("Pravidelná platba byla úspěšně upravena");
+        }
+      } else {
+        // Create mode
+        const newRecurring = {
+          id: 'r-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+          name,
+          type,
+          amount,
+          frequency,
+          category,
+          bookingDay,
+          nextDueDate,
+          endDate
+        };
+        
+        state.recurring.push(newRecurring);
+        saveState();
+        
+        document.getElementById('rec-name').value = '';
+        document.getElementById('rec-amount').value = '';
+        document.getElementById('rec-end-date').value = '';
+        setTodayDateInputs();
+        
+        showToast("Pravidelná platba byla úspěšně vytvořena");
+      }
       
       if (window.innerWidth < 768) {
         switchRecSubTab('list');
       }
       
       renderRecurringList();
+    }
+
+    function startRecurringEdit(id) {
+      triggerHapticFeedback();
+      const r = state.recurring.find(item => item.id === id);
+      if (!r) return;
+      
+      document.getElementById('edit-rec-id').value = id;
+      document.getElementById('rec-name').value = r.name;
+      document.getElementById('rec-amount').value = r.amount;
+      document.getElementById('rec-frequency').value = r.frequency;
+      document.getElementById('rec-category').value = r.category || '';
+      document.getElementById('rec-date').value = r.bookingDay || '';
+      document.getElementById('rec-end-date').value = r.endDate || '';
+      
+      setRecurringType(r.type);
+      
+      document.getElementById('rec-form-title').innerText = "Upravit trvalý příkaz";
+      document.getElementById('rec-form-actions-create').classList.add('hidden');
+      document.getElementById('rec-form-actions-edit').classList.remove('hidden');
+      
+      if (window.innerWidth < 768) {
+        switchRecSubTab('form');
+      }
+    }
+
+    function cancelRecurringEdit() {
+      triggerHapticFeedback();
+      
+      document.getElementById('edit-rec-id').value = '';
+      document.getElementById('rec-name').value = '';
+      document.getElementById('rec-amount').value = '';
+      document.getElementById('rec-frequency').value = 'monthly';
+      
+      const catSelect = document.getElementById('rec-category');
+      if (catSelect && catSelect.options.length > 0) {
+        catSelect.selectedIndex = 0;
+      }
+      
+      document.getElementById('rec-date').value = '';
+      document.getElementById('rec-end-date').value = '';
+      
+      setRecurringType('expense');
+      
+      document.getElementById('rec-form-title').innerText = "Nový trvalý příkaz";
+      document.getElementById('rec-form-actions-create').classList.remove('hidden');
+      document.getElementById('rec-form-actions-edit').classList.add('hidden');
     }
 
     function renderRecurringList() {
@@ -5839,9 +5933,14 @@
           <td class="py-3.5 font-medium text-slate-500 text-xs">${endText}</td>
           <td class="${typeClass} text-right">${typeSign}${formatCurrency(r.amount)}</td>
           <td class="py-3.5 text-right pr-2">
-            <button onclick="deleteRecurring('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all opacity-60 group-hover:opacity-100" title="${__('Smazat')}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+            <div class="flex items-center justify-end gap-1">
+              <button onclick="startRecurringEdit('${r.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all opacity-60 group-hover:opacity-100" title="${__('Upravit')}">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteRecurring('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all opacity-60 group-hover:opacity-100" title="${__('Smazat')}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
           </td>
         `;
         desktopContainer.appendChild(tr);
@@ -5866,9 +5965,14 @@
           
           <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
             <span class="${typeClass} text-sm">${typeSign}${formatCurrency(r.amount)}</span>
-            <button onclick="deleteRecurring('${r.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+            <div class="flex items-center gap-1">
+              <button onclick="startRecurringEdit('${r.id}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg transition-all" title="${__('Upravit')}">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteRecurring('${r.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
         `;
         mobileContainer.appendChild(card);
@@ -6660,7 +6764,7 @@
       };
     }
 
-    // Opens edit view populating all input values
+     // Opens edit view populating all input values
      function openEditLoan(id) {
        triggerHapticFeedback();
        const loan = state.loans.find(l => l.id === id);
@@ -6725,7 +6829,7 @@
        
        const today = new Date().toISOString().split('T')[0];
        const start = document.getElementById('loan-start-date');
-        if (start) start.value = '15';
+       if (start) start.value = '15';
        const endDateInput = document.getElementById('loan-end-date');
        if (endDateInput) endDateInput.value = today;
        
