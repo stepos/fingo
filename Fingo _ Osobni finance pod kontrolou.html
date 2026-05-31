@@ -2991,6 +2991,7 @@
       "transakcí": { en: "transactions", de: "Transaktionen" },
       "Bez popisu": { en: "No description", de: "Keine Beschreibung" },
       "Žádné platby": { en: "No payments", de: "Keine Zahlungen" },
+      "Žádné příjmy": { en: "No income", de: "Keine Einnahmen" },
       "Čerpáno:": { en: "Spent:", de: "Verbraucht:" },
       "z ": { en: "of ", de: "von " },
       "Zbývá:": { en: "Remaining:", de: "Verbleibend:" },
@@ -3063,6 +3064,7 @@
       "Upravit": { en: "Edit", de: "Bearbeiten" },
       "Smazat": { en: "Delete", de: "Löschen" },
       "Zaplaceno": { en: "Paid", de: "Bezahlt" },
+      "Přijato": { en: "Received", de: "Empfangen" },
       "Budoucí": { en: "Future", de: "Zukunft" },
       "Celkem v historii": { en: "Total in history", de: "Gesamt in der Historie" }
     };
@@ -5619,44 +5621,88 @@
     }
 
     window.highlightChartSlice = function(idx) {
-      if (categoryChartInstance) {
-        try {
-          categoryChartInstance.setActiveElements([{ datasetIndex: 0, index: idx }]);
-          if (categoryChartInstance.tooltip) {
-            categoryChartInstance.tooltip.setActiveElements([{ datasetIndex: 0, index: idx }], { x: 0, y: 0 });
+      [categoryChartPaidInstance, categoryChartTotalInstance].forEach(chart => {
+        if (chart) {
+          try {
+            chart.setActiveElements([{ datasetIndex: 0, index: idx }]);
+            if (chart.tooltip) {
+              chart.tooltip.setActiveElements([{ datasetIndex: 0, index: idx }], { x: 0, y: 0 });
+            }
+            chart.update();
+          } catch (e) {
+            console.error("Error highlighting slice:", e);
           }
-          categoryChartInstance.update();
-        } catch (e) {
-          console.error("Error highlighting slice:", e);
         }
-      }
+      });
     };
     
     window.clearChartHighlight = function() {
-      if (categoryChartInstance) {
-        try {
-          categoryChartInstance.setActiveElements([]);
-          if (categoryChartInstance.tooltip) {
-            categoryChartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+      [categoryChartPaidInstance, categoryChartTotalInstance].forEach(chart => {
+        if (chart) {
+          try {
+            chart.setActiveElements([]);
+            if (chart.tooltip) {
+              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            }
+            chart.update();
+          } catch (e) {
+            console.error("Error clearing highlight:", e);
           }
-          categoryChartInstance.update();
-        } catch (e) {
-          console.error("Error clearing highlight:", e);
+        }
+      });
+    };
+
+    function findCategoryForFuturePayment(fp) {
+      let found = state.categories.find(c => c.id === fp.category || c.name === fp.category);
+      if (found) return found.id;
+      
+      if (fp.category === 'Bydlení / Úvěry' || fp.category === 'Housing / Loans') {
+        const bydleni = state.categories.find(c => c.id === 'cat-bydleni');
+        if (bydleni) return bydleni.id;
+      }
+      
+      const name = fp.name || '';
+      const catName = fp.category || '';
+      const matchDum = state.categories.find(c => c.id === 'cat-1780150601597' || c.name === 'Dům');
+      if (matchDum) {
+        if (name.toLowerCase().includes('dům') || catName.toLowerCase().includes('dům')) {
+          return matchDum.id;
         }
       }
-    };
+      
+      return 'cat-ostatni';
+    }
 
     function buildCategoryChart(filteredTransactions) {
       const expenses = filteredTransactions.filter(t => t.type === 'expense');
       const emptyContainer = document.getElementById('category-chart-empty');
       const wrapper = document.getElementById('category-chart-wrapper');
       
-      if (categoryChartInstance) {
-        categoryChartInstance.destroy();
-        categoryChartInstance = null;
+      if (categoryChartPaidInstance) {
+        categoryChartPaidInstance.destroy();
+        categoryChartPaidInstance = null;
       }
+      if (categoryChartTotalInstance) {
+        categoryChartTotalInstance.destroy();
+        categoryChartTotalInstance = null;
+      }
+      categoryChartInstance = null;
       
-      if (expenses.length === 0) {
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      let totalFuture = 0;
+      const futureByCategory = {};
+      
+      futurePayments.forEach(fp => {
+        if (fp.type === 'expense') {
+          const amount = Number(fp.amount);
+          totalFuture += amount;
+          
+          const catId = findCategoryForFuturePayment(fp);
+          futureByCategory[catId] = (futureByCategory[catId] || 0) + amount;
+        }
+      });
+      
+      if (expenses.length === 0 && totalFuture === 0) {
         emptyContainer.classList.remove('hidden');
         if (wrapper) wrapper.classList.add('hidden');
         return;
@@ -5665,69 +5711,127 @@
       emptyContainer.classList.add('hidden');
       if (wrapper) wrapper.classList.remove('hidden');
       
-      const grouped = {};
+      const groupedPaid = {};
       expenses.forEach(e => {
-        grouped[e.category] = (grouped[e.category] || 0) + e.amount;
+        groupedPaid[e.category] = (groupedPaid[e.category] || 0) + e.amount;
       });
       
-      const totalAmount = Object.values(grouped).reduce((sum, val) => sum + val, 0);
-      document.getElementById('category-chart-total').textContent = formatCurrency(totalAmount);
+      const totalPaidAmount = Object.values(groupedPaid).reduce((sum, val) => sum + val, 0);
+      const paidTotalEl = document.getElementById('category-chart-paid-total');
+      if (paidTotalEl) paidTotalEl.textContent = formatCurrency(totalPaidAmount);
+      
+      const groupedTotal = {};
+      const allCategoryIds = new Set([...Object.keys(groupedPaid), ...Object.keys(futureByCategory)]);
+      
+      allCategoryIds.forEach(catId => {
+        const p = groupedPaid[catId] || 0;
+        const f = futureByCategory[catId] || 0;
+        groupedTotal[catId] = p + f;
+      });
+      
+      const grandTotalAmount = totalPaidAmount + totalFuture;
+      const totalTotalEl = document.getElementById('category-chart-total-total');
+      if (totalTotalEl) totalTotalEl.textContent = formatCurrency(grandTotalAmount);
       
       const categoryData = [];
-      Object.keys(grouped).forEach(catId => {
+      allCategoryIds.forEach(catId => {
         const cat = state.categories.find(c => c.id === catId) || { name: 'Bez kategorie', color: '#64748b' };
+        const paidVal = groupedPaid[catId] || 0;
+        const futureVal = futureByCategory[catId] || 0;
+        const totalVal = paidVal + futureVal;
+        
         categoryData.push({
           id: catId,
           name: cat.name,
           color: cat.color,
-          amount: grouped[catId],
-          percentage: totalAmount > 0 ? ((grouped[catId] / totalAmount) * 100).toFixed(1) : '0.0'
+          paid: paidVal,
+          future: futureVal,
+          total: totalVal,
+          percentage: grandTotalAmount > 0 ? ((totalVal / grandTotalAmount) * 100).toFixed(1) : '0.0'
         });
       });
       
-      categoryData.sort((a, b) => b.amount - a.amount);
+      categoryData.sort((a, b) => b.total - a.total);
       
       const labels = categoryData.map(c => c.name);
-      const data = categoryData.map(c => c.amount);
+      const paidData = categoryData.map(c => c.paid);
+      const totalData = categoryData.map(c => c.total);
       const backgroundColors = categoryData.map(c => c.color);
       
       const isDark = document.documentElement.classList.contains('dark');
       const borderColor = isDark ? '#1e293b' : '#ffffff';
       
-      const canvas = document.getElementById('categoryChart');
-      const ctx = canvas.getContext('2d');
-      categoryChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: backgroundColors,
-            borderWidth: 2,
-            borderColor: borderColor,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const val = context.raw || 0;
-                  const pct = totalAmount > 0 ? ((val / totalAmount) * 100).toFixed(1) : 0;
-                  return ` ${context.label}: ${formatCurrency(val)} (${pct}%)`;
+      const canvasPaid = document.getElementById('categoryChartPaid');
+      if (canvasPaid) {
+        const ctxPaid = canvasPaid.getContext('2d');
+        categoryChartPaidInstance = new Chart(ctxPaid, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: paidData,
+              backgroundColor: backgroundColors,
+              borderWidth: 2,
+              borderColor: borderColor,
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw || 0;
+                    const pct = totalPaidAmount > 0 ? ((val / totalPaidAmount) * 100).toFixed(1) : 0;
+                    return ` ${context.label}: ${formatCurrency(val)} (${pct}%)`;
+                  }
                 }
               }
-            }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+      
+      const canvasTotal = document.getElementById('categoryChartTotal');
+      if (canvasTotal) {
+        const ctxTotal = canvasTotal.getContext('2d');
+        categoryChartTotalInstance = new Chart(ctxTotal, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: totalData,
+              backgroundColor: backgroundColors,
+              borderWidth: 2,
+              borderColor: borderColor,
+              hoverOffset: 4
+            }]
           },
-          cutout: '70%'
-        }
-      });
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw || 0;
+                    const pct = grandTotalAmount > 0 ? ((val / grandTotalAmount) * 100).toFixed(1) : 0;
+                    return ` ${context.label}: ${formatCurrency(val)} (${pct}%)`;
+                  }
+                }
+              }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+      
+      categoryChartInstance = categoryChartPaidInstance;
       
       const legendContainer = document.getElementById('category-chart-legend');
       legendContainer.innerHTML = '';
@@ -5738,13 +5842,15 @@
         legendItem.setAttribute('onmouseenter', `highlightChartSlice(${idx})`);
         legendItem.setAttribute('onmouseleave', 'clearChartHighlight()');
         
+        const futureText = cat.future > 0 ? ` (+${formatCurrency(cat.future)})` : '';
+        
         legendItem.innerHTML = `
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${cat.color}"></span>
-            <span class="font-semibold text-slate-700 dark:text-slate-300 truncate">${cat.name}</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-350 truncate">${cat.name}</span>
           </div>
           <div class="flex items-center gap-2 text-right shrink-0">
-            <span class="font-bold text-slate-900 dark:text-slate-100">${formatCurrency(cat.amount)}</span>
+            <span class="font-bold text-slate-900 dark:text-slate-100">${formatCurrency(cat.paid)}<span class="text-[10px] text-slate-400 font-semibold">${futureText}</span></span>
             <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded-md">${cat.percentage}%</span>
           </div>
         `;
@@ -6819,31 +6925,61 @@
         const count = state.transactions.filter(t => t.category === c.id).length;
         const isDefault = defaultCategories.some(dc => dc.id === c.id);
         
-        // 1. All-time expenses
+        // Determine dynamically if this is an income category
+        let allTimeIncomes = 0;
+        let allTimeExpenses = 0;
+        state.transactions.forEach(t => {
+          if (t.category === c.id) {
+            if (t.type === 'income') {
+              allTimeIncomes += Number(t.amount);
+            } else if (t.type === 'expense') {
+              allTimeExpenses += Number(t.amount);
+            }
+          }
+        });
+        
+        let isIncomeCategory = false;
+        if (allTimeIncomes > allTimeExpenses) {
+          isIncomeCategory = true;
+        } else if (allTimeIncomes === 0 && allTimeExpenses === 0) {
+          const lowerName = (c.name || '').toLowerCase();
+          const lowerId = (c.id || '').toLowerCase();
+          if (lowerName.includes('příjem') || lowerName.includes('prijem') || 
+              lowerName.includes('výplata') || lowerName.includes('vyplata') || 
+              lowerName.includes('income') || lowerName.includes('salary') ||
+              lowerId.includes('prijem') || lowerId.includes('vyplata') ||
+              lowerId.includes('income') || lowerId.includes('salary')) {
+            isIncomeCategory = true;
+          }
+        }
+        
+        const targetType = isIncomeCategory ? 'income' : 'expense';
+
+        // 1. All-time sum
         let allTimePaid = 0;
         state.transactions.forEach(t => {
-          if (t.category === c.id && t.type === 'expense') {
+          if (t.category === c.id && t.type === targetType) {
             allTimePaid += Number(t.amount);
           }
         });
 
-        // 2. Paid this period (expenses only)
+        // 2. Value this period
         const filteredTrans = getFilteredTransactions(state.transactions);
         let paidThisMonth = 0;
         const paidItems = [];
         filteredTrans.forEach(t => {
-          if (t.category === c.id && t.type === 'expense') {
+          if (t.category === c.id && t.type === targetType) {
             paidThisMonth += Number(t.amount);
             paidItems.push(t);
           }
         });
 
-        // 3. Future recurring expenses & loans (Budoucí)
+        // 3. Future recurring transactions & loans (Budoucí)
         const futurePayments = getFutureRecurringPaymentsThisMonth();
         let futureRecurringThisMonth = 0;
         const futureItems = [];
         futurePayments.forEach(fp => {
-          if (fp.type === 'expense') {
+          if (fp.type === targetType) {
             if (fp.category === c.id || fp.category === c.name || (fp.category === 'Bydlení / Úvěry' && c.id === 'cat-bydleni') || (fp.category === 'Housing / Loans' && c.id === 'cat-bydleni')) {
               futureRecurringThisMonth += Number(fp.amount);
               futureItems.push(fp);
@@ -6859,14 +6995,16 @@
 
         let paidListHtml = '';
         if (paidItems.length === 0) {
-          paidListHtml = `<div class="text-slate-450 dark:text-slate-500 italic py-1.5 text-[9px] font-semibold">${__('Žádné platby')}</div>`;
+          paidListHtml = `<div class="text-slate-450 dark:text-slate-500 italic py-1.5 text-[9px] font-semibold">${isIncomeCategory ? __('Žádné příjmy') : __('Žádné platby')}</div>`;
         } else {
           paidListHtml = paidItems.map(t => {
             const dateStr = formatDateString(t.date);
+            const sign = isIncomeCategory ? '+' : '-';
+            const textClass = isIncomeCategory ? 'text-emerald-600' : 'text-rose-600';
             return `
               <div class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800/40 last:border-0 gap-2">
                 <span class="truncate text-slate-500 dark:text-slate-400 font-bold" title="${escapeHtml(t.description || __('Bez popisu'))}">${dateStr} - ${escapeHtml(t.description || __('Bez popisu'))}</span>
-                <span class="shrink-0 font-extrabold text-rose-600">-${formatCurrency(t.amount)}</span>
+                <span class="shrink-0 font-extrabold ${textClass}">${sign}${formatCurrency(t.amount)}</span>
               </div>
             `;
           }).join('');
@@ -6874,14 +7012,16 @@
 
         let futureListHtml = '';
         if (futureItems.length === 0) {
-          futureListHtml = `<div class="text-slate-450 dark:text-slate-500 italic py-1.5 text-[9px] font-semibold">${__('Žádné platby')}</div>`;
+          futureListHtml = `<div class="text-slate-450 dark:text-slate-500 italic py-1.5 text-[9px] font-semibold">${isIncomeCategory ? __('Žádné příjmy') : __('Žádné platby')}</div>`;
         } else {
           futureListHtml = futureItems.map(fp => {
             const dateStr = formatDateString(fp.date);
+            const sign = isIncomeCategory ? '+' : '-';
+            const textClass = isIncomeCategory ? 'text-emerald-600' : 'text-amber-500';
             return `
               <div class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800/40 last:border-0 gap-2">
                 <span class="truncate text-slate-500 dark:text-slate-400 font-bold" title="${escapeHtml(fp.name || __('Bez popisu'))}">${dateStr} - ${escapeHtml(fp.name || __('Bez popisu'))}</span>
-                <span class="shrink-0 font-extrabold text-amber-500">-${formatCurrency(fp.amount)}</span>
+                <span class="shrink-0 font-extrabold ${textClass}">${sign}${formatCurrency(fp.amount)}</span>
               </div>
             `;
           }).join('');
@@ -6924,7 +7064,7 @@
           
           <div class="grid grid-cols-3 gap-2 text-center">
             <div class="bg-slate-50/50 dark:bg-slate-950/20 p-1.5 rounded-xl border border-slate-100/50 dark:border-slate-800/30">
-              <span class="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">${__('Zaplaceno')}</span>
+              <span class="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">${isIncomeCategory ? __('Přijato') : __('Zaplaceno')}</span>
               <span class="text-[11px] font-bold text-emerald-600">${formatCurrency(paidThisMonth)}</span>
             </div>
             <div class="bg-slate-50/50 dark:bg-slate-950/20 p-1.5 rounded-xl border border-slate-100/50 dark:border-slate-800/30">
@@ -6948,7 +7088,7 @@
               <div>
                 <h5 class="font-black text-emerald-600 dark:text-emerald-500 mb-1 flex items-center gap-1 uppercase tracking-wider text-[8px]">
                   <i data-lucide="check-circle-2" class="w-3 h-3"></i>
-                  ${__('Zaplaceno')}
+                  ${isIncomeCategory ? __('Přijato') : __('Zaplaceno')}
                 </h5>
                 <div class="space-y-0.5">
                   ${paidListHtml}
