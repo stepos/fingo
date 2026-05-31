@@ -671,38 +671,67 @@
         </div>
       </div>
 
-      <!-- Loans Portfolio Overview (Only shown if active loans exist) -->
-      <div id="dashboard-loans-summary" class="hidden bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <!-- Total Debt / Expenses -->
-          <div class="flex items-center gap-4">
+      <!-- Portfolio Overview (Loans & Recurring Payments) -->
+      <div id="dashboard-loans-summary" class="hidden bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-6">
+        <!-- Row 1: Loans & Mortgages -->
+        <div id="dashboard-loans-row" class="hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5 last:border-0 last:pb-0">
+          <div class="flex items-center gap-4 min-w-[240px]">
             <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
               <i data-lucide="landmark" class="w-6 h-6"></i>
             </div>
             <div>
               <h4 class="font-bold text-slate-900 text-sm">Úvěry & Hypotéky</h4>
-              <p class="text-xs text-slate-400 font-medium">Celkové nesplacené závazky a hypotéky</p>
+              <p class="text-xs text-slate-400 font-medium">Splátky úvěrů a hypoték</p>
             </div>
           </div>
-          
-          <!-- Key numbers -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 md:gap-8 flex-1 md:flex-none">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 md:gap-8 flex-1">
             <div>
-              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Celkový zbývající dluh</span>
-              <span id="dashboard-loans-total-debt" class="text-base md:text-lg font-black text-rose-600">0,00 Kč</span>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Měsíčně celkem</span>
+              <span id="dashboard-loans-monthly-total" class="text-sm md:text-base font-bold text-slate-800">0,00 Kč</span>
             </div>
             <div>
-              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Měsíční splátky celkem</span>
-              <span id="dashboard-loans-monthly-total" class="text-base md:text-lg font-bold text-slate-800">0,00 Kč</span>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tento měsíc zaplaceno</span>
+              <span id="dashboard-loans-paid-this-month" class="text-sm md:text-base font-bold text-emerald-600">0,00 Kč</span>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tento měsíc čekající na zaplacení</span>
+              <span id="dashboard-loans-waiting-this-month" class="text-sm md:text-base font-bold text-amber-500">0,00 Kč</span>
             </div>
             <div class="col-span-2 sm:col-span-1">
-              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Celková splacenost dluhu</span>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Splaceno celkem</span>
               <div class="flex items-center gap-2">
-                <div class="w-24 bg-slate-100 rounded-full h-2">
-                  <div id="dashboard-loans-progress-bar" class="bg-emerald-400 h-2 rounded-full" style="width: 0%"></div>
+                <div class="w-20 bg-slate-100 rounded-full h-1.5">
+                  <div id="dashboard-loans-progress-bar" class="bg-emerald-400 h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
-                <span id="dashboard-loans-progress-percent" class="text-xs font-bold text-emerald-500">0%</span>
+                <span id="dashboard-loans-progress-percent" class="text-[11px] font-bold text-emerald-500">0%</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Recurring Payments -->
+        <div id="dashboard-recurring-row" class="hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5 last:border-0 last:pb-0">
+          <div class="flex items-center gap-4 min-w-[240px]">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
+              <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm">Pravidelné platby</h4>
+              <p class="text-xs text-slate-400 font-medium">Trvalé příkazy a opakované platby</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 md:gap-8 flex-1">
+            <div>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Měsíčně celkem</span>
+              <span id="dashboard-recurring-monthly-total" class="text-sm md:text-base font-bold text-slate-800">0,00 Kč</span>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tento měsíc zaplaceno</span>
+              <span id="dashboard-recurring-paid-this-month" class="text-sm md:text-base font-bold text-emerald-600">0,00 Kč</span>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tento měsíc čekající na zaplacení</span>
+              <span id="dashboard-recurring-waiting-this-month" class="text-sm md:text-base font-bold text-amber-500">0,00 Kč</span>
             </div>
           </div>
         </div>
@@ -4818,34 +4847,99 @@
       renderDashboardRecent();
       buildCharts(filtered);
       
-      // Loans summary calculations
+      // Portfolio Overview (Loans & Recurring Payments) calculations
       const loans = state.loans || [];
+      const recurring = state.recurring || [];
       const loansSummaryEl = document.getElementById('dashboard-loans-summary');
+      const todayDay = new Date().getDate();
       
       if (loansSummaryEl) {
-        if (loans.length > 0) {
+        const hasLoans = loans.length > 0;
+        const hasRecurring = recurring.length > 0;
+        
+        if (hasLoans || hasRecurring) {
           loansSummaryEl.classList.remove('hidden');
           
-          let totalOriginal = 0;
-          let totalRemaining = 0;
-          let totalMonthly = 0;
-          
-          loans.forEach(loan => {
-            const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
-            if (!details.isExpired) {
-              totalOriginal += Number(loan.totalAmount);
-              totalRemaining += Number(loan.remainingAmount);
-              totalMonthly += Number(loan.monthlyPayment);
+          // Loans Row
+          const loansRow = document.getElementById('dashboard-loans-row');
+          if (loansRow) {
+            if (hasLoans) {
+              loansRow.classList.remove('hidden');
+              
+              let totalOriginal = 0;
+              let totalRemaining = 0;
+              let totalMonthly = 0;
+              let totalPaidThisMonth = 0;
+              let totalWaitingThisMonth = 0;
+              
+              loans.forEach(loan => {
+                const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+                if (!details.isExpired) {
+                  totalOriginal += Number(loan.totalAmount);
+                  totalRemaining += Number(loan.remainingAmount);
+                  
+                  const monthly = Number(loan.monthlyPayment);
+                  totalMonthly += monthly;
+                  
+                  const dayNum = String(loan.startDate).includes('-') 
+                    ? parseDateSafe(loan.startDate).getDate() 
+                    : (parseInt(loan.startDate) || 15);
+                  
+                  if (dayNum <= todayDay) {
+                    totalPaidThisMonth += monthly;
+                  } else {
+                    totalWaitingThisMonth += monthly;
+                  }
+                }
+              });
+              
+              const totalPaid = Math.max(0, totalOriginal - totalRemaining);
+              const progressPercent = totalOriginal > 0 ? Math.min(100, (totalPaid / totalOriginal) * 100) : 0;
+              
+              document.getElementById('dashboard-loans-monthly-total').innerText = formatCurrency(totalMonthly);
+              document.getElementById('dashboard-loans-paid-this-month').innerText = formatCurrency(totalPaidThisMonth);
+              document.getElementById('dashboard-loans-waiting-this-month').innerText = formatCurrency(totalWaitingThisMonth);
+              document.getElementById('dashboard-loans-progress-bar').style.width = `${progressPercent}%`;
+              document.getElementById('dashboard-loans-progress-percent').innerText = `${progressPercent.toFixed(1)}%`;
+            } else {
+              loansRow.classList.add('hidden');
             }
-          });
+          }
           
-          const totalPaid = Math.max(0, totalOriginal - totalRemaining);
-          const progressPercent = totalOriginal > 0 ? Math.min(100, (totalPaid / totalOriginal) * 100) : 0;
-          
-          document.getElementById('dashboard-loans-total-debt').innerText = formatCurrency(totalRemaining);
-          document.getElementById('dashboard-loans-monthly-total').innerText = formatCurrency(totalMonthly);
-          document.getElementById('dashboard-loans-progress-bar').style.width = `${progressPercent}%`;
-          document.getElementById('dashboard-loans-progress-percent').innerText = `${progressPercent.toFixed(1)}%`;
+          // Recurring Row
+          const recurringRow = document.getElementById('dashboard-recurring-row');
+          if (recurringRow) {
+            if (hasRecurring) {
+              recurringRow.classList.remove('hidden');
+              
+              let recMonthly = 0;
+              let recPaidThisMonth = 0;
+              let recWaitingThisMonth = 0;
+              
+              recurring.forEach(r => {
+                if (r.type === 'expense') {
+                  const amt = Number(r.amount);
+                  recMonthly += amt;
+                  
+                  const dayNum = r.bookingDay 
+                    ? (parseInt(r.bookingDay) || 15) 
+                    : (r.nextDueDate ? parseDateSafe(r.nextDueDate).getDate() : 15);
+                  
+                  if (dayNum <= todayDay) {
+                    recPaidThisMonth += amt;
+                  } else {
+                    recWaitingThisMonth += amt;
+                  }
+                }
+              });
+              
+              document.getElementById('dashboard-recurring-monthly-total').innerText = formatCurrency(recMonthly);
+              document.getElementById('dashboard-recurring-paid-this-month').innerText = formatCurrency(recPaidThisMonth);
+              document.getElementById('dashboard-recurring-waiting-this-month').innerText = formatCurrency(recWaitingThisMonth);
+            } else {
+              recurringRow.classList.add('hidden');
+            }
+          }
         } else {
           loansSummaryEl.classList.add('hidden');
         }

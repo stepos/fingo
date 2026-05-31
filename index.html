@@ -4818,34 +4818,99 @@
       renderDashboardRecent();
       buildCharts(filtered);
       
-      // Loans summary calculations
+      // Portfolio Overview (Loans & Recurring Payments) calculations
       const loans = state.loans || [];
+      const recurring = state.recurring || [];
       const loansSummaryEl = document.getElementById('dashboard-loans-summary');
+      const todayDay = new Date().getDate();
       
       if (loansSummaryEl) {
-        if (loans.length > 0) {
+        const hasLoans = loans.length > 0;
+        const hasRecurring = recurring.length > 0;
+        
+        if (hasLoans || hasRecurring) {
           loansSummaryEl.classList.remove('hidden');
           
-          let totalOriginal = 0;
-          let totalRemaining = 0;
-          let totalMonthly = 0;
-          
-          loans.forEach(loan => {
-            const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
-            if (!details.isExpired) {
-              totalOriginal += Number(loan.totalAmount);
-              totalRemaining += Number(loan.remainingAmount);
-              totalMonthly += Number(loan.monthlyPayment);
+          // Loans Row
+          const loansRow = document.getElementById('dashboard-loans-row');
+          if (loansRow) {
+            if (hasLoans) {
+              loansRow.classList.remove('hidden');
+              
+              let totalOriginal = 0;
+              let totalRemaining = 0;
+              let totalMonthly = 0;
+              let totalPaidThisMonth = 0;
+              let totalWaitingThisMonth = 0;
+              
+              loans.forEach(loan => {
+                const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+                if (!details.isExpired) {
+                  totalOriginal += Number(loan.totalAmount);
+                  totalRemaining += Number(loan.remainingAmount);
+                  
+                  const monthly = Number(loan.monthlyPayment);
+                  totalMonthly += monthly;
+                  
+                  const dayNum = String(loan.startDate).includes('-') 
+                    ? parseDateSafe(loan.startDate).getDate() 
+                    : (parseInt(loan.startDate) || 15);
+                  
+                  if (dayNum <= todayDay) {
+                    totalPaidThisMonth += monthly;
+                  } else {
+                    totalWaitingThisMonth += monthly;
+                  }
+                }
+              });
+              
+              const totalPaid = Math.max(0, totalOriginal - totalRemaining);
+              const progressPercent = totalOriginal > 0 ? Math.min(100, (totalPaid / totalOriginal) * 100) : 0;
+              
+              document.getElementById('dashboard-loans-monthly-total').innerText = formatCurrency(totalMonthly);
+              document.getElementById('dashboard-loans-paid-this-month').innerText = formatCurrency(totalPaidThisMonth);
+              document.getElementById('dashboard-loans-waiting-this-month').innerText = formatCurrency(totalWaitingThisMonth);
+              document.getElementById('dashboard-loans-progress-bar').style.width = `${progressPercent}%`;
+              document.getElementById('dashboard-loans-progress-percent').innerText = `${progressPercent.toFixed(1)}%`;
+            } else {
+              loansRow.classList.add('hidden');
             }
-          });
+          }
           
-          const totalPaid = Math.max(0, totalOriginal - totalRemaining);
-          const progressPercent = totalOriginal > 0 ? Math.min(100, (totalPaid / totalOriginal) * 100) : 0;
-          
-          document.getElementById('dashboard-loans-total-debt').innerText = formatCurrency(totalRemaining);
-          document.getElementById('dashboard-loans-monthly-total').innerText = formatCurrency(totalMonthly);
-          document.getElementById('dashboard-loans-progress-bar').style.width = `${progressPercent}%`;
-          document.getElementById('dashboard-loans-progress-percent').innerText = `${progressPercent.toFixed(1)}%`;
+          // Recurring Row
+          const recurringRow = document.getElementById('dashboard-recurring-row');
+          if (recurringRow) {
+            if (hasRecurring) {
+              recurringRow.classList.remove('hidden');
+              
+              let recMonthly = 0;
+              let recPaidThisMonth = 0;
+              let recWaitingThisMonth = 0;
+              
+              recurring.forEach(r => {
+                if (r.type === 'expense') {
+                  const amt = Number(r.amount);
+                  recMonthly += amt;
+                  
+                  const dayNum = r.bookingDay 
+                    ? (parseInt(r.bookingDay) || 15) 
+                    : (r.nextDueDate ? parseDateSafe(r.nextDueDate).getDate() : 15);
+                  
+                  if (dayNum <= todayDay) {
+                    recPaidThisMonth += amt;
+                  } else {
+                    recWaitingThisMonth += amt;
+                  }
+                }
+              });
+              
+              document.getElementById('dashboard-recurring-monthly-total').innerText = formatCurrency(recMonthly);
+              document.getElementById('dashboard-recurring-paid-this-month').innerText = formatCurrency(recPaidThisMonth);
+              document.getElementById('dashboard-recurring-waiting-this-month').innerText = formatCurrency(recWaitingThisMonth);
+            } else {
+              recurringRow.classList.add('hidden');
+            }
+          }
         } else {
           loansSummaryEl.classList.add('hidden');
         }
