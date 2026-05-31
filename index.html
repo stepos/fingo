@@ -566,11 +566,6 @@
           <label class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider hidden sm:inline">Období:</label>
           <div class="relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl shadow-sm w-full sm:w-auto">
             <select id="global-period-select" onchange="handleGlobalPeriodChange()" class="appearance-none w-full sm:w-auto pl-3.5 pr-9 py-2.5 bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
-              <option value="this-month" class="dark:bg-slate-900">Tento měsíc</option>
-              <option value="last-month" class="dark:bg-slate-900">Minulý měsíc</option>
-              <option value="this-year" class="dark:bg-slate-900">Tento rok</option>
-              <option value="all" class="dark:bg-slate-900" selected>Všechna data</option>
-              <option value="custom" class="dark:bg-slate-900">Vlastní rozsah</option>
             </select>
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
               <i data-lucide="chevron-down" class="w-4 h-4"></i>
@@ -2722,7 +2717,10 @@
       "Vytvořit příkaz": { en: "Create Payment", de: "Dauerauftrag erstellen" },
       "Uložit změny": { en: "Save Changes", de: "Änderungen speichern" },
       "Upravit": { en: "Edit", de: "Bearbeiten" },
-      "Smazat": { en: "Delete", de: "Löschen" }
+      "Smazat": { en: "Delete", de: "Löschen" },
+      "Zaplaceno": { en: "Paid", de: "Bezahlt" },
+      "Budoucí": { en: "Future", de: "Zukunft" },
+      "Celkem v historii": { en: "Total in history", de: "Gesamt in der Historie" }
     };
 
     // Global translation helper
@@ -3501,6 +3499,7 @@
       }
       
       loadState();
+      populatePeriodSelect();
       
       document.getElementById('modal-db-startup').classList.add('hidden');
       
@@ -4041,6 +4040,7 @@
     async function saveState() {
       if (!dbConfig.name) return;
       
+      populatePeriodSelect();
       const val = JSON.stringify(state);
       
       // Always update local cache
@@ -4641,6 +4641,77 @@
       }
     }
 
+    function getMonthLabel(year, month) {
+      const names = {
+        cs: ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"],
+        en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        de: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
+      };
+      const lang = currentLanguage || 'cs';
+      const monthArr = names[lang] || names['cs'];
+      return `${monthArr[month]} ${year}`;
+    }
+
+    function populatePeriodSelect() {
+      const select = document.getElementById('global-period-select');
+      if (!select) return;
+      
+      const prevValue = select.value;
+      select.innerHTML = '';
+      
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      let minYear = currentYear;
+      let minMonth = currentMonth;
+      
+      if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(t => {
+          if (t.date) {
+            const d = parseDateSafe(t.date);
+            if (d.getFullYear() < minYear || (d.getFullYear() === minYear && d.getMonth() < minMonth)) {
+              minYear = d.getFullYear();
+              minMonth = d.getMonth();
+            }
+          }
+        });
+      }
+      
+      let y = minYear;
+      let m = minMonth;
+      
+      const options = [];
+      while (y < currentYear || (y === currentYear && m <= currentMonth)) {
+        const value = `${y}-${String(m + 1).padStart(2, '0')}`;
+        const label = getMonthLabel(y, m);
+        options.push({ value, label });
+        
+        m++;
+        if (m > 11) {
+          m = 0;
+          y++;
+        }
+      }
+      
+      options.reverse();
+      
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.innerText = opt.label;
+        option.className = "dark:bg-slate-900";
+        select.appendChild(option);
+      });
+      
+      const currentMonthValue = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      if (prevValue && options.some(opt => opt.value === prevValue)) {
+        select.value = prevValue;
+      } else {
+        select.value = currentMonthValue;
+      }
+    }
+
     // Helper to filter transactions according to the selected global date period
     function getFilteredTransactions(transactions) {
       const select = document.getElementById('global-period-select');
@@ -4651,11 +4722,15 @@
       let startDate = null;
       let endDate = null;
       
-      if (period === 'all') {
+      const match = period.match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        const year = parseInt(match[1]);
+        const month = parseInt(match[2]) - 1;
+        startDate = new Date(year, month, 1);
+        endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
+      } else if (period === 'all') {
         return transactions || [];
-      }
-      
-      if (period === 'this-month') {
+      } else if (period === 'this-month') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       } else if (period === 'last-month') {
@@ -4672,6 +4747,9 @@
           endDate = parseDateSafe(endVal);
           endDate.setHours(23, 59, 59, 999);
         }
+      } else {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       }
       
       return (transactions || []).filter(t => {
@@ -4770,7 +4848,9 @@
     }
 
     function updateDashboardAndData() {
-      const balance = state.transactions.reduce((acc, t) => {
+      const filtered = getFilteredTransactions(state.transactions);
+      
+      const balance = filtered.reduce((acc, t) => {
         return t.type === 'income' ? acc + t.amount : acc - t.amount;
       }, 0);
       
@@ -4854,7 +4934,7 @@
         }
       }
       
-      const filtered = getFilteredTransactions(state.transactions);
+      
       
       const income = filtered.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc, 0);
       const expense = filtered.reduce((acc, t) => t.type === 'expense' ? acc + t.amount : acc, 0);
@@ -6122,12 +6202,50 @@
       
       container.innerHTML = '';
       
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+
       state.categories.forEach(c => {
         const count = state.transactions.filter(t => t.category === c.id).length;
         const isDefault = defaultCategories.some(dc => dc.id === c.id);
         
+        // 1. All-time expenses
+        let allTimePaid = 0;
+        state.transactions.forEach(t => {
+          if (t.category === c.id && t.type === 'expense') {
+            allTimePaid += Number(t.amount);
+          }
+        });
+
+        // 2. Paid this month (expenses only)
+        let paidThisMonth = 0;
+        state.transactions.forEach(t => {
+          if (t.category === c.id && t.type === 'expense' && t.date) {
+            const tDate = parseDateSafe(t.date);
+            if (tDate.getFullYear() === currentYear && tDate.getMonth() === currentMonth) {
+              paidThisMonth += Number(t.amount);
+            }
+          }
+        });
+
+        // 3. Future recurring expenses this month (Budoucí)
+        let futureRecurringThisMonth = 0;
+        (state.recurring || []).forEach(r => {
+          if (r.category === c.id && r.type === 'expense') {
+            if (r.nextDueDate) {
+              const due = parseDateSafe(r.nextDueDate);
+              if (due.getFullYear() === currentYear && due.getMonth() === currentMonth && due > now) {
+                futureRecurringThisMonth += Number(r.amount);
+              }
+            }
+          }
+        });
+
+        const totalThisMonth = paidThisMonth + futureRecurringThisMonth;
+        
         const card = document.createElement('div');
-        card.className = `bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-4 rounded-2xl shadow-card flex items-center justify-between relative group hover:shadow-premium transition-all min-w-0`;
+        card.className = `bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-4 rounded-2xl shadow-card flex flex-col justify-between relative group hover:shadow-premium transition-all min-w-0`;
         
         let actionBtnHtml = `
           <div class="flex items-center gap-1 shrink-0">
@@ -6141,20 +6259,44 @@
         `;
         
         card.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background-color: ${c.color}15; color: ${c.color}">
-              <i data-lucide="${c.icon || 'help-circle'}" class="w-5 h-5"></i>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${__(c.name)}</p>
-                ${isDefault ? `<span class="text-[8px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/80 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0">${__('Systém')}</span>` : ''}
+          <div class="flex items-center justify-between min-w-0 w-full mb-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background-color: ${c.color}15; color: ${c.color}">
+                <i data-lucide="${c.icon || 'help-circle'}" class="w-5 h-5"></i>
               </div>
-              <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">${count} ${__('transakcí')}</span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${__(c.name)}</p>
+                  ${isDefault ? `<span class="text-[8px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/80 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0">${__('Systém')}</span>` : ''}
+                </div>
+                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">${count} ${__('transakcí')}</span>
+              </div>
+            </div>
+            <div class="shrink-0 ml-2">
+              ${actionBtnHtml}
             </div>
           </div>
-          <div class="shrink-0 ml-2">
-            ${actionBtnHtml}
+          
+          <div class="border-t border-slate-100 dark:border-slate-800/60 my-2.5"></div>
+          
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-slate-50/50 dark:bg-slate-950/20 p-1.5 rounded-xl border border-slate-100/50 dark:border-slate-800/30">
+              <span class="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">${__('Zaplaceno')}</span>
+              <span class="text-[11px] font-bold text-emerald-600">${formatCurrency(paidThisMonth)}</span>
+            </div>
+            <div class="bg-slate-50/50 dark:bg-slate-950/20 p-1.5 rounded-xl border border-slate-100/50 dark:border-slate-800/30">
+              <span class="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">${__('Budoucí')}</span>
+              <span class="text-[11px] font-bold text-amber-500">${formatCurrency(futureRecurringThisMonth)}</span>
+            </div>
+            <div class="bg-slate-50/50 dark:bg-slate-950/20 p-1.5 rounded-xl border border-slate-100/50 dark:border-slate-800/30">
+              <span class="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">${__('Celkem')}</span>
+              <span class="text-[11px] font-extrabold text-slate-800 dark:text-slate-200">${formatCurrency(totalThisMonth)}</span>
+            </div>
+          </div>
+          
+          <div class="flex justify-between items-center mt-2.5 text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+            <span>${__('Celkem v historii')}:</span>
+            <span class="text-slate-600 dark:text-slate-300 font-extrabold">${formatCurrency(allTimePaid)}</span>
           </div>
         `;
         container.appendChild(card);
@@ -7725,6 +7867,7 @@
       // Load saved language
       const savedLang = safeStorage.getItem('fingo_language') || 'cs';
       currentLanguage = savedLang;
+      populatePeriodSelect();
       
       // Load saved currency
       const savedCurrency = safeStorage.getItem('fingo_currency') || 'CZK';
