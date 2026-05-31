@@ -3365,7 +3365,7 @@
     }
 
     // Open/initialize database
-    function selectAndOpenDatabase(name, storageType) {
+    function selectAndOpenDatabase(name, storageType, preventTabSwitch = false) {
       dbConfig.name = name;
       dbConfig.storageType = storageType;
       
@@ -3424,7 +3424,11 @@
       document.getElementById('modal-db-startup').classList.add('hidden');
       
       processRecurringPayments();
-      switchTab('dashboard');
+      if (!preventTabSwitch) {
+        switchTab('dashboard');
+      } else {
+        refreshActiveTab();
+      }
       populateHistoryCategoryFilter();
       updateSyncWidget();
       showToast(`Soubor "${name}" byl úspěšně otevřen.`);
@@ -3699,7 +3703,7 @@
         if (gField) gField.value = data.id;
 
         showToast("Záloha byla úspěšně vytvořena na GitHub Gist.");
-        selectAndOpenDatabase(dbName, 'github');
+        selectAndOpenDatabase(dbName, 'github', true);
         updateGitHubSyncStatusUI('synced');
         
         // Toggle disconnect button visibility in settings
@@ -3800,24 +3804,13 @@
         if (tField) tField.value = token;
         if (gField) gField.value = gistId;
 
-        selectAndOpenDatabase(dbName, 'github');
+        selectAndOpenDatabase(dbName, 'github', true);
         updateGitHubSyncStatusUI('synced');
         showToast(`Data "${dbName}" byla stažena z GitHub Gistu.`);
 
         // Toggle disconnect button visibility in settings
         const discBtn = document.getElementById('settings-github-disconnect-btn');
         if (discBtn) discBtn.classList.remove('hidden');
-
-        // Refresh UI
-        if (currentTab === 'dashboard') {
-          updateDashboardAndData();
-        } else if (currentTab === 'transactions') {
-          filterHistory();
-        } else if (currentTab === 'loans') {
-          renderLoans();
-        } else if (currentTab === 'categories') {
-          renderCategoriesView();
-        }
 
         return true;
       } catch (err) {
@@ -3937,6 +3930,24 @@
 
       if (success) {
         document.getElementById('modal-db-startup').classList.add('hidden');
+      }
+    }
+
+    function refreshActiveTab() {
+      if (currentTab === 'dashboard') {
+        updateDashboardAndData();
+      } else if (currentTab === 'transactions') {
+        filterHistory();
+      } else if (currentTab === 'budgets') {
+        renderBudgetsView();
+      } else if (currentTab === 'goals') {
+        renderGoalsView();
+      } else if (currentTab === 'recurring') {
+        renderRecurringList();
+      } else if (currentTab === 'loans') {
+        renderLoans();
+      } else if (currentTab === 'categories') {
+        renderCategoriesView();
       }
     }
 
