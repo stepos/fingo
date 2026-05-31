@@ -420,6 +420,10 @@
         <i data-lucide="landmark" class="w-5 h-5"></i>
         Úvěry & Hypotéky
       </button>
+      <button onclick="switchTab('simulator')" id="nav-desktop-simulator" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+        <i data-lucide="zap" class="w-5 h-5"></i>
+        Finanční Svoboda
+      </button>
       <button onclick="switchTab('categories')" id="nav-desktop-categories" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
         <i data-lucide="tags" class="w-5 h-5"></i>
         Kategorie
@@ -663,6 +667,22 @@
           </div>
           <h3 id="stat-total-expense" class="text-2xl font-bold text-slate-900 dark:text-slate-100">0,00 Kč</h3>
           <p id="stat-expense-desc" class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">Výdaje v období</p>
+        </div>
+      </div>
+
+      <!-- Smart Insights Widget -->
+      <div id="dashboard-insights-card" class="hidden bg-gradient-to-br from-indigo-50/40 to-purple-50/40 dark:from-indigo-950/20 dark:to-purple-950/20 border border-indigo-100/80 dark:border-indigo-900/40 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none animate-pulse">
+            <i data-lucide="sparkles" class="w-4.5 h-4.5"></i>
+          </div>
+          <div>
+            <h4 class="font-black text-slate-900 dark:text-slate-100 text-sm md:text-base tracking-tight">Chytré finanční postřehy</h4>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Automatická analýza Vašich aktuálních dat a rozpočtů</p>
+          </div>
+        </div>
+        <div id="dashboard-insights-list" class="space-y-3 pt-2 text-xs md:text-sm text-slate-600 dark:text-slate-350">
+          <!-- Dynamically populated insights -->
         </div>
       </div>
 
@@ -1684,6 +1704,150 @@
       </div>
     </section>
 
+    <!-- ================= VIEW: SIMULATOR ================= -->
+    <section id="view-simulator" class="view-section hidden space-y-6 md:space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Simulátor finanční svobody</h2>
+          <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">Naplánujte si rentu a optimalizujte splácení dluhů</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Card 1: FIRE Retirement Calculator -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-200 dark:shadow-none">
+              <i data-lucide="flame" class="w-5.5 h-5.5"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base">Kalkulačka finanční nezávislosti (FIRE)</h4>
+              <p class="text-[10px] text-slate-400 font-medium">Jak dlouho zbývá do dosažení renty?</p>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <!-- Input: Monthly Expenses -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="sim-fire-expenses" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Cílové měsíční výdaje v rentě:</label>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-expenses-val">0 Kč</span>
+              </div>
+              <input type="range" id="sim-fire-expenses" min="10000" max="250000" step="5000" value="50000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <!-- Input: Current Savings -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="sim-fire-savings" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Stávající zainvestované úspory:</label>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-savings-val">0 Kč</span>
+              </div>
+              <input type="range" id="sim-fire-savings" min="0" max="10000000" step="50000" value="500000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <!-- Input: Monthly Investment Rate -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="sim-fire-monthly" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Měsíční úspory / investice:</label>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-monthly-val">0 Kč</span>
+              </div>
+              <input type="range" id="sim-fire-monthly" min="0" max="150000" step="2000" value="10000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <!-- Input: Investment Yield -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="sim-fire-yield" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Očekávaný roční výnos portfolia:</label>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-yield-val">7 %</span>
+              </div>
+              <input type="range" id="sim-fire-yield" min="1" max="15" step="0.5" value="7" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+          </div>
+
+          <!-- FIRE Outputs Card -->
+          <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-500/20 dark:border-amber-900/40 rounded-2xl p-4 space-y-4">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-semibold text-slate-500 dark:text-slate-400">Potřebné portfolio (Pravidlo 4%):</span>
+              <strong class="font-bold text-slate-800 dark:text-slate-200" id="sim-fire-target-portfolio">15 000 000 Kč</strong>
+            </div>
+            
+            <div class="pt-3 border-t border-amber-500/10 flex flex-col items-center justify-center py-2">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Renty dosáhnete za:</span>
+              <div class="text-2xl md:text-3xl font-black text-amber-500 tracking-tight" id="sim-fire-time-result">14 let a 2 měsíce</div>
+            </div>
+
+            <!-- Progress to FIRE -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex justify-between text-[10px] font-bold text-slate-400">
+                <span>Pokrok k cíli</span>
+                <span id="sim-fire-progress-pct">3.3%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div id="sim-fire-progress-bar" class="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300" style="width: 3.3%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Debt Snowball / Mortgage Repayment Simulator -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none">
+              <i data-lucide="trending-down" class="w-5.5 h-5.5"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base">Mimořádné splátky úvěrů & hypoték</h4>
+              <p class="text-[10px] text-slate-400 font-medium">Jak mimořádná splátka zkrátí Vaše dluhy?</p>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <!-- Input: Extra Repayment -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="sim-debt-extra" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Celková měsíční splátka navíc:</label>
+                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="sim-debt-extra-val">0 Kč</span>
+              </div>
+              <input type="range" id="sim-debt-extra" min="0" max="50000" step="1000" value="5000" oninput="calculateDebtSnowball()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+            </div>
+
+            <!-- Active Loans Check list -->
+            <div class="space-y-2 max-h-[140px] overflow-y-auto pr-1 animate-fade-in">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivní úvěry v simulaci</label>
+              <div id="sim-debt-loans-list" class="space-y-2">
+                <!-- Dynamically populated list of active loans -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Debt Payoff Outputs Card -->
+          <div class="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-950/20 dark:to-purple-950/20 border border-indigo-500/20 dark:border-indigo-900/40 rounded-2xl p-4 space-y-4">
+            <div class="grid grid-cols-2 gap-4 divide-x divide-slate-100 dark:divide-slate-800/80">
+              <div class="text-center">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Ušetříte na úrocích:</span>
+                <strong class="text-lg md:text-xl font-black text-emerald-500 tracking-tight" id="sim-debt-saved-interest">0 Kč</strong>
+              </div>
+              <div class="text-center pl-4">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Bez dluhů budete o:</span>
+                <strong class="text-lg md:text-xl font-black text-indigo-500 tracking-tight" id="sim-debt-time-saved">0 měsíců dříve</strong>
+              </div>
+            </div>
+            
+            <div class="pt-3 border-t border-indigo-500/10 flex flex-col justify-between text-xs space-y-1.5 text-slate-500 dark:text-slate-400">
+              <div class="flex justify-between">
+                <span>Standardní doba splacení:</span>
+                <strong class="font-bold text-slate-700 dark:text-slate-350" id="sim-debt-normal-date">Nezadáno</strong>
+              </div>
+              <div class="flex justify-between text-indigo-600 dark:text-indigo-400">
+                <span>Nová zkrácená doba splacení:</span>
+                <strong class="font-bold" id="sim-debt-new-date">Nezadáno</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= VIEW: SETTINGS ================= -->
     <section id="view-settings" class="view-section hidden space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2344,7 +2508,7 @@
       <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
       <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 text-center">Další sekce aplikace</h3>
       
-      <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="grid grid-cols-2 gap-4 mb-4">
         <button onclick="selectMobileMoreTab('recurring')" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-150 transition-all text-slate-700">
           <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2">
             <i data-lucide="calendar-days" class="w-5.5 h-5.5"></i>
@@ -2357,6 +2521,13 @@
             <i data-lucide="tags" class="w-5.5 h-5.5"></i>
           </div>
           <span class="text-xs font-semibold text-center leading-tight">Kategorie</span>
+        </button>
+
+        <button onclick="selectMobileMoreTab('simulator')" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-150 transition-all text-slate-700">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2">
+            <i data-lucide="zap" class="w-5.5 h-5.5"></i>
+          </div>
+          <span class="text-xs font-semibold text-center leading-tight">Svoboda</span>
         </button>
 
         <button onclick="selectMobileMoreTab('settings')" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-150 transition-all text-slate-700">
@@ -4421,7 +4592,7 @@
       
       document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
         const id = btn.id || '';
-        const isMoreSubTab = tabName === 'recurring' || tabName === 'categories' || tabName === 'settings';
+        const isMoreSubTab = tabName === 'recurring' || tabName === 'categories' || tabName === 'settings' || tabName === 'simulator';
         if (id.includes(tabName) || (id.includes('more') && isMoreSubTab)) {
           btn.classList.add('active-mobile');
         } else {
@@ -4488,6 +4659,11 @@
           populateCategorySelect('loan-category');
           switchLoanSubTab('form');
           renderLoans();
+          break;
+        case 'simulator':
+          pageTitle.innerText = "Simulátor finanční svobody";
+          pageSubtitle.innerText = "Propočítejte si rentu a optimalizujte své dluhy";
+          initSimulator();
           break;
         case 'categories':
           pageTitle.innerText = "Kategorie";
@@ -5196,6 +5372,7 @@
       if (currentLanguage !== 'cs') {
         translatePage(currentLanguage);
       }
+      updateSmartInsights();
     }
 
     function renderDashboardRecent() {
@@ -6355,26 +6532,22 @@
           }
         });
 
-        // 2. Paid this month (expenses only)
+        // 2. Paid this period (expenses only)
+        const filteredTrans = getFilteredTransactions(state.transactions);
         let paidThisMonth = 0;
-        state.transactions.forEach(t => {
-          if (t.category === c.id && t.type === 'expense' && t.date) {
-            const tDate = parseDateSafe(t.date);
-            if (tDate.getFullYear() === currentYear && tDate.getMonth() === currentMonth) {
-              paidThisMonth += Number(t.amount);
-            }
+        filteredTrans.forEach(t => {
+          if (t.category === c.id && t.type === 'expense') {
+            paidThisMonth += Number(t.amount);
           }
         });
 
-        // 3. Future recurring expenses this month (Budoucí)
+        // 3. Future recurring expenses & loans (Budoucí)
+        const futurePayments = getFutureRecurringPaymentsThisMonth();
         let futureRecurringThisMonth = 0;
-        (state.recurring || []).forEach(r => {
-          if (r.category === c.id && r.type === 'expense') {
-            if (r.nextDueDate) {
-              const due = parseDateSafe(r.nextDueDate);
-              if (due.getFullYear() === currentYear && due.getMonth() === currentMonth && due > now) {
-                futureRecurringThisMonth += Number(r.amount);
-              }
+        futurePayments.forEach(fp => {
+          if (fp.type === 'expense') {
+            if (fp.category === c.id || fp.category === c.name || (fp.category === 'Bydlení / Úvěry' && c.id === 'cat-bydleni') || (fp.category === 'Housing / Loans' && c.id === 'cat-bydleni')) {
+              futureRecurringThisMonth += Number(fp.amount);
             }
           }
         });
@@ -8015,6 +8188,409 @@
       // Auto-refresh when tab is focused (desktop mode with connected file handle)
       window.addEventListener('focus', checkForExternalFileChanges);
     });
+
+    function updateSmartInsights() {
+      const container = document.getElementById('dashboard-insights-card');
+      const listEl = document.getElementById('dashboard-insights-list');
+      if (!container || !listEl) return;
+      
+      const insights = [];
+      const now = new Date();
+      const todayDay = now.getDate();
+      
+      const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const monthProgress = todayDay / totalDays;
+      
+      const select = document.getElementById('global-period-select');
+      const period = select ? select.value : '';
+      const match = period.match(/^(\d{4})-(\d{2})$/);
+      let isCurrentMonth = true;
+      if (match) {
+        const year = parseInt(match[1]);
+        const month = parseInt(match[2]) - 1;
+        if (year !== now.getFullYear() || month !== now.getMonth()) {
+          isCurrentMonth = false;
+        }
+      }
+      
+      if (isCurrentMonth && state.budgets && state.budgets.length > 0) {
+        state.budgets.forEach(b => {
+          const category = (state.categories || []).find(c => c.id === b.categoryId);
+          if (!category) return;
+          
+          let spent = 0;
+          state.transactions.forEach(t => {
+            if (t.category === b.categoryId && t.type === 'expense' && t.date) {
+              const d = parseDateSafe(t.date);
+              if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
+                spent += Number(t.amount);
+              }
+            }
+          });
+          
+          const limit = Number(b.limit);
+          if (limit > 0 && spent > 0) {
+            const spentPct = spent / limit;
+            if (spentPct > monthProgress + 0.15) {
+              const aheadPct = Math.round((spentPct - monthProgress) * 100);
+              const catName = currentLanguage === 'cs' ? category.name : (category.nameEn || category.name);
+              
+              let text = '';
+              if (currentLanguage === 'cs') {
+                text = `Utrácíte za kategorii <strong>${catName}</strong> o <strong>${aheadPct} %</strong> rychleji, než by odpovídalo rovnoměrnému čerpání rozpočtu.`;
+              } else if (currentLanguage === 'en') {
+                text = `You are spending in the category <strong>${catName}</strong> <strong>${aheadPct}%</strong> faster than recommended for this month.`;
+              } else {
+                text = `Sie geben in der Kategorie <strong>${catName}</strong> <strong>${aheadPct}%</strong> schneller aus als für diesen Monat empfohlen.`;
+              }
+              
+              insights.push({
+                type: 'warning',
+                icon: 'alert-triangle',
+                color: 'text-amber-500',
+                bgColor: 'bg-amber-500/10 border-amber-500/25',
+                text
+              });
+            }
+          }
+        });
+      }
+      
+      const filtered = getFilteredTransactions(state.transactions);
+      const income = filtered.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc, 0);
+      const expense = filtered.reduce((acc, t) => t.type === 'expense' ? acc + t.amount : acc, 0);
+      const surplus = income - expense;
+      
+      if (surplus > 2000 && state.goals && state.goals.length > 0) {
+        const incompleteGoals = state.goals.filter(g => g.currentAmount < g.targetAmount);
+        if (incompleteGoals.length > 0) {
+          const targetGoal = incompleteGoals[0];
+          let text = '';
+          if (currentLanguage === 'cs') {
+            text = `Tento měsíc máte přebytek <strong>${formatCurrency(surplus)}</strong>. Zvažte jeho část převést na spořicí cíl <strong>${targetGoal.name}</strong>.`;
+          } else if (currentLanguage === 'en') {
+            text = `You have a surplus of <strong>${formatCurrency(surplus)}</strong> this month. Consider moving some of it to your savings goal <strong>${targetGoal.name}</strong>.`;
+          } else {
+            text = `Sie haben in diesem Monat einen Überschuss von <strong>${formatCurrency(surplus)}</strong>. Überlegen Sie, einen Teil davon auf das Sparziel <strong>${targetGoal.name}</strong> zu übertragen.`;
+          }
+          
+          insights.push({
+            type: 'savings',
+            icon: 'piggy-bank',
+            color: 'text-emerald-500',
+            bgColor: 'bg-emerald-500/10 border-emerald-500/25',
+            text
+          });
+        }
+      }
+      
+      if (state.loans && state.loans.length > 0) {
+        let bestLoan = null;
+        let bestPct = 0;
+        
+        state.loans.forEach(loan => {
+          const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+          if (!details.isExpired) {
+            const original = Number(loan.totalAmount);
+            const remaining = Number(loan.remainingAmount);
+            const paid = Math.max(0, original - remaining);
+            const pct = original > 0 ? (paid / original) * 100 : 0;
+            if (pct > 50 && pct > bestPct) {
+              bestPct = pct;
+              bestLoan = loan;
+            }
+          }
+        });
+        
+        if (bestLoan) {
+          let text = '';
+          const remainingAmount = Number(bestLoan.remainingAmount);
+          if (currentLanguage === 'cs') {
+            text = `Váš úvěr <strong>${bestLoan.name}</strong> je splacen z <strong>${bestPct.toFixed(0)} %</strong>! Zbývá doplatit ${formatCurrency(remainingAmount)}.`;
+          } else if (currentLanguage === 'en') {
+            text = `Your loan <strong>${bestLoan.name}</strong> is <strong>${bestPct.toFixed(0)}%</strong> paid off! Remaining balance is ${formatCurrency(remainingAmount)}.`;
+          } else {
+            text = `Ihr Kredit <strong>${bestLoan.name}</strong> ist zu <strong>${bestPct.toFixed(0)}%</strong> abbezahlt! Restbetrag: ${formatCurrency(remainingAmount)}.`;
+          }
+          
+          insights.push({
+            type: 'milestone',
+            icon: 'award',
+            color: 'text-indigo-500',
+            bgColor: 'bg-indigo-500/10 border-indigo-500/25',
+            text
+          });
+        }
+      }
+      
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      const urgentExpenses = futurePayments.filter(fp => {
+        if (fp.type !== 'expense') return false;
+        const diffTime = new Date(fp.date) - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 && diffDays <= 7;
+      });
+      
+      if (urgentExpenses.length > 0) {
+        const item = urgentExpenses[0];
+        const dueDate = new Date(item.date).toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        let text = '';
+        if (currentLanguage === 'cs') {
+          text = `Blíží se splátka <strong>${item.name}</strong> ve výši <strong>${formatCurrency(item.amount)}</strong> (dne ${dueDate}). Ujistěte se, že máte dostatek hotovosti.`;
+        } else if (currentLanguage === 'en') {
+          text = `Upcoming payment <strong>${item.name}</strong> of <strong>${formatCurrency(item.amount)}</strong> is due on ${dueDate}. Make sure you have enough funds.`;
+        } else {
+          text = `Die Zahlung <strong>${item.name}</strong> über <strong>${formatCurrency(item.amount)}</strong> ist am ${dueDate} fällig. Stellen Sie sicher, dass Ihr Konto gedeckt ist.`;
+        }
+        
+        insights.push({
+          type: 'bill',
+          icon: 'calendar',
+          color: 'text-rose-500',
+          bgColor: 'bg-rose-500/10 border-rose-500/25',
+          text
+        });
+      }
+      
+      if (insights.length > 0) {
+        container.classList.remove('hidden');
+        listEl.innerHTML = insights.map(ins => {
+          return `
+            <div class="flex items-start gap-3 p-3 rounded-xl border ${ins.bgColor} text-slate-700 dark:text-slate-350">
+              <i data-lucide="${ins.icon}" class="w-5 h-5 shrink-0 ${ins.color} mt-0.5"></i>
+              <div class="leading-relaxed text-[11px] md:text-xs">${ins.text}</div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function initSimulator() {
+      const select = document.getElementById('global-period-select');
+      const period = select ? select.value : '';
+      const filtered = getFilteredTransactions(state.transactions);
+      const currentMonthExpenses = filtered.reduce((acc, t) => t.type === 'expense' ? acc + t.amount : acc, 0);
+      
+      const expInput = document.getElementById('sim-fire-expenses');
+      if (expInput && currentMonthExpenses > 0) {
+        const rounded = Math.max(10000, Math.min(250000, Math.round(currentMonthExpenses / 5000) * 5000));
+        expInput.value = rounded;
+      }
+      
+      let savingsSum = 0;
+      (state.goals || []).forEach(g => {
+        savingsSum += Number(g.currentAmount || 0);
+      });
+      const savInput = document.getElementById('sim-fire-savings');
+      if (savInput && savingsSum > 0) {
+        const rounded = Math.max(0, Math.min(10000000, Math.round(savingsSum / 50000) * 50000));
+        savInput.value = rounded;
+      }
+      
+      const currentMonthIncomes = filtered.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc, 0);
+      const monthlySurplus = Math.max(0, currentMonthIncomes - currentMonthExpenses);
+      const monthlyInput = document.getElementById('sim-fire-monthly');
+      if (monthlyInput && monthlySurplus > 0) {
+        const rounded = Math.max(0, Math.min(150000, Math.round(monthlySurplus / 2000) * 2000));
+        monthlyInput.value = rounded;
+      }
+      
+      const loansListEl = document.getElementById('sim-debt-loans-list');
+      if (loansListEl) {
+        const activeLoans = (state.loans || []).map(loan => {
+          const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+          return { ...loan, isExpired: details.isExpired };
+        }).filter(l => !l.isExpired);
+        
+        if (activeLoans.length === 0) {
+          loansListEl.innerHTML = `
+            <div class="text-[10px] text-slate-400 font-medium py-2">
+              ${currentLanguage === 'cs' ? 'Nemáte žádné aktivní úvěry' : 'No active loans'}
+            </div>
+          `;
+        } else {
+          loansListEl.innerHTML = activeLoans.map(l => {
+            const rem = Number(l.remainingAmount);
+            return `
+              <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/85 rounded-xl">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="sim-loan-check-${l.id}" checked onchange="calculateDebtSnowball()" class="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-900 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${l.name}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${formatCurrency(rem)}</span>
+                  <span class="block text-[8px] text-slate-400 font-semibold">${l.interestRate}% p.a. • ${formatCurrency(Number(l.monthlyPayment))}/měs</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+      
+      calculateFIRE();
+      calculateDebtSnowball();
+    }
+    
+    function calculateFIRE() {
+      const expenses = Number(document.getElementById('sim-fire-expenses').value);
+      const savings = Number(document.getElementById('sim-fire-savings').value);
+      const monthly = Number(document.getElementById('sim-fire-monthly').value);
+      const roiVal = Number(document.getElementById('sim-fire-yield').value);
+      
+      document.getElementById('sim-fire-expenses-val').innerText = formatCurrency(expenses);
+      document.getElementById('sim-fire-savings-val').innerText = formatCurrency(savings);
+      document.getElementById('sim-fire-monthly-val').innerText = formatCurrency(monthly);
+      document.getElementById('sim-fire-yield-val').innerText = `${roiVal} %`;
+      
+      const targetPortfolio = expenses * 12 / 0.04;
+      document.getElementById('sim-fire-target-portfolio').innerText = formatCurrency(targetPortfolio);
+      
+      const progressPct = targetPortfolio > 0 ? Math.min(100, (savings / targetPortfolio) * 100) : 0;
+      document.getElementById('sim-fire-progress-pct').innerText = `${progressPct.toFixed(1)}%`;
+      document.getElementById('sim-fire-progress-bar').style.width = `${progressPct}%`;
+      
+      let months = 0;
+      let currentVal = savings;
+      const monthlyRate = (roiVal / 100) / 12;
+      
+      if (currentVal >= targetPortfolio) {
+        months = 0;
+      } else if (monthly <= 0 && monthlyRate <= 0) {
+        months = Infinity;
+      } else {
+        while (currentVal < targetPortfolio && months < 1200) {
+          months++;
+          currentVal = currentVal * (1 + monthlyRate);
+          currentVal += monthly;
+        }
+      }
+      
+      const resultEl = document.getElementById('sim-fire-time-result');
+      if (months === Infinity || months >= 1200) {
+        resultEl.innerText = currentLanguage === 'cs' ? 'Nedosažitelné' : (currentLanguage === 'en' ? 'Unreachable' : 'Unerreichbar');
+      } else if (months === 0) {
+        resultEl.innerText = currentLanguage === 'cs' ? 'Již dosaženo!' : (currentLanguage === 'en' ? 'Already reached!' : 'Bereits erreicht!');
+      } else {
+        const years = Math.floor(months / 12);
+        const remMonths = months % 12;
+        
+        let text = '';
+        if (currentLanguage === 'cs') {
+          const yrText = years === 1 ? 'rok' : (years >= 2 && years <= 4 ? 'roky' : 'let');
+          const mnText = remMonths === 1 ? 'měsíc' : (remMonths >= 2 && remMonths <= 4 ? 'měsíce' : 'měsíců');
+          text = `${years} ${yrText} a ${remMonths} ${mnText}`;
+        } else if (currentLanguage === 'en') {
+          text = `${years} year(s) and ${remMonths} month(s)`;
+        } else {
+          text = `${years} Jahr(e) und ${remMonths} Monat(e)`;
+        }
+        resultEl.innerText = text;
+      }
+    }
+    
+    function calculateDebtSnowball() {
+      const extra = Number(document.getElementById('sim-debt-extra').value);
+      document.getElementById('sim-debt-extra-val').innerText = formatCurrency(extra);
+      
+      const activeLoans = [];
+      (state.loans || []).forEach(loan => {
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+        if (!details.isExpired) {
+          const chk = document.getElementById(`sim-loan-check-${loan.id}`);
+          if (!chk || chk.checked) {
+            activeLoans.push({
+              id: loan.id,
+              name: loan.name,
+              balance: Number(loan.remainingAmount),
+              monthly: Number(loan.monthlyPayment),
+              rate: Number(loan.interestRate || 0) / 100 / 12
+            });
+          }
+        }
+      });
+      
+      if (activeLoans.length === 0) {
+        document.getElementById('sim-debt-saved-interest').innerText = formatCurrency(0);
+        document.getElementById('sim-debt-time-saved').innerText = `0 ${currentLanguage === 'cs' ? 'měsíců' : 'months'}`;
+        document.getElementById('sim-debt-normal-date').innerText = '-';
+        document.getElementById('sim-debt-new-date').innerText = '-';
+        return;
+      }
+      
+      let normalInterestPaid = 0;
+      let normalMonths = 0;
+      let normalBalances = activeLoans.map(l => ({ ...l }));
+      
+      while (normalBalances.some(l => l.balance > 0) && normalMonths < 600) {
+        normalMonths++;
+        normalBalances.forEach(l => {
+          if (l.balance > 0) {
+            const interest = l.balance * l.rate;
+            normalInterestPaid += interest;
+            const principalPaid = Math.min(l.balance, l.monthly - interest);
+            l.balance -= Math.max(0, principalPaid);
+          }
+        });
+      }
+      
+      let acceleratedInterestPaid = 0;
+      let acceleratedMonths = 0;
+      let acceleratedBalances = activeLoans.map(l => ({ ...l }));
+      
+      while (acceleratedBalances.some(l => l.balance > 0) && acceleratedMonths < 600) {
+        acceleratedMonths++;
+        
+        acceleratedBalances.forEach(l => {
+          if (l.balance > 0) {
+            const interest = l.balance * l.rate;
+            acceleratedInterestPaid += interest;
+            const principalPaid = Math.min(l.balance, l.monthly - interest);
+            l.balance -= Math.max(0, principalPaid);
+          }
+        });
+        
+        let leftoverExtra = extra;
+        const sorted = acceleratedBalances
+          .filter(l => l.balance > 0)
+          .sort((a, b) => b.rate - a.rate);
+          
+        for (let i = 0; i < sorted.length; i++) {
+          const l = sorted[i];
+          if (leftoverExtra <= 0) break;
+          const pay = Math.min(l.balance, leftoverExtra);
+          l.balance -= pay;
+          leftoverExtra -= pay;
+        }
+      }
+      
+      const savedInterest = Math.max(0, normalInterestPaid - acceleratedInterestPaid);
+      const timeSaved = Math.max(0, normalMonths - acceleratedMonths);
+      
+      document.getElementById('sim-debt-saved-interest').innerText = formatCurrency(savedInterest);
+      
+      let timeSavedText = '';
+      if (currentLanguage === 'cs') {
+        timeSavedText = `${timeSaved} ${timeSaved === 1 ? 'měsíc' : (timeSaved >= 2 && timeSaved <= 4 ? 'měsíce' : 'měsíců')}`;
+      } else if (currentLanguage === 'en') {
+        timeSavedText = `${timeSaved} month(s)`;
+      } else {
+        timeSavedText = `${timeSaved} Monat(e)`;
+      }
+      document.getElementById('sim-debt-time-saved').innerText = timeSavedText;
+      
+      const now = new Date();
+      const normalPayoff = new Date(now.getFullYear(), now.getMonth() + normalMonths, 15);
+      const accelPayoff = new Date(now.getFullYear(), now.getMonth() + acceleratedMonths, 15);
+      
+      const dateOptions = { month: 'long', year: 'numeric' };
+      const locale = currentLanguage === 'cs' ? 'cs-CZ' : (currentLanguage === 'de' ? 'de-DE' : 'en-US');
+      
+      document.getElementById('sim-debt-normal-date').innerText = normalPayoff.toLocaleDateString(locale, dateOptions);
+      document.getElementById('sim-debt-new-date').innerText = accelPayoff.toLocaleDateString(locale, dateOptions);
+    }
   </script>
   <!-- ================= PRINTABLE PDF REPORT CONTAINER ================= -->
   <div id="print-report-container" class="hidden print:block bg-white p-8 font-sans text-slate-800 w-full max-w-4xl mx-auto">
