@@ -5949,29 +5949,27 @@
       });
       
       (state.loans || []).forEach(loan => {
-        let loanStart = parseDateSafe(loan.startDate);
-        loanStart.setHours(0, 0, 0, 0);
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
         
-        let loanEnd = null;
-        if (loan.endDate) {
-          loanEnd = parseDateSafe(loan.endDate);
+        let loanStart = null;
+        if (String(loan.startDate).includes('-')) {
+          loanStart = parseDateSafe(loan.startDate);
         } else {
-          const duration = parseInt(loan.duration) || 0;
-          loanEnd = new Date(loanStart);
-          if (loan.durationUnit === 'years') {
-            loanEnd.setFullYear(loanEnd.getFullYear() + duration);
-          } else {
-            loanEnd.setMonth(loanEnd.getMonth() + duration);
-          }
+          loanStart = new Date(0);
         }
-        loanEnd.setHours(23, 59, 59, 999);
+        const loanEnd = details.endDate;
         
-        const bookingDayNum = loan.startDate ? parseDateSafe(loan.startDate).getDate() : 15;
-        let currentDueDate = new Date(year, month, bookingDayNum);
-        currentDueDate.setHours(0, 0, 0, 0);
-        
-        if (currentDueDate >= startOfRange && currentDueDate <= endOfMonth && currentDueDate >= loanStart && currentDueDate <= loanEnd) {
-          sum += Number(loan.monthlyPayment);
+        if (loanStart <= endOfMonth && loanEnd >= startOfRange) {
+          const dayNum = String(loan.startDate).includes('-') 
+            ? parseDateSafe(loan.startDate).getDate() 
+            : (parseInt(loan.startDate) || 15);
+            
+          const currentDueDate = new Date(year, month, dayNum);
+          currentDueDate.setHours(0, 0, 0, 0);
+          
+          if (currentDueDate >= startOfRange && currentDueDate <= endOfMonth && currentDueDate >= loanStart && currentDueDate <= loanEnd) {
+            sum += Number(loan.monthlyPayment);
+          }
         }
       });
       
