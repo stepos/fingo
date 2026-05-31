@@ -6034,13 +6034,56 @@
         return `${parts[1]}/${parts[0].substring(2)}`;
       });
       
+      function getPaidLoansForMonth(monthKey) {
+        const parts = monthKey.split('-');
+        const year = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1;
+        
+        const startOfMonth = new Date(year, month, 1);
+        const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        let sum = 0;
+        
+        (state.loans || []).forEach(loan => {
+          const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+          
+          let loanStart = null;
+          if (String(loan.startDate).includes('-')) {
+            loanStart = parseDateSafe(loan.startDate);
+          } else {
+            loanStart = new Date(0);
+          }
+          const loanEnd = details.endDate;
+          
+          if (loanStart <= endOfMonth && loanEnd >= startOfMonth) {
+            const dayNum = String(loan.startDate).includes('-') 
+              ? parseDateSafe(loan.startDate).getDate() 
+              : (parseInt(loan.startDate) || 15);
+              
+            const paymentDate = new Date(year, month, dayNum);
+            paymentDate.setHours(0, 0, 0, 0);
+            
+            if (paymentDate >= loanStart && paymentDate <= loanEnd) {
+              if (paymentDate < now) {
+                sum += Number(loan.monthlyPayment);
+              }
+            }
+          }
+        });
+        
+        return sum;
+      }
+      
       const incomeDataset = [];
       const expenseDataset = [];
       const futureExpenseDataset = [];
       
       displayMonths.forEach(m => {
         incomeDataset.push(monthlyData[m].income);
-        expenseDataset.push(monthlyData[m].expense);
+        const paidLoans = getPaidLoansForMonth(m);
+        expenseDataset.push(monthlyData[m].expense + paidLoans);
         futureExpenseDataset.push(getFutureExpensesForMonth(m));
       });
       
