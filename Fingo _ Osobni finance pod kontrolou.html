@@ -2912,6 +2912,7 @@
       "Struktura výdajů": { en: "Expense Structure", de: "Ausgabenstruktur" },
       "Podíl jednotlivých kategorií na výdajích": { en: "Share of individual categories in expenses", de: "Anteil einzelner Kategorien an den Ausgaben" },
       "Celkem výdaje": { en: "Total Expenses", de: "Gesamtausgaben" },
+      "Čistá bilance": { en: "Net Balance", de: "Netto-Bilanz" },
       "Vývoj financí v čase": { en: "Financial Trend", de: "Finanztrend" },
       "Porovnání celkových příjmů a výdajů po měsících": { en: "Comparison of total income and expenses by month", de: "Vergleich der Einnahmen und Ausgaben nach Monaten" },
       "Poslední aktivity": { en: "Recent Activities", de: "Kürzliche Aktivitäten" },
@@ -3200,6 +3201,8 @@
     let mobileGoalSubTab = 'form';
     
     let categoryChartInstance = null;
+    let categoryChartPaidInstance = null;
+    let categoryChartTotalInstance = null;
     let trendChartInstance = null;
 
 
@@ -5982,6 +5985,14 @@
       emptyContainer.classList.add('hidden');
       canvas.style.display = 'block';
       
+      function formatCurrencyNoDecimals(amount) {
+        const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+        const locale = locales[currentLanguage] || 'cs-CZ';
+        const currencies = { CZK: ' Kč', USD: ' $', EUR: ' €' };
+        const symbol = currencies[currentCurrency] || ' Kč';
+        return Math.round(amount).toLocaleString(locale) + symbol;
+      }
+      
       const monthlyData = {};
       state.transactions.forEach(t => {
         if (!t.date) return;
@@ -6026,6 +6037,63 @@
       const textColor = isDark ? '#94a3b8' : '#64748b';
       const gridColor = isDark ? '#334155' : '#f1f5f9';
       
+      const chartTotalsPlugin = {
+        id: 'chartTotals',
+        afterDatasetsDraw(chart) {
+          const { ctx, data } = chart;
+          ctx.save();
+          ctx.font = 'bold 9px Inter';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          
+          const metaIncome = chart.getDatasetMeta(0);
+          const metaExpensePaid = chart.getDatasetMeta(1);
+          const metaExpenseFuture = chart.getDatasetMeta(2);
+          
+          const isIncomeVisible = chart.isDatasetVisible(0);
+          const isExpensePaidVisible = chart.isDatasetVisible(1);
+          const isExpenseFutureVisible = chart.isDatasetVisible(2);
+          
+          for (let i = 0; i < data.labels.length; i++) {
+            // Income total
+            const valIncome = data.datasets[0].data[i] || 0;
+            if (valIncome > 0 && isIncomeVisible && metaIncome.data[i]) {
+              const x = metaIncome.data[i].x;
+              const y = metaIncome.data[i].y;
+              ctx.fillStyle = '#10b981';
+              ctx.fillText(formatCurrencyNoDecimals(valIncome), x, y - 4);
+            }
+            
+            // Expense total (Paid + Future stacked)
+            const valExpensePaid = data.datasets[1].data[i] || 0;
+            const valExpenseFuture = data.datasets[2].data[i] || 0;
+            
+            let x = 0;
+            let y = 0;
+            let totalExpense = 0;
+            
+            if (isExpenseFutureVisible && valExpenseFuture > 0 && metaExpenseFuture.data[i]) {
+              x = metaExpenseFuture.data[i].x;
+              y = metaExpenseFuture.data[i].y;
+              totalExpense += valExpenseFuture;
+            }
+            if (isExpensePaidVisible && valExpensePaid > 0 && metaExpensePaid.data[i]) {
+              if (x === 0) {
+                x = metaExpensePaid.data[i].x;
+                y = metaExpensePaid.data[i].y;
+              }
+              totalExpense += valExpensePaid;
+            }
+            
+            if (totalExpense > 0 && x > 0 && y > 0) {
+              ctx.fillStyle = '#f43f5e';
+              ctx.fillText(formatCurrencyNoDecimals(totalExpense), x, y - 4);
+            }
+          }
+          ctx.restore();
+        }
+      };
+      
       const ctx = canvas.getContext('2d');
       trendChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -6061,6 +6129,10 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
           scales: {
             x: {
               stacked: true,
@@ -6114,11 +6186,37 @@
                 label: function(context) {
                   const val = context.raw || 0;
                   return ` ${context.dataset.label}: ${formatCurrency(val)}`;
+                },
+                footer: function(tooltipItems) {
+                  let income = 0;
+                  let expensePaid = 0;
+                  let expenseExpected = 0;
+                  
+                  tooltipItems.forEach(item => {
+                    const val = item.raw || 0;
+                    if (item.datasetIndex === 0) {
+                      income = val;
+                    } else if (item.datasetIndex === 1) {
+                      expensePaid = val;
+                    } else if (item.datasetIndex === 2) {
+                      expenseExpected = val;
+                    }
+                  });
+                  
+                  const totalExpense = expensePaid + expenseExpected;
+                  const balance = income - totalExpense;
+                  
+                  return [
+                    `-------------------------`,
+                    `${__('Celkem výdaje')}: ${formatCurrency(totalExpense)}`,
+                    `${__('Čistá bilance')}: ${formatCurrency(balance)}`
+                  ].join('\n');
                 }
               }
             }
           }
-        }
+        },
+        plugins: [chartTotalsPlugin]
       });
     }
 
