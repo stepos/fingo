@@ -1520,8 +1520,8 @@
               <!-- Dates Grid: Booking Date & End Date -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label for="loan-start-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum zaúčtování</label>
-                  <input type="date" id="loan-start-date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
+                  <label for="loan-start-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Den zaúčtování</label>
+                  <input type="number" id="loan-start-date" min="1" max="31" placeholder="den (1-31)" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
                 </div>
                 <div>
                   <label for="loan-end-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Konec splácení (datum)</label>
@@ -2612,6 +2612,7 @@
       "Měsíční splátka": { en: "Monthly payment", de: "Monatliche Rate" },
       "Sazba (% p.a.)": { en: "Rate (% p.a.)", de: "Zinssatz (% p.a.)" },
       "Začátek:": { en: "Start:", de: "Beginn:" },
+      "Den zaúčtování": { en: "Booking day", de: "Buchungstag" },
       "Zaúčtováno:": { en: "Booked:", de: "Gebucht:" },
       "Konec splácení:": { en: "Repayment end:", de: "Rückzahlungsende:" },
       "Zbývá doplatit:": { en: "Remaining balance:", de: "Restschuld:" },
@@ -4784,7 +4785,7 @@
           let totalMonthly = 0;
           
           loans.forEach(loan => {
-            const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit);
+            const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
             if (!details.isExpired) {
               totalOriginal += Number(loan.totalAmount);
               totalRemaining += Number(loan.remainingAmount);
@@ -6119,12 +6120,38 @@
 
     // ================= LOANS INTEGRATION CODE =================
 
+    function formatLoanBookingDay(dayVal) {
+      if (!dayVal) return '';
+      let day = dayVal;
+      if (String(dayVal).includes('-')) {
+        day = parseDateSafe(dayVal).getDate();
+      }
+      if (currentLanguage === 'cs') return `${day}. v měsíci`;
+      if (currentLanguage === 'en') return `${day}. of the month`;
+      return `${day}. im Monat`;
+    }
     // Calculate details like Czech remaining time and end date
-    function calculateLoanEndDetails(startDateStr, duration, unit) {
-      const startDate = parseDateSafe(startDateStr);
-      const durationMonths = unit === 'years' ? duration * 12 : duration;
+    function calculateLoanEndDetails(startDateStr, duration, unit, endDateStr = null) {
+      let endDate;
       
-      const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + durationMonths, startDate.getDate());
+      if (endDateStr) {
+        endDate = parseDateSafe(endDateStr);
+      } else if (startDateStr && duration && unit) {
+        // Fallback for old loans
+        let startDay = parseInt(startDateStr);
+        if (isNaN(startDay)) {
+          const startDate = parseDateSafe(startDateStr);
+          const durationMonths = unit === 'years' ? duration * 12 : duration;
+          endDate = new Date(startDate.getFullYear(), startDate.getMonth() + durationMonths, startDate.getDate());
+        } else {
+          // If it's a day of month number, default to current month/year
+          const today = new Date();
+          const durationMonths = unit === 'years' ? duration * 12 : duration;
+          endDate = new Date(today.getFullYear(), today.getMonth() + durationMonths, startDay);
+        }
+      } else {
+        endDate = new Date();
+      }
       
       const today = new Date();
       today.setHours(0,0,0,0);
@@ -6146,50 +6173,37 @@
         }
       }
       
-      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
-      const locale = locales[currentLanguage] || 'cs-CZ';
-      const formattedEndDate = endDate.toLocaleDateString(locale);
-      
       let remainingTimeText = '';
       if (isExpired) {
-        remainingTimeText = currentLanguage === 'cs' ? 'Splaceno / Ukončeno' : (currentLanguage === 'en' ? 'Paid / Completed' : 'Bezahlt / Beendet');
+        remainingTimeText = currentLanguage === 'cs' ? 'Splaceno' : (currentLanguage === 'en' ? 'Paid off' : 'Abbezahlt');
       } else {
         const parts = [];
         if (remainingYears > 0) {
           if (currentLanguage === 'cs') {
-            if (remainingYears === 1) parts.push('1 rok');
-            else if (remainingYears >= 2 && remainingYears <= 4) parts.push(`${remainingYears} roky`);
-            else parts.push(`${remainingYears} let`);
+            parts.push(`${remainingYears} ${remainingYears === 1 ? 'rok' : (remainingYears >= 2 && remainingYears <= 4 ? 'roky' : 'let')}`);
           } else if (currentLanguage === 'en') {
-            parts.push(remainingYears === 1 ? '1 year' : `${remainingYears} years`);
-          } else if (currentLanguage === 'de') {
-            parts.push(remainingYears === 1 ? '1 Jahr' : `${remainingYears} Jahre`);
+            parts.push(`${remainingYears} year${remainingYears === 1 ? '' : 's'}`);
+          } else {
+            parts.push(`${remainingYears} Jahr${remainingYears === 1 ? '' : 'e'}`);
           }
         }
-        if (remainingMonths > 0) {
+        if (remainingMonths > 0 || parts.length === 0) {
           if (currentLanguage === 'cs') {
-            if (remainingMonths === 1) parts.push('1 měsíc');
-            else if (remainingMonths >= 2 && remainingMonths <= 4) parts.push(`${remainingMonths} měsíce`);
-            else parts.push(`${remainingMonths} měsíců`);
+            parts.push(`${remainingMonths} ${remainingMonths === 1 ? 'měsíc' : (remainingMonths >= 2 && remainingMonths <= 4 ? 'měsíce' : 'měsíců')}`);
           } else if (currentLanguage === 'en') {
-            parts.push(remainingMonths === 1 ? '1 month' : `${remainingMonths} months`);
-          } else if (currentLanguage === 'de') {
-            parts.push(remainingMonths === 1 ? '1 Monat' : `${remainingMonths} Monate`);
+            parts.push(`${remainingMonths} month${remainingMonths === 1 ? '' : 's'}`);
+          } else {
+            parts.push(`${remainingMonths} Monat${remainingMonths === 1 ? '' : 'e'}`);
           }
         }
-        const joiners = { cs: ' a ', en: ' and ', de: ' und ' };
-        const joiner = joiners[currentLanguage] || ' a ';
-        remainingTimeText = parts.join(joiner);
-        if (!remainingTimeText) {
-          remainingTimeText = currentLanguage === 'cs' ? 'Méně než měsíc' : (currentLanguage === 'en' ? 'Less than a month' : 'Weniger als ein Monat');
-        }
+        remainingTimeText = parts.join(' ');
       }
       
       return {
-        endDateStr: endDate.toISOString().split('T')[0],
-        formattedEndDate,
-        remainingTimeText,
-        isExpired
+        endDate,
+        formattedEndDate: endDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US'),
+        isExpired,
+        remainingTimeText
       };
     }
 
@@ -6219,7 +6233,7 @@
       }
       
       activeLoans.forEach(loan => {
-        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit);
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
         
         if (!details.isExpired) {
           totalDebt += Number(loan.remainingAmount);
@@ -6289,7 +6303,7 @@
               <div class="space-y-2 border-b border-slate-100 pb-4 mb-4 text-xs">
                 <div class="flex justify-between items-center">
                   <span class="font-medium text-slate-400">${__('Zaúčtováno:')}</span>
-                  <span class="font-semibold text-slate-700">${formatDateString(loan.startDate)}</span>
+                  <span class="font-semibold text-slate-700">${formatLoanBookingDay(loan.startDate)}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="font-medium text-slate-400">${__('Konec splácení:')}</span>
@@ -6501,12 +6515,16 @@
        
        const loanStartDateInput = document.getElementById('loan-start-date');
        if (loanStartDateInput) {
-         loanStartDateInput.value = loan.startDate || new Date().toISOString().split('T')[0];
+         let dayVal = loan.startDate || '15';
+         if (String(dayVal).includes('-')) {
+           dayVal = parseDateSafe(dayVal).getDate();
+         }
+         loanStartDateInput.value = dayVal;
        }
        
        let endDateStr = loan.endDate;
        if (!endDateStr && loan.startDate && loan.duration) {
-         const start = parseDateSafe(loan.startDate);
+         const start = parseDateSafe(String(loan.startDate).includes('-') ? loan.startDate : `${new Date().getFullYear()}-${new Date().getMonth()+1}-${loan.startDate}`);
          const durationMonths = loan.durationUnit === 'years' ? loan.duration * 12 : loan.duration;
          const computedEnd = new Date(start.getFullYear(), start.getMonth() + durationMonths, start.getDate());
          endDateStr = computedEnd.toISOString().split('T')[0];
@@ -6544,7 +6562,7 @@
        
        const today = new Date().toISOString().split('T')[0];
        const start = document.getElementById('loan-start-date');
-       if (start) start.value = today;
+       if (start) start.value = '15';
        const endDateInput = document.getElementById('loan-end-date');
        if (endDateInput) endDateInput.value = today;
        
