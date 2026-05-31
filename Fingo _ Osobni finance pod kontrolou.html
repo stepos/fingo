@@ -4879,6 +4879,39 @@
         }
       });
       
+      (state.loans || []).forEach(loan => {
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+        
+        let loanStart = null;
+        if (String(loan.startDate).includes('-')) {
+          loanStart = parseDateSafe(loan.startDate);
+        } else {
+          loanStart = new Date(0);
+        }
+        const loanEnd = details.endDate;
+        
+        if (loanStart <= endOfRange && loanEnd >= startOfRange) {
+          const dayNum = String(loan.startDate).includes('-') 
+            ? parseDateSafe(loan.startDate).getDate() 
+            : (parseInt(loan.startDate) || 15);
+            
+          const paymentDate = new Date(startOfRange.getFullYear(), startOfRange.getMonth(), dayNum);
+          paymentDate.setHours(0, 0, 0, 0);
+          
+          if (paymentDate >= startOfRange && paymentDate <= endOfRange && paymentDate >= loanStart && paymentDate <= loanEnd) {
+            futurePayments.push({
+              id: `loan-${loan.id || Math.random()}`,
+              name: loan.name,
+              type: 'expense',
+              amount: Number(loan.monthlyPayment),
+              category: loan.category || (currentLanguage === 'cs' ? 'Bydlení / Úvěry' : 'Housing / Loans'),
+              date: paymentDate.toISOString().split('T')[0],
+              formattedDate: paymentDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
+            });
+          }
+        }
+      });
+      
       futurePayments.sort((a, b) => new Date(a.date) - new Date(b.date));
       return futurePayments;
     }
