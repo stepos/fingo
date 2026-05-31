@@ -810,18 +810,29 @@
               <p class="text-sm font-medium text-slate-500">Žádné výdaje pro toto období</p>
             </div>
             
-            <div id="category-chart-wrapper" class="w-full flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mt-2">
-              <div class="relative w-[180px] h-[180px] shrink-0" id="category-chart-container">
-                <canvas id="categoryChart"></canvas>
-                <!-- Celková částka uprostřed prstencového grafu -->
-                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Celkem výdaje</span>
-                  <span id="category-chart-total" class="text-base font-extrabold text-slate-800 leading-none mt-1">0 Kč</span>
+            <div id="category-chart-wrapper" class="w-full flex flex-col items-center justify-center gap-6 sm:gap-8 mt-2">
+              <div class="flex flex-row items-center justify-center gap-6 sm:gap-8 w-full max-w-md shrink-0">
+                <!-- Donut Chart 1: Zaplacené -->
+                <div class="relative w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] shrink-0" id="category-chart-paid-container">
+                  <canvas id="categoryChartPaid"></canvas>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span class="text-[8px] uppercase tracking-wider text-slate-400 font-bold">Zaplaceno</span>
+                    <span id="category-chart-paid-total" class="text-xs font-black text-slate-800 dark:text-slate-200 leading-none mt-0.5">0 Kč</span>
+                  </div>
+                </div>
+                
+                <!-- Donut Chart 2: Celkové s budoucími -->
+                <div class="relative w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] shrink-0" id="category-chart-total-container">
+                  <canvas id="categoryChartTotal"></canvas>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span class="text-[8px] uppercase tracking-wider text-slate-400 font-bold">Celkem</span>
+                    <span id="category-chart-total-total" class="text-xs font-black text-slate-800 dark:text-slate-200 leading-none mt-0.5">0 Kč</span>
+                  </div>
                 </div>
               </div>
               
               <!-- Vlastní detailní legenda -->
-              <div id="category-chart-legend" class="flex-1 w-full space-y-2 max-h-[200px] overflow-y-auto pr-1 no-scrollbar">
+              <div id="category-chart-legend" class="w-full space-y-1.5 max-h-[160px] overflow-y-auto pr-1 no-scrollbar border-t border-slate-100 dark:border-slate-800/60 pt-3">
                 <!-- Dynamicky generováno pomocí JS -->
               </div>
             </div>
