@@ -6434,6 +6434,23 @@
       });
       
       renderHistoryList(list);
+      
+      // Filter and render future payments
+      let futureList = getFutureRecurringPaymentsThisMonth();
+      if (catFilter !== 'all') {
+        futureList = futureList.filter(fp => fp.category === catFilter);
+      }
+      if (searchQuery) {
+        futureList = futureList.filter(fp => {
+          const descMatch = (fp.name || '').toLowerCase().includes(searchQuery);
+          const catObj = state.categories.find(c => c.id === fp.category);
+          const catMatch = catObj ? catObj.name.toLowerCase().includes(searchQuery) : false;
+          return descMatch || catMatch;
+        });
+      }
+      futureList.sort((a, b) => parseDateSafe(a.date) - parseDateSafe(b.date));
+      
+      renderFuturePaymentsList(futureList);
     }
 
     function renderHistoryList(list) {
@@ -6531,6 +6548,100 @@
         translatePage(currentLanguage);
       }
     }
+
+    function renderFuturePaymentsList(futureList) {
+      const desktopContainer = document.getElementById('history-future-list-desktop');
+      const mobileContainer = document.getElementById('history-future-list-mobile');
+      const emptyEl = document.getElementById('history-future-empty');
+      
+      if (!desktopContainer || !mobileContainer) return;
+      
+      desktopContainer.innerHTML = '';
+      mobileContainer.innerHTML = '';
+      
+      if (futureList.length === 0) {
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+      
+      futureList.forEach(fp => {
+        const cat = state.categories.find(c => c.id === fp.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
+        const amountSign = fp.type === 'income' ? '+' : '-';
+        const amountClass = fp.type === 'income' ? 'text-green-600 font-bold opacity-75' : 'text-rose-600 font-bold opacity-75';
+        
+        const escapedName = (fp.name || '').split("'").join("\\'");
+        const escapedType = (fp.type || 'expense').split("'").join("\\'");
+        const escapedCategory = (fp.category || 'cat-ostatni').split("'").join("\\'");
+        const escapedDate = (fp.date || '').split("'").join("\\'");
+        
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/50 transition-colors group opacity-85';
+        tr.innerHTML = `
+          <td class="py-3 pl-1"></td>
+          <td class="py-3 font-medium text-slate-450 text-xs italic">${formatDateString(fp.date)}</td>
+          <td class="py-3 font-semibold text-slate-700 italic">${fp.name || '-'} <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded ml-1 uppercase">Budoucí</span></td>
+          <td class="py-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold opacity-85" style="background-color: ${cat.color}10; color: ${cat.color}">
+              <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
+              ${__(cat.name)}
+            </span>
+          </td>
+          <td class="${amountClass} text-right italic">${amountSign}${formatCurrency(fp.amount)}</td>
+          <td class="py-3 text-right pr-2">
+            <button onclick="bookFuturePayment('${escapedName}', ${fp.amount}, '${escapedType}', '${escapedCategory}', '${escapedDate}')" class="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 rounded-lg transition-all" title="${__('Zaúčtovat transakci')}">
+              Zaúčtovat
+            </button>
+          </td>
+        `;
+        desktopContainer.appendChild(tr);
+        
+        const card = document.createElement('div');
+        card.className = 'flex items-center justify-between p-4 bg-slate-50/60 rounded-xl border border-slate-100 opacity-85';
+        card.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 opacity-75" style="background-color: ${cat.color}15; color: ${cat.color}">
+              <i data-lucide="${cat.icon || 'help-circle'}" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="font-bold text-slate-650 text-sm leading-tight truncate italic">${fp.name || '-'}</p>
+              <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
+                <span class="italic text-indigo-500 font-extrabold">Budoucí • ${formatDateString(fp.date)}</span>
+                <span>•</span>
+                <span style="color: ${cat.color}">${__(cat.name)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
+            <span class="${amountClass} text-sm italic">${amountSign}${formatCurrency(fp.amount)}</span>
+            <button onclick="bookFuturePayment('${escapedName}', ${fp.amount}, '${escapedType}', '${escapedCategory}', '${escapedDate}')" class="px-2 py-1 text-[10px] font-bold text-indigo-600 active:text-white bg-indigo-50 active:bg-indigo-600 rounded-md transition-all">
+              Zaúčtovat
+            </button>
+          </div>
+        `;
+        mobileContainer.appendChild(card);
+      });
+      
+      lucide.createIcons();
+    }
+
+    window.bookFuturePayment = function(name, amount, type, category, date) {
+      triggerHapticFeedback();
+      const newTransaction = {
+        id: 't-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        type,
+        amount,
+        category,
+        date,
+        description: name
+      };
+      state.transactions.push(newTransaction);
+      saveState();
+      showToast("Platba byla zaúčtována do historie");
+      filterHistory();
+      updateDashboardAndData();
+    };
 
     let transactionIdToDelete = null;
     function promptDeleteTransaction(id) {
