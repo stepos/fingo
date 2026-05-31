@@ -621,6 +621,23 @@
           </div>
           <p class="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Aktuální čistý zůstatek</p>
           <h3 id="stat-total-balance" class="text-3xl md:text-4xl font-black tracking-tight">0,00 Kč</h3>
+          
+          <div id="stat-projected-balance-wrapper" class="mt-3 pt-2.5 border-t border-white/10 flex flex-col gap-1.5 hidden">
+            <div class="flex items-center justify-between text-[11px] md:text-xs text-indigo-200">
+              <span>Očekávaný zůstatek (koncem měsíce):</span>
+              <strong id="stat-projected-balance" class="text-white font-bold">0,00 Kč</strong>
+            </div>
+            <div id="stat-future-payments-container" class="hidden mt-0.5 text-[10px] text-indigo-300 flex flex-col gap-1 bg-white/5 p-2 rounded-xl border border-white/5">
+              <div onclick="toggleFuturePaymentsList(event)" class="flex items-center justify-between cursor-pointer hover:text-white transition-all select-none">
+                <span id="stat-future-payments-text" class="truncate pr-1">Načítání...</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" id="future-payments-chevron"></i>
+              </div>
+              <div id="future-payments-expanded-list" class="hidden mt-2 space-y-1.5 max-h-[150px] overflow-y-auto pr-1 no-scrollbar text-[9px] pt-1.5 border-t border-white/5">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
           <div class="mt-4 flex items-center gap-2 text-[10px] md:text-xs text-slate-400">
             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/35">
               <i data-lucide="info" class="w-3.5 h-3.5 text-slate-200"></i>
@@ -1299,8 +1316,8 @@
               
               <!-- Next Due Date -->
               <div>
-                <label for="rec-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum příští splatnosti</label>
-                <input type="date" id="rec-date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium">
+                <label for="rec-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Den zaúčtování</label>
+                <input type="number" id="rec-date" min="1" max="31" placeholder="den (1-31)" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
               </div>
               
               <!-- End Date (Optional) -->
@@ -1334,7 +1351,7 @@
                     <th class="pb-3 font-semibold">Název</th>
                     <th class="pb-3 font-semibold">Frekvence</th>
                     <th class="pb-3 font-semibold">Kategorie</th>
-                    <th class="pb-3 font-semibold">Příští splatnost</th>
+                    <th class="pb-3 font-semibold">Zaúčtováno</th>
                     <th class="pb-3 font-semibold">Ukončení</th>
                     <th class="pb-3 font-semibold text-right">Částka</th>
                     <th class="pb-3 font-semibold text-right pr-2">Akce</th>
@@ -2495,6 +2512,7 @@
       
       // Dashboard Cards
       "Aktuální čistý zůstatek": { en: "Current Net Balance", de: "Aktueller Netto-Saldo" },
+      "Očekávaný zůstatek (koncem měsíce):": { en: "Projected balance (end of month):", de: "Prognostizierter Saldo (Monatsende):" },
       "Kompletní bilance účtu": { en: "Complete account balance", de: "Vollständiger Kontosaldo" },
       "Příjmy": { en: "Income", de: "Einnahmen" },
       "Příjmy v období": { en: "Incomes in period", de: "Einnahmen im Zeitraum" },
@@ -2660,7 +2678,10 @@
       return trimmed;
     }
 
+    let isTranslating = false;
     function translatePage(lang) {
+      if (isTranslating) return;
+      isTranslating = true;
       currentLanguage = lang;
       safeStorage.setItem('fingo_language', lang);
       
@@ -2746,6 +2767,8 @@
       });
       
       updateHeaderDateTime();
+      updateDashboardAndData();
+      isTranslating = false;
     }
 
     function switchCurrency(currency) {
@@ -3108,7 +3131,7 @@
       if (transDate) transDate.value = today;
       
       const recDate = document.getElementById('rec-date');
-      if (recDate) recDate.value = today;
+      if (recDate) recDate.value = '15';
       
       const editTransDate = document.getElementById('edit-trans-date');
       if (editTransDate) editTransDate.value = today;
@@ -4613,6 +4636,83 @@
       });
     }
 
+    function getPaymentWordCzech(count) {
+      if (count === 1) return 'platba';
+      if (count >= 2 && count <= 4) return 'platby';
+      return 'plateb';
+    }
+
+    function getFutureRecurringPaymentsThisMonth() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999);
+      
+      const futurePayments = [];
+      
+      (state.recurring || []).forEach(rec => {
+        let currentDueDate = parseDateSafe(rec.nextDueDate);
+        currentDueDate.setHours(0, 0, 0, 0);
+        
+        while (currentDueDate <= endOfMonth) {
+          if (currentDueDate > today) {
+            if (rec.endDate) {
+              const endDateObj = parseDateSafe(rec.endDate);
+              endDateObj.setHours(0, 0, 0, 0);
+              if (currentDueDate > endDateObj) {
+                break;
+              }
+            }
+            
+            futurePayments.push({
+              id: rec.id,
+              name: rec.name,
+              type: rec.type,
+              amount: Number(rec.amount),
+              category: rec.category,
+              date: currentDueDate.toISOString().split('T')[0],
+              formattedDate: currentDueDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
+            });
+          }
+          
+          const nextDate = new Date(currentDueDate);
+          if (rec.frequency === 'weekly') {
+            nextDate.setDate(nextDate.getDate() + 7);
+          } else if (rec.frequency === 'monthly') {
+            nextDate.setMonth(nextDate.getMonth() + 1);
+          } else if (rec.frequency === 'yearly') {
+            nextDate.setFullYear(nextDate.getFullYear() + 1);
+          }
+          currentDueDate = nextDate;
+        }
+      });
+      
+      futurePayments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return futurePayments;
+    }
+
+    function toggleFuturePaymentsList(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      triggerHapticFeedback();
+      const list = document.getElementById('future-payments-expanded-list');
+      const chevron = document.getElementById('future-payments-chevron');
+      if (list) {
+        const isHidden = list.classList.toggle('hidden');
+        if (chevron) {
+          if (isHidden) {
+            chevron.style.transform = 'rotate(0deg)';
+          } else {
+            chevron.style.transform = 'rotate(180deg)';
+          }
+        }
+        lucide.createIcons();
+      }
+    }
+
     function updateDashboardAndData() {
       const balance = state.transactions.reduce((acc, t) => {
         return t.type === 'income' ? acc + t.amount : acc - t.amount;
@@ -4627,6 +4727,75 @@
         balanceEl.className = "text-3xl md:text-4xl font-black tracking-tight text-rose-400";
       } else {
         balanceEl.className = "text-3xl md:text-4xl font-black tracking-tight text-slate-100";
+      }
+
+      // Započítání budoucích opakujících se plateb do konce měsíce
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      const futureExpenses = futurePayments.filter(p => p.type === 'expense');
+      const futureIncomes = futurePayments.filter(p => p.type === 'income');
+      
+      const futureExpensesSum = futureExpenses.reduce((acc, p) => acc + p.amount, 0);
+      const futureIncomesSum = futureIncomes.reduce((acc, p) => acc + p.amount, 0);
+      const adjustedBalance = balance + futureIncomesSum - futureExpensesSum;
+
+      // Update projected balance (with future payments) in the UI
+      const projectedEl = document.getElementById('stat-projected-balance');
+      if (projectedEl) {
+        projectedEl.innerText = formatCurrency(adjustedBalance);
+      }
+
+      const projectedWrapper = document.getElementById('stat-projected-balance-wrapper');
+      if (projectedWrapper) {
+        if (futurePayments.length > 0) {
+          projectedWrapper.classList.remove('hidden');
+        } else {
+          projectedWrapper.classList.add('hidden');
+        }
+      }
+      
+      // Zobrazení a naplnění informací o budoucích platbách do konce měsíce
+      const futureContainer = document.getElementById('stat-future-payments-container');
+      const futureTextEl = document.getElementById('stat-future-payments-text');
+      const futureListEl = document.getElementById('future-payments-expanded-list');
+      
+      if (futureContainer && futureTextEl && futureListEl) {
+        if (futurePayments.length > 0) {
+          futureContainer.classList.remove('hidden');
+          
+          let text = '';
+          if (currentLanguage === 'cs') {
+            text = `Do konce měsíce odejde ${futureExpenses.length} ${getPaymentWordCzech(futureExpenses.length)} v celkové výši ${formatCurrency(futureExpensesSum)}.`;
+          } else if (currentLanguage === 'en') {
+            text = `Until end of month, ${futureExpenses.length} payment(s) of ${formatCurrency(futureExpensesSum)} will go out.`;
+          } else if (currentLanguage === 'de') {
+            text = `Bis Ende des Monats gehen ${futureExpenses.length} Zahlung(en) über ${formatCurrency(futureExpensesSum)} ab.`;
+          }
+          
+          futureTextEl.innerText = text;
+          
+          // Render list items
+          futureListEl.innerHTML = futurePayments.map(item => {
+            const displaySign = item.type === 'income' ? '+' : '-';
+            const displayColor = item.type === 'income' ? 'text-emerald-400' : 'text-rose-400';
+            const dotColor = item.type === 'income' ? 'bg-emerald-400' : 'bg-rose-400';
+            
+            return `
+              <div class="flex items-center justify-between border-b border-white/5 pb-1.5 last:border-b-0 last:pb-0">
+                <div class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>
+                  <span class="font-bold text-slate-100">${item.name}</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-bold ${displayColor}">${displaySign}${formatCurrency(item.amount)}</span>
+                  <span class="block text-[8px] text-slate-400 font-semibold">${item.formattedDate}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          futureContainer.classList.add('hidden');
+          futureListEl.classList.add('hidden');
+        }
       }
       
       const filtered = getFilteredTransactions(state.transactions);
@@ -5494,13 +5663,15 @@
       const amount = Number(document.getElementById('rec-amount').value);
       const frequency = document.getElementById('rec-frequency').value;
       const category = document.getElementById('rec-category').value;
-      const nextDueDate = document.getElementById('rec-date').value;
+      const bookingDay = document.getElementById('rec-date').value;
       const endDate = document.getElementById('rec-end-date').value || null;
       
       if (isNaN(amount) || amount <= 0) {
         showToast("Částka musí být kladné číslo", "error");
         return;
       }
+      
+      const nextDueDate = getNextOccurrenceOfDay(bookingDay);
       
       const newRecurring = {
         id: 'r-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
@@ -5509,6 +5680,7 @@
         amount,
         frequency,
         category,
+        bookingDay,
         nextDueDate,
         endDate
       };
@@ -5569,7 +5741,7 @@
               ${__(cat.name)}
             </span>
           </td>
-          <td class="py-3.5 font-medium text-slate-500 text-xs">${formatDateString(r.nextDueDate)}</td>
+          <td class="py-3.5 font-medium text-slate-500 text-xs">${formatLoanBookingDay(r.bookingDay || r.nextDueDate)}</td>
           <td class="py-3.5 font-medium text-slate-500 text-xs">${endText}</td>
           <td class="${typeClass} text-right">${typeSign}${formatCurrency(r.amount)}</td>
           <td class="py-3.5 text-right pr-2">
@@ -5592,7 +5764,7 @@
               <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-wide">
                 <span class="text-indigo-600">${__(freqText)}</span>
                 <span>•</span>
-                <span>${__('Příští:')} ${formatDateString(r.nextDueDate)}</span>
+                <span>${__('Zaúčtováno:')} ${formatLoanBookingDay(r.bookingDay || r.nextDueDate)}</span>
                 ${r.endDate ? `<span>•</span> <span>${__('Konec:')} ${formatDateString(r.endDate)}</span>` : ''}
               </div>
             </div>
@@ -5996,6 +6168,26 @@
     }
 
     // ================= LOANS INTEGRATION CODE =================
+
+    function getNextOccurrenceOfDay(dayNum) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      
+      let year = today.getFullYear();
+      let month = today.getMonth();
+      const targetDay = parseInt(dayNum) || 15;
+      
+      function getClampedDate(y, m, d) {
+        const lastDay = new Date(y, m + 1, 0).getDate();
+        return new Date(y, m, Math.min(d, lastDay));
+      }
+      
+      let date = getClampedDate(year, month, targetDay);
+      if (date < today) {
+        date = getClampedDate(year, month + 1, targetDay);
+      }
+      return date.toISOString().split('T')[0];
+    }
 
     function formatLoanBookingDay(dayVal) {
       if (!dayVal) return '';
