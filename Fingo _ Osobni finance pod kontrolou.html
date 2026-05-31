@@ -1501,7 +1501,7 @@
 
               <!-- Remaining Balance -->
               <div>
-                <label for="loan-remaining-amount" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Aktuální zbývající jistina (Kč)</label>
+                <label for="loan-remaining-amount" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Zbývá doplatit (Kč)</label>
                 <input type="number" id="loan-remaining-amount" min="0" required placeholder="kolik ještě zbývá doplatit" class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
               </div>
 
@@ -1517,21 +1517,15 @@
                 </div>
               </div>
 
-              <!-- Start Date -->
-              <div>
-                <label for="loan-start-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum začátku splácení</label>
-                <input type="date" id="loan-start-date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-              </div>
-
-              <!-- Duration -->
-              <div>
-                <label for="loan-duration" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Doba splácení</label>
-                <div class="grid grid-cols-3 gap-2">
-                  <input type="number" id="loan-duration" min="1" required placeholder="doba" class="col-span-2 px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-                  <select id="loan-duration-unit" class="col-span-1 px-2 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-                    <option value="years">Roky</option>
-                    <option value="months">Měsíce</option>
-                  </select>
+              <!-- Dates Grid: Booking Date & End Date -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label for="loan-start-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum zaúčtování</label>
+                  <input type="date" id="loan-start-date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
+                </div>
+                <div>
+                  <label for="loan-end-date" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Konec splácení (datum)</label>
+                  <input type="date" id="loan-end-date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
                 </div>
               </div>
 
@@ -2618,6 +2612,10 @@
       "Měsíční splátka": { en: "Monthly payment", de: "Monatliche Rate" },
       "Sazba (% p.a.)": { en: "Rate (% p.a.)", de: "Zinssatz (% p.a.)" },
       "Začátek:": { en: "Start:", de: "Beginn:" },
+      "Zaúčtováno:": { en: "Booked:", de: "Gebucht:" },
+      "Konec splácení:": { en: "Repayment end:", de: "Rückzahlungsende:" },
+      "Zbývá doplatit:": { en: "Remaining balance:", de: "Restschuld:" },
+      "Zbývá času:": { en: "Time remaining:", de: "Verbleibende Zeit:" },
       "Datum konce:": { en: "End Date:", de: "Enddatum:" },
       "Splačeno": { en: "Paid", de: "Gezahlt" },
       "zbývá": { en: "remaining", de: "verbleibend" },
@@ -3129,6 +3127,9 @@
       
       const loanStart = document.getElementById('loan-start-date');
       if (loanStart) loanStart.value = today;
+      
+      const loanEndDate = document.getElementById('loan-end-date');
+      if (loanEndDate) loanEndDate.value = today;
       
       const loanPaymentDate = document.getElementById('loan-payment-date');
       if (loanPaymentDate) loanPaymentDate.value = today;
@@ -6164,16 +6165,20 @@
               <!-- Duration details -->
               <div class="space-y-2 border-b border-slate-100 pb-4 mb-4 text-xs">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">${__('Začátek:')}</span>
+                  <span class="font-medium text-slate-400">${__('Zaúčtováno:')}</span>
                   <span class="font-semibold text-slate-700">${formatDateString(loan.startDate)}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">${__('Datum konce:')}</span>
+                  <span class="font-medium text-slate-400">${__('Konec splácení:')}</span>
                   <span class="font-semibold text-slate-700">${details.formattedEndDate}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-slate-400">${__('Zbývá:')}</span>
-                  <span class="font-bold text-indigo-600">${details.remainingTimeText}</span>
+                  <span class="font-medium text-slate-400">${__('Zbývá doplatit:')}</span>
+                  <span class="font-bold text-slate-800">${formatCurrency(remaining)}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="font-medium text-slate-400">${__('Zbývá času:')}</span>
+                  <span class="font-semibold text-indigo-600">${details.remainingTimeText}</span>
                 </div>
               </div>
               
@@ -6292,12 +6297,11 @@
       const monthlyPayment = Number(document.getElementById('loan-monthly-payment').value);
       const interestRate = Number(document.getElementById('loan-interest-rate').value);
       const startDate = document.getElementById('loan-start-date').value;
-      const duration = Number(document.getElementById('loan-duration').value);
-      const durationUnit = document.getElementById('loan-duration-unit').value;
+      const endDate = document.getElementById('loan-end-date').value;
       const notes = document.getElementById('loan-notes').value.trim();
       const category = document.getElementById('loan-category').value;
       
-      if (!name || isNaN(totalAmount) || isNaN(remainingAmount) || isNaN(monthlyPayment) || isNaN(interestRate) || !startDate || isNaN(duration)) {
+      if (!name || isNaN(totalAmount) || isNaN(remainingAmount) || isNaN(monthlyPayment) || isNaN(interestRate) || !startDate || !endDate) {
         showToast("Prosím vyplňte všechna pole správně.", "error");
         return;
       }
@@ -6306,14 +6310,18 @@
         // Edit existing
         const index = state.loans.findIndex(l => l.id === id);
         if (index !== -1) {
-          state.loans[index] = { id, name, type, totalAmount, remainingAmount, monthlyPayment, interestRate, startDate, duration, durationUnit, notes, category };
+          const existing = state.loans[index];
+          state.loans[index] = { 
+            ...existing, 
+            id, name, type, totalAmount, remainingAmount, monthlyPayment, interestRate, startDate, endDate, notes, category 
+          };
           showToast("Úvěr byl úspěšně upraven.");
         }
       } else {
         // Add new
         const newLoan = {
           id: 'l-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-          name, type, totalAmount, remainingAmount, monthlyPayment, interestRate, startDate, duration, durationUnit, notes, category
+          name, type, totalAmount, remainingAmount, monthlyPayment, interestRate, startDate, endDate, notes, category
         };
         state.loans.push(newLoan);
         showToast("Úvěr byl úspěšně přidán.");
@@ -6353,65 +6361,81 @@
     }
 
     // Opens edit view populating all input values
-    function openEditLoan(id) {
-      triggerHapticFeedback();
-      const loan = state.loans.find(l => l.id === id);
-      if (!loan) return;
-      
-      document.getElementById('loan-id').value = loan.id;
-      document.getElementById('loan-name').value = loan.name;
-      document.getElementById('loan-type').value = loan.type;
-      document.getElementById('loan-total-amount').value = loan.totalAmount;
-      document.getElementById('loan-remaining-amount').value = loan.remainingAmount;
-      document.getElementById('loan-monthly-payment').value = loan.monthlyPayment;
-      document.getElementById('loan-interest-rate').value = loan.interestRate;
-      document.getElementById('loan-start-date').value = loan.startDate;
-      document.getElementById('loan-duration').value = loan.duration;
-      document.getElementById('loan-duration-unit').value = loan.durationUnit;
-      document.getElementById('loan-notes').value = loan.notes || '';
-      document.getElementById('loan-category').value = loan.category;
-      
-      document.getElementById('loan-form-title').innerHTML = `
-        <i data-lucide="edit" class="w-5 h-5 text-indigo-500"></i>
-        Upravit úvěr
-      `;
-      document.getElementById('btn-submit-loan-text').innerText = "Uložit změny";
-      document.getElementById('btn-cancel-loan-edit').classList.remove('hidden');
-      
-      if (window.innerWidth < 768) {
-        switchLoanSubTab('form');
-      }
-      
-      lucide.createIcons();
-    }
-
-    // Reset fields back to default
-    function resetLoanForm() {
-      document.getElementById('loan-id').value = '';
-      document.getElementById('loan-form').reset();
-      
-      document.getElementById('loan-form-title').innerHTML = `
-        <i data-lucide="landmark" class="w-5 h-5 text-indigo-500"></i>
-        Nový úvěr / Hypotéka
-      `;
-      document.getElementById('btn-submit-loan-text').innerText = "Přidat úvěr";
-      document.getElementById('btn-cancel-loan-edit').classList.add('hidden');
-      
-      // Keep today as default start date
-      const today = new Date().toISOString().split('T')[0];
-      const start = document.getElementById('loan-start-date');
-      if (start) start.value = today;
-      
-      // Default loan category to 'cat-uvery'
-      const loanCat = document.getElementById('loan-category');
-      if (loanCat) {
-        if ([...loanCat.options].some(opt => opt.value === 'cat-uvery')) {
-          loanCat.value = 'cat-uvery';
-        }
-      }
-      
-      lucide.createIcons();
-    }
+     // Opens edit view populating all input values
+     function openEditLoan(id) {
+       triggerHapticFeedback();
+       const loan = state.loans.find(l => l.id === id);
+       if (!loan) return;
+       
+       document.getElementById('loan-id').value = loan.id;
+       document.getElementById('loan-name').value = loan.name;
+       document.getElementById('loan-type').value = loan.type;
+       document.getElementById('loan-total-amount').value = loan.totalAmount;
+       document.getElementById('loan-remaining-amount').value = loan.remainingAmount;
+       document.getElementById('loan-monthly-payment').value = loan.monthlyPayment;
+       document.getElementById('loan-interest-rate').value = loan.interestRate;
+       document.getElementById('loan-notes').value = loan.notes || '';
+       document.getElementById('loan-category').value = loan.category;
+       
+       const loanStartDateInput = document.getElementById('loan-start-date');
+       if (loanStartDateInput) {
+         loanStartDateInput.value = loan.startDate || new Date().toISOString().split('T')[0];
+       }
+       
+       let endDateStr = loan.endDate;
+       if (!endDateStr && loan.startDate && loan.duration) {
+         const start = parseDateSafe(loan.startDate);
+         const durationMonths = loan.durationUnit === 'years' ? loan.duration * 12 : loan.duration;
+         const computedEnd = new Date(start.getFullYear(), start.getMonth() + durationMonths, start.getDate());
+         endDateStr = computedEnd.toISOString().split('T')[0];
+       }
+       const loanEndDateInput = document.getElementById('loan-end-date');
+       if (loanEndDateInput) {
+         loanEndDateInput.value = endDateStr || new Date().toISOString().split('T')[0];
+       }
+       
+       document.getElementById('loan-form-title').innerHTML = `
+         <i data-lucide="edit" class="w-5 h-5 text-indigo-500"></i>
+         Upravit úvěr
+       `;
+       document.getElementById('btn-submit-loan-text').innerText = "Uložit změny";
+       document.getElementById('btn-cancel-loan-edit').classList.remove('hidden');
+       
+       if (window.innerWidth < 768) {
+         switchLoanSubTab('form');
+       }
+       
+       lucide.createIcons();
+     }
+ 
+     // Reset fields back to default
+     function resetLoanForm() {
+       document.getElementById('loan-id').value = '';
+       document.getElementById('loan-form').reset();
+       
+       document.getElementById('loan-form-title').innerHTML = `
+         <i data-lucide="landmark" class="w-5 h-5 text-indigo-500"></i>
+         Nový úvěr / Hypotéka
+       `;
+       document.getElementById('btn-submit-loan-text').innerText = "Přidat úvěr";
+       document.getElementById('btn-cancel-loan-edit').classList.add('hidden');
+       
+       const today = new Date().toISOString().split('T')[0];
+       const start = document.getElementById('loan-start-date');
+       if (start) start.value = today;
+       const endDateInput = document.getElementById('loan-end-date');
+       if (endDateInput) endDateInput.value = today;
+       
+       // Default loan category to 'cat-uvery'
+       const loanCat = document.getElementById('loan-category');
+       if (loanCat) {
+         if ([...loanCat.options].some(opt => opt.value === 'cat-uvery')) {
+           loanCat.value = 'cat-uvery';
+         }
+       }
+       
+       lucide.createIcons();
+     }
 
     // Modal dialog to trigger a manual installment
     function openLoanPaymentModal(id) {
