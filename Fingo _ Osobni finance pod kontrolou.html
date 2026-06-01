@@ -862,8 +862,8 @@
       <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card">
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h4 class="font-bold text-slate-900 text-base">Poslední aktivity</h4>
-            <p class="text-xs text-slate-400 font-medium">Přehled posledních 5 zapsaných transakcí</p>
+            <h4 class="font-bold text-slate-900 text-base">Aktivity</h4>
+            <p class="text-xs text-slate-400 font-medium">Přehled transakcí za vybrané období</p>
           </div>
           <button onclick="switchTab('transactions')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
             Zobrazit všechny <i data-lucide="chevron-right" class="w-4 h-4"></i>
@@ -2926,8 +2926,8 @@
       "Čistá bilance": { en: "Net Balance", de: "Netto-Bilanz" },
       "Vývoj financí v čase": { en: "Financial Trend", de: "Finanztrend" },
       "Porovnání celkových příjmů a výdajů po měsících": { en: "Comparison of total income and expenses by month", de: "Vergleich der Einnahmen und Ausgaben nach Monaten" },
-      "Poslední aktivity": { en: "Recent Activities", de: "Kürzliche Aktivitäten" },
-      "Přehled posledních 5 zapsaných transakcí": { en: "Overview of the last 5 transactions", de: "Übersicht der letzten 5 Transaktionen" },
+      "Aktivity": { en: "Activities", de: "Aktivitäten" },
+      "Přehled transakcí za vybrané období": { en: "Overview of transactions for the selected period", de: "Übersicht der Transaktionen im Zeitraum" },
       "Zobrazit všechny": { en: "Show all", de: "Alle anzeigen" },
       "Zatím nebyly zapsány žádné transakce.": { en: "No transactions recorded yet.", de: "Noch keine Transaktionen aufgezeichnet." },
       
@@ -5576,16 +5576,16 @@
       desktopContainer.innerHTML = '';
       mobileContainer.innerHTML = '';
       
-      const sorted = [...state.transactions].sort((a,b) => parseDateSafe(b.date) - parseDateSafe(a.date));
-      const recent = sorted.slice(0, 5);
+      const filtered = getFilteredTransactions(state.transactions);
+      const sorted = [...filtered].sort((a,b) => parseDateSafe(b.date) - parseDateSafe(a.date));
       
-      if (recent.length === 0) {
+      if (sorted.length === 0) {
         emptyEl.classList.remove('hidden');
         return;
       }
       emptyEl.classList.add('hidden');
       
-      recent.forEach(t => {
+      sorted.forEach(t => {
         const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
         const amountSign = t.type === 'income' ? '+' : '-';
         const amountClass = t.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
@@ -5598,7 +5598,7 @@
           <td class="py-3.5">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${cat.name}
+              ${__(cat.name)}
             </span>
           </td>
           <td class="${amountClass} text-right">${amountSign}${formatCurrency(t.amount)}</td>
@@ -5617,7 +5617,7 @@
               <div class="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 tracking-wide">
                 <span>${formatDateString(t.date)}</span>
                 <span>•</span>
-                <span class="font-bold" style="color: ${cat.color}">${cat.name}</span>
+                <span class="font-bold" style="color: ${cat.color}">${__(cat.name)}</span>
               </div>
             </div>
           </div>
