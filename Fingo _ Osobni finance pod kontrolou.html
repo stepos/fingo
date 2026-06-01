@@ -5968,83 +5968,7 @@
       return 'cat-ostatni';
     }
 
-    const customDoughnutLabelsPlugin = {
-      id: 'customDoughnutLabels',
-      afterDraw(chart) {
-        const { ctx } = chart;
-        const isDark = document.documentElement.classList.contains('dark');
-        const meta = chart.getDatasetMeta(0);
-        if (!meta.data || meta.data.length === 0) return;
-        
-        ctx.save();
-        ctx.font = 'bold 9px "Inter", -apple-system, sans-serif';
-        ctx.textBaseline = 'middle';
-        
-        const total = chart.data.datasets[0].data.reduce((sum, v) => sum + v, 0);
-        
-        meta.data.forEach((arc, i) => {
-          const val = chart.data.datasets[0].data[i];
-          if (!val || val === 0) return;
-          
-          const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-          if (percentage < 1) return; // Skip very small segments to prevent overlaps
-          
-          const centerAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
-          const r = arc.outerRadius;
-          const cx = arc.x;
-          const cy = arc.y;
-          
-          // Start point on arc border
-          const xStart = cx + Math.cos(centerAngle) * r;
-          const yStart = cy + Math.sin(centerAngle) * r;
-          
-          // Extension line endpoint
-          const extension = 12;
-          const xInflection = cx + Math.cos(centerAngle) * (r + extension);
-          const yInflection = cy + Math.sin(centerAngle) * (r + extension);
-          
-          // Horizontal pointer line endpoint
-          const isRightSide = Math.cos(centerAngle) >= 0;
-          const horizLength = 15;
-          const xEnd = xInflection + (isRightSide ? horizLength : -horizLength);
-          const yEnd = yInflection;
-          
-          // Color line matching the slice
-          ctx.strokeStyle = arc.options.backgroundColor;
-          ctx.lineWidth = 1.2;
-          
-          ctx.beginPath();
-          ctx.moveTo(xStart, yStart);
-          ctx.lineTo(xInflection, yInflection);
-          ctx.lineTo(xEnd, yEnd);
-          ctx.stroke();
-          
-          // Colored indicator dot
-          ctx.fillStyle = arc.options.backgroundColor;
-          ctx.beginPath();
-          ctx.arc(xStart, yStart, 2, 0, 2 * Math.PI);
-          ctx.fill();
-          
-          // Draw label
-          let name = chart.data.labels[i] || '';
-          if (name.length > 12) {
-            name = name.substring(0, 10) + '..';
-          }
-          const labelText = `${name} (${percentage}%)`;
-          ctx.fillStyle = isDark ? '#f1f5f9' : '#0f172a';
-          
-          if (isRightSide) {
-            ctx.textAlign = 'left';
-            ctx.fillText(labelText, xEnd + 3, yEnd);
-          } else {
-            ctx.textAlign = 'right';
-            ctx.fillText(labelText, xEnd - 3, yEnd);
-          }
-        });
-        
-        ctx.restore();
-      }
-    };
+
 
     function buildCategoryChart(filteredTransactions) {
       const expenses = filteredTransactions.filter(t => t.type === 'expense');
@@ -6152,14 +6076,6 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: {
-              padding: {
-                left: 55,
-                right: 55,
-                top: 15,
-                bottom: 15
-              }
-            },
             onClick: (event, activeElements) => {
               if (activeElements && activeElements.length > 0) {
                 const index = activeElements[0].index;
@@ -6183,8 +6099,7 @@
               }
             },
             cutout: '70%'
-          },
-          plugins: [customDoughnutLabelsPlugin]
+          }
         });
       }
       
@@ -6206,14 +6121,6 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: {
-              padding: {
-                left: 55,
-                right: 55,
-                top: 15,
-                bottom: 15
-              }
-            },
             onClick: (event, activeElements) => {
               if (activeElements && activeElements.length > 0) {
                 const index = activeElements[0].index;
@@ -6237,8 +6144,7 @@
               }
             },
             cutout: '70%'
-          },
-          plugins: [customDoughnutLabelsPlugin]
+          }
         });
       }
       
