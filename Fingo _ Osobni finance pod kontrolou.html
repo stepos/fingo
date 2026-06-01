@@ -872,13 +872,29 @@
         
         <!-- Desktop Table view -->
         <div class="hidden md:block overflow-x-auto">
-          <table class="w-full text-left text-sm">
+          <table class="w-full text-left text-sm select-none">
             <thead>
               <tr class="text-slate-400 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider">
-                <th class="pb-3 font-semibold">Datum</th>
-                <th class="pb-3 font-semibold">Popis</th>
-                <th class="pb-3 font-semibold">Kategorie</th>
-                <th class="pb-3 font-semibold text-right">Částka</th>
+                <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleDashboardHeaderClick('date')">
+                  <span class="inline-flex items-center gap-1">
+                    Datum <span id="dashboard-sort-icon-date"></span>
+                  </span>
+                </th>
+                <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleDashboardHeaderClick('description')">
+                  <span class="inline-flex items-center gap-1">
+                    Popis <span id="dashboard-sort-icon-description"></span>
+                  </span>
+                </th>
+                <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleDashboardHeaderClick('category')">
+                  <span class="inline-flex items-center gap-1">
+                    Kategorie <span id="dashboard-sort-icon-category"></span>
+                  </span>
+                </th>
+                <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors text-right" onclick="handleDashboardHeaderClick('amount')">
+                  <span class="inline-flex items-center justify-end gap-1 w-full">
+                    Částka <span id="dashboard-sort-icon-amount"></span>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody id="dashboard-recent-transactions" class="divide-y divide-slate-100">
@@ -1062,6 +1078,10 @@
                     <option value="date-asc">Nejstarší</option>
                     <option value="amount-desc">Nejvyšší částka</option>
                     <option value="amount-asc">Nejnižší částka</option>
+                    <option value="category-asc">Kategorie A-Z</option>
+                    <option value="category-desc">Kategorie Z-A</option>
+                    <option value="description-asc">Popis A-Z</option>
+                    <option value="description-desc">Popis Z-A</option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-slate-400">
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
@@ -1081,14 +1101,30 @@
 
             <!-- Desktop View: Table -->
             <div class="hidden md:block overflow-x-auto">
-              <table class="w-full text-left text-sm">
+              <table class="w-full text-left text-sm select-none">
                 <thead>
                   <tr class="text-slate-400 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider">
                     <th class="pb-3 w-8"></th>
-                    <th class="pb-3 font-semibold">Datum</th>
-                    <th class="pb-3 font-semibold">Popis</th>
-                    <th class="pb-3 font-semibold">Kategorie</th>
-                    <th class="pb-3 font-semibold text-right">Částka</th>
+                    <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('date')">
+                      <span class="inline-flex items-center gap-1">
+                        Datum <span id="history-sort-icon-date"></span>
+                      </span>
+                    </th>
+                    <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('description')">
+                      <span class="inline-flex items-center gap-1">
+                        Popis <span id="history-sort-icon-description"></span>
+                      </span>
+                    </th>
+                    <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('category')">
+                      <span class="inline-flex items-center gap-1">
+                        Kategorie <span id="history-sort-icon-category"></span>
+                      </span>
+                    </th>
+                    <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors text-right" onclick="handleHistoryHeaderClick('amount')">
+                      <span class="inline-flex items-center justify-end gap-1 w-full">
+                        Částka <span id="history-sort-icon-amount"></span>
+                      </span>
+                    </th>
                     <th class="pb-3 font-semibold text-right pr-2">Akce</th>
                   </tr>
                 </thead>
@@ -1109,6 +1145,47 @@
               </div>
               <p class="text-sm font-medium">Nebyly nalezeny žádné platby</p>
               <p class="text-xs mt-1">Upravte text vyhledávání nebo filtry</p>
+            </div>
+          </div>
+
+          <!-- Expected Future Payments Card -->
+          <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card mt-6">
+            <h3 class="font-bold text-slate-900 text-base mb-2 flex items-center gap-2">
+              <i data-lucide="calendar" class="w-5 h-5 text-indigo-500"></i>
+              Budoucí a očekávané platby
+            </h3>
+            <p class="text-xs text-slate-400 mb-6 font-medium">Přehled plánovaných trvalých plateb a splátek úvěrů pro vybrané období</p>
+            
+            <!-- Desktop View: Table -->
+            <div class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="text-slate-400 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider">
+                    <th class="pb-3 w-8"></th>
+                    <th class="pb-3 font-semibold">Datum</th>
+                    <th class="pb-3 font-semibold">Popis</th>
+                    <th class="pb-3 font-semibold">Kategorie</th>
+                    <th class="pb-3 font-semibold text-right">Částka</th>
+                    <th class="pb-3 font-semibold text-right pr-2">Akce</th>
+                  </tr>
+                </thead>
+                <tbody id="history-future-list-desktop" class="divide-y divide-slate-100">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Mobile View: Card Feed -->
+            <div class="md:hidden space-y-3" id="history-future-list-mobile">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div id="history-future-empty" class="hidden text-center py-12 text-slate-400">
+              <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mx-auto mb-3">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-medium">Žádné plánované platby</p>
+              <p class="text-xs mt-1">Pro toto období nejsou žádné očekávané výdaje</p>
             </div>
           </div>
         </div>
@@ -2859,6 +2936,7 @@
     let currentTab = 'dashboard';
     let currentLanguage = 'cs';
     let currentCurrency = 'CZK';
+    let dashboardSort = { column: 'date', dir: 'desc' };
     const textTranslations = {
       // Sidebar & Navigation
       "Přehled": { en: "Dashboard", de: "Übersicht" },
@@ -5577,7 +5655,23 @@
       mobileContainer.innerHTML = '';
       
       const filtered = getFilteredTransactions(state.transactions);
-      const sorted = [...filtered].sort((a,b) => parseDateSafe(b.date) - parseDateSafe(a.date));
+      const sorted = [...filtered].sort((a, b) => {
+        const col = dashboardSort.column;
+        const asc = dashboardSort.dir === 'asc' ? 1 : -1;
+        
+        if (col === 'date') {
+          return (parseDateSafe(a.date) - parseDateSafe(b.date)) * asc;
+        } else if (col === 'amount') {
+          return (a.amount - b.amount) * asc;
+        } else if (col === 'description') {
+          return (a.description || '').localeCompare(b.description || '', currentLanguage === 'cs' ? 'cs-CZ' : 'en-US') * asc;
+        } else if (col === 'category') {
+          const catA = (state.categories.find(c => c.id === a.category) || { name: '' }).name;
+          const catB = (state.categories.find(c => c.id === b.category) || { name: '' }).name;
+          return catA.localeCompare(catB, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US') * asc;
+        }
+        return 0;
+      });
       
       if (sorted.length === 0) {
         emptyEl.classList.remove('hidden');
@@ -5626,6 +5720,92 @@
         mobileContainer.appendChild(mobileCard);
       });
       
+      lucide.createIcons();
+      updateDashboardSortIcons();
+    }
+
+    function updateDashboardSortIcons() {
+      const columns = ['date', 'description', 'category', 'amount'];
+      columns.forEach(col => {
+        const el = document.getElementById(`dashboard-sort-icon-${col}`);
+        if (!el) return;
+        if (dashboardSort.column === col) {
+          const iconName = dashboardSort.dir === 'asc' ? 'arrow-up-narrow-wide' : 'arrow-down-wide-narrow';
+          el.innerHTML = `<i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-500 inline-block align-middle ml-1"></i>`;
+        } else {
+          el.innerHTML = '';
+        }
+      });
+      lucide.createIcons();
+    }
+
+    window.handleDashboardHeaderClick = function(col) {
+      triggerHapticFeedback();
+      if (dashboardSort.column === col) {
+        dashboardSort.dir = dashboardSort.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        dashboardSort.column = col;
+        dashboardSort.dir = 'desc';
+      }
+      renderDashboardRecent();
+    };
+
+    window.handleHistoryHeaderClick = function(col) {
+      triggerHapticFeedback();
+      const sortSelect = document.getElementById('history-sort');
+      if (!sortSelect) return;
+      
+      const currentVal = sortSelect.value;
+      let newVal = '';
+      
+      if (col === 'date') {
+        newVal = (currentVal === 'date-desc') ? 'date-asc' : 'date-desc';
+      } else if (col === 'amount') {
+        newVal = (currentVal === 'amount-desc') ? 'amount-asc' : 'amount-desc';
+      } else if (col === 'category') {
+        newVal = (currentVal === 'category-asc') ? 'category-desc' : 'category-asc';
+      } else if (col === 'description') {
+        newVal = (currentVal === 'description-asc') ? 'description-desc' : 'description-asc';
+      }
+      
+      sortSelect.value = newVal;
+      filterHistory();
+    };
+
+    function updateHistorySortIcons() {
+      const sortSelect = document.getElementById('history-sort');
+      if (!sortSelect) return;
+      const val = sortSelect.value;
+      
+      const columns = ['date', 'description', 'category', 'amount'];
+      columns.forEach(col => {
+        const el = document.getElementById(`history-sort-icon-${col}`);
+        if (!el) return;
+        
+        let match = false;
+        let isAsc = false;
+        
+        if (col === 'date' && (val === 'date-asc' || val === 'date-desc')) {
+          match = true;
+          isAsc = val === 'date-asc';
+        } else if (col === 'amount' && (val === 'amount-asc' || val === 'amount-desc')) {
+          match = true;
+          isAsc = val === 'amount-asc';
+        } else if (col === 'category' && (val === 'category-asc' || val === 'category-desc')) {
+          match = true;
+          isAsc = val === 'category-asc';
+        } else if (col === 'description' && (val === 'description-asc' || val === 'description-desc')) {
+          match = true;
+          isAsc = val === 'description-asc';
+        }
+        
+        if (match) {
+          const iconName = isAsc ? 'arrow-up-narrow-wide' : 'arrow-down-wide-narrow';
+          el.innerHTML = `<i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-500 inline-block align-middle ml-1"></i>`;
+        } else {
+          el.innerHTML = '';
+        }
+      });
       lucide.createIcons();
     }
 
@@ -6429,6 +6609,18 @@
           return b.amount - a.amount;
         } else if (sortVal === 'amount-asc') {
           return a.amount - b.amount;
+        } else if (sortVal === 'category-asc') {
+          const catA = (state.categories.find(c => c.id === a.category) || { name: '' }).name;
+          const catB = (state.categories.find(c => c.id === b.category) || { name: '' }).name;
+          return catA.localeCompare(catB, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        } else if (sortVal === 'category-desc') {
+          const catA = (state.categories.find(c => c.id === a.category) || { name: '' }).name;
+          const catB = (state.categories.find(c => c.id === b.category) || { name: '' }).name;
+          return catB.localeCompare(catA, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        } else if (sortVal === 'description-asc') {
+          return (a.description || '').localeCompare(b.description || '', currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        } else if (sortVal === 'description-desc') {
+          return (b.description || '').localeCompare(a.description || '', currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
         }
         return 0;
       });
@@ -6451,6 +6643,7 @@
       futureList.sort((a, b) => parseDateSafe(a.date) - parseDateSafe(b.date));
       
       renderFuturePaymentsList(futureList);
+      updateHistorySortIcons();
     }
 
     function renderHistoryList(list) {
