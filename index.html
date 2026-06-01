@@ -619,8 +619,38 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
         <!-- Total Balance Card -->
         <div class="col-span-2 sm:col-span-1 balance-card-premium text-white p-5 md:p-6 relative overflow-hidden">
-          <div class="absolute -right-8 -bottom-8 opacity-10 text-white">
-            <i data-lucide="piggy-bank" class="w-36 h-36"></i>
+          <!-- Custom Premium background illustration covering the entire space -->
+          <div class="absolute inset-0 pointer-events-none select-none opacity-20 dark:opacity-30">
+            <svg class="w-full h-full" viewBox="0 0 300 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="piggy-glow" cx="80%" cy="80%" r="60%">
+                  <stop offset="0%" stop-color="#818cf8" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#818cf8" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="piggy-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#a5b4fc" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <rect width="300" height="160" fill="url(#piggy-glow)"/>
+              <path d="M 0 120 Q 75 140 150 110 T 300 130" stroke="url(#piggy-stroke)" stroke-width="1" stroke-dasharray="4 4" fill="none"/>
+              <path d="M 0 100 Q 90 70 180 120 T 300 90" stroke="url(#piggy-stroke)" stroke-width="1" fill="none"/>
+              <path d="M 0 140 C 100 110 200 160 300 110" stroke="url(#piggy-stroke)" stroke-width="1.5" fill="none"/>
+              <circle cx="220" cy="90" r="40" stroke="url(#piggy-stroke)" stroke-width="1" stroke-dasharray="2 3" />
+              <circle cx="220" cy="90" r="70" stroke="url(#piggy-stroke)" stroke-width="0.8" />
+              <circle cx="220" cy="90" r="100" stroke="url(#piggy-stroke)" stroke-width="0.5" stroke-dasharray="4 6" />
+              <g transform="translate(180, 55) scale(0.9)" stroke="url(#piggy-stroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                <path d="M 22 55 L 22 65 M 34 57 L 34 67 M 56 57 L 56 67 M 68 55 L 68 65" stroke-width="3"/>
+                <path d="M 45 12 C 15 12 10 32 10 44 C 10 56 22 58 45 58 C 68 58 80 56 80 44 C 80 32 75 12 45 12 Z" />
+                <path d="M 80 38 C 84 38 88 40 88 44 C 88 48 84 50 80 50 Z" fill="rgba(165, 180, 252, 0.1)"/>
+                <circle cx="62" cy="28" r="2" fill="#a5b4fc" stroke="none"/>
+                <path d="M 50 13 L 56 2 L 64 8 Z" fill="rgba(165, 180, 252, 0.15)"/>
+                <path d="M 10 40 Q 2 38 4 32 T 8 34" stroke-width="2"/>
+                <path d="M 40 12 L 50 12" stroke-width="3" stroke="#a5b4fc"/>
+                <path d="M 95 20 L 97 25 L 102 27 L 97 29 L 95 34 L 93 29 L 88 27 L 93 25 Z" stroke="none" fill="#a5b4fc" opacity="0.6" />
+                <path d="M 25 22 L 26 25 L 29 26 L 26 27 L 25 30 L 24 27 L 21 26 L 24 25 Z" stroke="none" fill="#a5b4fc" opacity="0.4" />
+              </g>
+            </svg>
           </div>
           <p class="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Aktuální čistý zůstatek</p>
           <h3 id="stat-total-balance" class="text-3xl md:text-4xl font-black tracking-tight">0,00 Kč</h3>
@@ -1950,7 +1980,7 @@
       </div>
 
       <!-- Calculators Sub-View (Compound Interest & Loan Calculators) -->
-      <div id="sim-view-calculators" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+      <div id="sim-view-calculators" class="hidden grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
         <!-- Card 1: Compound Interest Calculator -->
         <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-6">
           <div class="flex items-center gap-3">
@@ -2104,6 +2134,88 @@
             <div class="border-t border-indigo-500/10 pt-3 flex justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
               <span>Celkem zaplatíte:</span>
               <strong id="sim-loan-total-out">0 Kč</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Consolidation Calculator -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 md:p-6 shadow-card hover:shadow-premium transition-all space-y-6 flex flex-col justify-between">
+          <div class="space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white flex items-center justify-center shadow-md shadow-violet-200 dark:shadow-none">
+                <i data-lucide="git-merge" class="w-5.5 h-5.5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base">Konsolidační kalkulačka</h4>
+                <p class="text-[10px] text-slate-400 font-medium">Spočtěte si sloučení Vašich stávajících úvěrů</p>
+              </div>
+            </div>
+
+            <!-- List of existing loans to select -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Vyberte úvěry ke konsolidaci:</label>
+              <div id="sim-consolidation-loans-list" class="space-y-2 max-h-[150px] overflow-y-auto pr-1 no-scrollbar">
+                <!-- Dynamically populated list of active loans -->
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <!-- Extra Cash Slider -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="sim-consolidation-extra" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Peníze navíc:</label>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-extra-val">0 Kč</span>
+                </div>
+                <input type="range" id="sim-consolidation-extra" min="0" max="2000000" step="10000" value="0" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
+              </div>
+
+              <!-- Consolidation Rate Slider -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="sim-consolidation-rate" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Nová úroková sazba (% p.a.):</label>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-rate-val">5.5 %</span>
+                </div>
+                <input type="range" id="sim-consolidation-rate" min="0.1" max="25" step="0.1" value="5.5" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
+              </div>
+
+              <!-- Consolidation Years Slider -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="sim-consolidation-years" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Nová doba splácení (roky):</label>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-years-val">10 let</span>
+                </div>
+                <input type="range" id="sim-consolidation-years" min="1" max="30" step="1" value="10" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Consolidation Outputs Card -->
+          <div class="bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 dark:from-violet-950/20 dark:to-fuchsia-950/20 border border-violet-500/20 dark:border-violet-900/40 rounded-2xl p-4 space-y-4">
+            <div class="pt-1 flex flex-col items-center justify-center py-2">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Nová měsíční splátka:</span>
+              <div class="text-2xl md:text-3xl font-black text-violet-500 tracking-tight" id="sim-consolidation-monthly-result">0,00 Kč</div>
+            </div>
+
+            <div class="border-t border-violet-500/10 pt-3 flex justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
+              <div class="flex flex-col">
+                <span>Nová výše úvěru:</span>
+                <strong class="font-bold text-slate-700 dark:text-slate-350" id="sim-consolidation-amount-out">0 Kč</strong>
+              </div>
+              <div class="flex flex-col text-right">
+                <span>Úspora na splátce:</span>
+                <strong class="font-bold" id="sim-consolidation-saving-monthly-out">0 Kč</strong>
+              </div>
+            </div>
+
+            <div class="border-t border-violet-500/10 pt-3 flex justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
+              <div class="flex flex-col">
+                <span>Celkem zaplatíte:</span>
+                <strong class="font-bold text-slate-700 dark:text-slate-350" id="sim-consolidation-total-out">0 Kč</strong>
+              </div>
+              <div class="flex flex-col text-right">
+                <span>Celková úspora:</span>
+                <strong class="font-bold" id="sim-consolidation-total-saving-out">0 Kč</strong>
+              </div>
             </div>
           </div>
         </div>
@@ -9477,13 +9589,13 @@
         monthlyInput.value = rounded;
       }
       
+      const activeLoans = (state.loans || []).map(loan => {
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+        return { ...loan, isExpired: details.isExpired };
+      }).filter(l => !l.isExpired);
+
       const loansListEl = document.getElementById('sim-debt-loans-list');
       if (loansListEl) {
-        const activeLoans = (state.loans || []).map(loan => {
-          const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
-          return { ...loan, isExpired: details.isExpired };
-        }).filter(l => !l.isExpired);
-        
         if (activeLoans.length === 0) {
           loansListEl.innerHTML = `
             <div class="text-[10px] text-slate-400 font-medium py-2">
@@ -9497,6 +9609,33 @@
               <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/85 rounded-xl">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" id="sim-loan-check-${l.id}" checked onchange="calculateDebtSnowball()" class="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-900 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${l.name}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${formatCurrency(rem)}</span>
+                  <span class="block text-[8px] text-slate-400 font-semibold">${l.interestRate}% p.a. • ${formatCurrency(Number(l.monthlyPayment))}/měs</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      const consolLoansListEl = document.getElementById('sim-consolidation-loans-list');
+      if (consolLoansListEl) {
+        if (activeLoans.length === 0) {
+          consolLoansListEl.innerHTML = `
+            <div class="text-[10px] text-slate-400 font-medium py-2">
+              ${currentLanguage === 'cs' ? 'Nemáte žádné aktivní úvěry' : 'No active loans'}
+            </div>
+          `;
+        } else {
+          consolLoansListEl.innerHTML = activeLoans.map(l => {
+            const rem = Number(l.remainingAmount);
+            return `
+              <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/85 rounded-xl">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="sim-consol-check-${l.id}" checked onchange="calculateConsolidation()" class="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-900 text-violet-600 focus:ring-violet-500 w-4.5 h-4.5 cursor-pointer">
                   <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${l.name}</span>
                 </div>
                 <div class="text-right">
@@ -9692,6 +9831,7 @@
         viewCalculators.classList.remove('hidden');
         calculateCompound();
         calculateSimpleLoan();
+        calculateConsolidation();
       }
     }
 
@@ -9778,6 +9918,95 @@
       document.getElementById('sim-loan-principal-out').innerText = formatCurrency(amount);
       document.getElementById('sim-loan-interest-out').innerText = formatCurrency(totalInterest);
       document.getElementById('sim-loan-total-out').innerText = formatCurrency(totalPaid);
+    }
+
+    function calculateConsolidation() {
+      const extraCash = Number(document.getElementById('sim-consolidation-extra').value);
+      const newRate = Number(document.getElementById('sim-consolidation-rate').value);
+      const newYears = Number(document.getElementById('sim-consolidation-years').value);
+      
+      document.getElementById('sim-consolidation-extra-val').innerText = formatCurrency(extraCash);
+      document.getElementById('sim-consolidation-rate-val').innerText = `${newRate.toFixed(1)} %`;
+      
+      let yearText = '';
+      if (currentLanguage === 'cs') {
+        yearText = newYears === 1 ? 'rok' : (newYears >= 2 && newYears <= 4 ? 'roky' : 'let');
+      } else if (currentLanguage === 'en') {
+        yearText = newYears === 1 ? 'year' : 'years';
+      } else {
+        yearText = newYears === 1 ? 'Jahr' : 'Jahre';
+      }
+      document.getElementById('sim-consolidation-years-val').innerText = `${newYears} ${yearText}`;
+
+      let totalRemainingOriginal = 0;
+      let totalOriginalMonthlyPayment = 0;
+      let totalOriginalRemainingPayout = 0;
+
+      const activeLoans = (state.loans || []).map(loan => {
+        const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+        return { ...loan, isExpired: details.isExpired };
+      }).filter(l => !l.isExpired);
+
+      activeLoans.forEach(l => {
+        const check = document.getElementById(`sim-consol-check-${l.id}`);
+        if (check && check.checked) {
+          const rem = Number(l.remainingAmount);
+          const payment = Number(l.monthlyPayment);
+          
+          totalRemainingOriginal += rem;
+          totalOriginalMonthlyPayment += payment;
+          
+          const details = calculateLoanEndDetails(l.startDate, l.duration, l.durationUnit, l.endDate);
+          const remainingMonths = Math.max(0, details.remainingYears * 12 + details.remainingMonths);
+          totalOriginalRemainingPayout += (payment * remainingMonths);
+        }
+      });
+
+      const newLoanAmount = totalRemainingOriginal + extraCash;
+      const monthlyRate = newRate / 100 / 12;
+      const newMonths = newYears * 12;
+      
+      let newPayment = 0;
+      if (newLoanAmount > 0) {
+        if (monthlyRate > 0) {
+          newPayment = newLoanAmount * monthlyRate * Math.pow(1 + monthlyRate, newMonths) / (Math.pow(1 + monthlyRate, newMonths) - 1);
+        } else {
+          newPayment = newLoanAmount / newMonths;
+        }
+      }
+      
+      const newTotalPaid = newPayment * newMonths;
+      const monthlySaving = totalOriginalMonthlyPayment - newPayment;
+      const totalSaving = (totalOriginalRemainingPayout + extraCash) - newTotalPaid;
+
+      document.getElementById('sim-consolidation-monthly-result').innerText = formatCurrency(newPayment);
+      document.getElementById('sim-consolidation-amount-out').innerText = formatCurrency(newLoanAmount);
+      
+      const monthlySavingEl = document.getElementById('sim-consolidation-saving-monthly-out');
+      if (newLoanAmount === 0) {
+        monthlySavingEl.innerText = formatCurrency(0);
+        monthlySavingEl.className = 'font-bold text-slate-700 dark:text-slate-350';
+      } else if (monthlySaving >= 0) {
+        monthlySavingEl.innerText = `+${formatCurrency(monthlySaving)} / měs`;
+        monthlySavingEl.className = 'font-bold text-emerald-500';
+      } else {
+        monthlySavingEl.innerText = `-${formatCurrency(Math.abs(monthlySaving))} / měs`;
+        monthlySavingEl.className = 'font-bold text-rose-500';
+      }
+      
+      document.getElementById('sim-consolidation-total-out').innerText = formatCurrency(newTotalPaid);
+      
+      const totalSavingEl = document.getElementById('sim-consolidation-total-saving-out');
+      if (newLoanAmount === 0) {
+        totalSavingEl.innerText = formatCurrency(0);
+        totalSavingEl.className = 'font-bold text-slate-700 dark:text-slate-350';
+      } else if (totalSaving >= 0) {
+        totalSavingEl.innerText = `+${formatCurrency(totalSaving)}`;
+        totalSavingEl.className = 'font-bold text-emerald-500';
+      } else {
+        totalSavingEl.innerText = `-${formatCurrency(Math.abs(totalSaving))}`;
+        totalSavingEl.className = 'font-bold text-rose-500';
+      }
     }
   </script>
   <!-- ================= PRINTABLE PDF REPORT CONTAINER ================= -->
