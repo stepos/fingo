@@ -5846,6 +5846,21 @@
       });
     };
 
+    window.filterTransactionsByCategory = function(catId) {
+      triggerHapticFeedback();
+      switchTab('transactions');
+      
+      const searchInput = document.getElementById('history-search');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      const select = document.getElementById('history-cat-filter');
+      if (select) {
+        select.value = catId;
+        filterHistory();
+      }
+    };
+
     function findCategoryForFuturePayment(fp) {
       let found = state.categories.find(c => c.id === fp.category || c.name === fp.category);
       if (found) return found.id;
@@ -5973,6 +5988,16 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, activeElements) => {
+              if (activeElements && activeElements.length > 0) {
+                const index = activeElements[0].index;
+                const catId = categoryData[index].id;
+                filterTransactionsByCategory(catId);
+              }
+            },
+            onHover: (event, activeElements) => {
+              event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+            },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -6008,6 +6033,16 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, activeElements) => {
+              if (activeElements && activeElements.length > 0) {
+                const index = activeElements[0].index;
+                const catId = categoryData[index].id;
+                filterTransactionsByCategory(catId);
+              }
+            },
+            onHover: (event, activeElements) => {
+              event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+            },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -6035,6 +6070,7 @@
         legendItem.className = 'flex items-center justify-between text-xs py-1.5 px-2 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-xl transition-all cursor-pointer -mx-2';
         legendItem.setAttribute('onmouseenter', `highlightChartSlice(${idx})`);
         legendItem.setAttribute('onmouseleave', 'clearChartHighlight()');
+        legendItem.setAttribute('onclick', `filterTransactionsByCategory('${cat.id}')`);
         
         const futureText = cat.future > 0 ? ` (+${formatCurrency(cat.future)})` : '';
         
