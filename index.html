@@ -4781,7 +4781,7 @@
           if (catEmptyMsg) catEmptyMsg.classList.add('hidden');
           
           sortedCats.forEach(c => {
-            const categoryObj = state.categories.find(cat => cat.id === c.catId) || { name: c.catId === 'all' ? 'Ostatní' : 'Bez kategorie' };
+            const categoryObj = state.categories.find(cat => cat.id === c.catId) || { name: c.catId === 'all' ? 'Ostatní' : 'Bez kategorie', color: '#64748b' };
             const tr = document.createElement('tr');
             tr.className = "border-b border-slate-100";
             
@@ -4798,13 +4798,43 @@
             }
             
             tr.innerHTML = `
-              <td class="py-2.5 font-semibold text-slate-800">${escapeHtml(categoryObj.name)}</td>
+              <td class="py-2.5 font-semibold text-slate-800 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${categoryObj.color || '#64748b'}"></span>
+                <span>${escapeHtml(categoryObj.name)}</span>
+              </td>
               <td class="py-2.5 font-medium text-slate-500">${typeLabel}</td>
               <td class="py-2.5 text-right font-bold ${amountClass}">${sign} ${formatCurrency(c.amount)}</td>
               <td class="py-2.5 text-right font-bold text-slate-500">${pctLabel}</td>
             `;
             catTbody.appendChild(tr);
           });
+        }
+      }
+      
+      // Populate Print Chart Legend
+      const printLegend = document.getElementById('print-chart-categories-legend');
+      if (printLegend) {
+        printLegend.innerHTML = '';
+        
+        const uniqueCatIds = new Set();
+        filtered.forEach(t => {
+          if (t.category) uniqueCatIds.add(t.category);
+        });
+        
+        if (uniqueCatIds.size > 0) {
+          uniqueCatIds.forEach(catId => {
+            const catObj = state.categories.find(c => c.id === catId) || { name: 'Bez kategorie', color: '#64748b' };
+            const legendCol = document.createElement('div');
+            legendCol.className = "flex items-center gap-1.5 min-w-0";
+            legendCol.innerHTML = `
+              <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${catObj.color}"></span>
+              <span class="truncate">${escapeHtml(catObj.name)}</span>
+            `;
+            printLegend.appendChild(legendCol);
+          });
+          printLegend.classList.remove('hidden');
+        } else {
+          printLegend.classList.add('hidden');
         }
       }
       
@@ -9794,6 +9824,7 @@
           </div>
         </div>
         <div id="print-chart-categories-placeholder" class="text-xs text-slate-400 py-10">Graf není k dispozici</div>
+        <div id="print-chart-categories-legend" class="mt-4 pt-3 border-t border-slate-100 w-full grid grid-cols-3 gap-x-4 gap-y-1.5 text-[9px] font-semibold text-slate-600"></div>
       </div>
     </div>
 
