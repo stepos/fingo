@@ -6186,18 +6186,35 @@
             plugins: {
               legend: { display: false },
               tooltip: {
+                mode: 'index',
+                intersect: false,
                 backgroundColor: isDark ? '#1e293b' : '#ffffff',
                 titleColor: isDark ? '#ffffff' : '#1e293b',
                 bodyColor: isDark ? '#94a3b8' : '#64748b',
+                footerColor: isDark ? '#f1f5f9' : '#0f172a',
+                footerFont: { weight: 'bold', family: 'Inter' },
                 borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 borderWidth: 1,
                 padding: 10,
                 cornerRadius: 12,
                 callbacks: {
                   label: function(context) {
-                    const val = context.raw || 0;
-                    const datasetLabel = context.dataset.label;
-                    return ` ${datasetLabel}: ${formatCurrency(val)}`;
+                    const idx = context.dataIndex;
+                    const item = categoryData[idx];
+                    if (!item) return '';
+                    if (context.datasetIndex === 0) {
+                      return ` Zaplaceno: ${formatCurrency(item.paid)}`;
+                    } else if (context.datasetIndex === 1) {
+                      return ` Budoucí: ${formatCurrency(item.future)}`;
+                    }
+                    return '';
+                  },
+                  footer: function(tooltipItems) {
+                    if (tooltipItems.length === 0) return '';
+                    const idx = tooltipItems[0].dataIndex;
+                    const item = categoryData[idx];
+                    if (!item) return '';
+                    return ` Celkem: ${formatCurrency(item.total)}`;
                   }
                 }
               }
