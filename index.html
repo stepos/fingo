@@ -3266,7 +3266,9 @@
       "Zaplaceno": { en: "Paid", de: "Bezahlt" },
       "Přijato": { en: "Received", de: "Empfangen" },
       "Budoucí": { en: "Future", de: "Zukunft" },
-      "Celkem v historii": { en: "Total in history", de: "Gesamt in der Historie" }
+      "Celkem v historii": { en: "Total in history", de: "Gesamt in der Historie" },
+      "Tento měsíc zaplaceno": { en: "Paid this month", de: "Diesen Monat bezahlt" },
+      "K zaplacení": { en: "To pay", de: "Zu bezahlen" }
     };
 
     // Global translation helper
@@ -6156,6 +6158,11 @@
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+              axis: 'y'
+            },
             scales: {
               x: {
                 stacked: true,
@@ -6188,6 +6195,7 @@
               tooltip: {
                 mode: 'index',
                 intersect: false,
+                axis: 'y',
                 backgroundColor: isDark ? '#1e293b' : '#ffffff',
                 titleColor: isDark ? '#ffffff' : '#1e293b',
                 bodyColor: isDark ? '#94a3b8' : '#64748b',
@@ -6203,9 +6211,9 @@
                     const item = categoryData[idx];
                     if (!item) return '';
                     if (context.datasetIndex === 0) {
-                      return ` Zaplaceno: ${formatCurrency(item.paid)}`;
+                      return ` ${__('Tento měsíc zaplaceno')}: ${formatCurrency(item.paid)}`;
                     } else if (context.datasetIndex === 1) {
-                      return ` Budoucí: ${formatCurrency(item.future)}`;
+                      return ` ${__('K zaplacení')}: ${formatCurrency(item.future)}`;
                     }
                     return '';
                   },
@@ -6214,7 +6222,7 @@
                     const idx = tooltipItems[0].dataIndex;
                     const item = categoryData[idx];
                     if (!item) return '';
-                    return ` Celkem: ${formatCurrency(item.total)}`;
+                    return ` ${__('Celkem')}: ${formatCurrency(item.total)}`;
                   }
                 }
               }
