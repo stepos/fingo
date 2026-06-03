@@ -8488,8 +8488,7 @@
       }
       
       let csvContent = "\uFEFF"; // Byte Order Mark (BOM) for Excel Czech encoding
-      csvContent += "Datum;Typ;Částka;Kategorie;Popis\r
-";
+      csvContent += "Datum;Typ;Částka;Kategorie;Popis\r\n";
       
       state.transactions.forEach(t => {
         const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie' };
@@ -8500,8 +8499,7 @@
           cat.name || '',
           (t.description || '').split('"').join('""')
         ];
-        csvContent += row.join(';') + "\r
-";
+        csvContent += row.join(';') + "\\r\\n";
       });
       
       const now = new Date();
