@@ -859,25 +859,9 @@
               <p class="text-sm font-medium text-slate-500">Žádné výdaje pro toto období</p>
             </div>
             
-            <div id="category-chart-wrapper" class="w-full flex flex-col items-center justify-center gap-6 sm:gap-8 mt-2">
-              <div class="flex flex-row items-center justify-center gap-6 sm:gap-8 w-full max-w-md shrink-0">
-                <!-- Donut Chart 1: Zaplacené -->
-                <div class="relative w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] shrink-0" id="category-chart-paid-container">
-                  <canvas id="categoryChartPaid"></canvas>
-                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-[8px] uppercase tracking-wider text-slate-400 font-bold">Zaplaceno</span>
-                    <span id="category-chart-paid-total" class="text-xs font-black text-slate-800 dark:text-slate-200 leading-none mt-0.5">0 Kč</span>
-                  </div>
-                </div>
-                
-                <!-- Donut Chart 2: Celkové s budoucími -->
-                <div class="relative w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] shrink-0" id="category-chart-total-container">
-                  <canvas id="categoryChartTotal"></canvas>
-                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-[8px] uppercase tracking-wider text-slate-400 font-bold">Celkem</span>
-                    <span id="category-chart-total-total" class="text-xs font-black text-slate-800 dark:text-slate-200 leading-none mt-0.5">0 Kč</span>
-                  </div>
-                </div>
+            <div id="category-chart-wrapper" class="w-full flex flex-col gap-4 mt-2">
+              <div class="relative w-full h-[220px]" id="category-chart-main-container">
+                <canvas id="categoryChart"></canvas>
               </div>
               
               <!-- Vlastní detailní legenda -->
@@ -4822,8 +4806,7 @@
       const incomeExpenseImg = document.getElementById('print-chart-income-expense');
       const incomeExpensePl = document.getElementById('print-chart-income-expense-placeholder');
       
-      const categoryPaidImg = document.getElementById('print-chart-categories-paid');
-      const categoryTotalImg = document.getElementById('print-chart-categories-total');
+      const categoryImg = document.getElementById('print-chart-categories');
       const categoryPl = document.getElementById('print-chart-categories-placeholder');
       
       if (typeof trendChartInstance !== 'undefined' && trendChartInstance) {
@@ -4842,30 +4825,17 @@
       }
       
       let hasCategoryCharts = false;
-      if (typeof categoryChartPaidInstance !== 'undefined' && categoryChartPaidInstance) {
+      if (typeof categoryChartInstance !== 'undefined' && categoryChartInstance) {
         try {
-          categoryPaidImg.src = categoryChartPaidInstance.toBase64Image();
-          categoryPaidImg.classList.remove('hidden');
+          categoryImg.src = categoryChartInstance.toBase64Image();
+          categoryImg.classList.remove('hidden');
           hasCategoryCharts = true;
         } catch(e) {
-          console.error("Failed to copy category paid chart", e);
-          categoryPaidImg.classList.add('hidden');
+          console.error("Failed to copy category chart", e);
+          categoryImg.classList.add('hidden');
         }
       } else {
-        categoryPaidImg.classList.add('hidden');
-      }
-      
-      if (typeof categoryChartTotalInstance !== 'undefined' && categoryChartTotalInstance) {
-        try {
-          categoryTotalImg.src = categoryChartTotalInstance.toBase64Image();
-          categoryTotalImg.classList.remove('hidden');
-          hasCategoryCharts = true;
-        } catch(e) {
-          console.error("Failed to copy category total chart", e);
-          categoryTotalImg.classList.add('hidden');
-        }
-      } else {
-        categoryTotalImg.classList.add('hidden');
+        categoryImg.classList.add('hidden');
       }
       
       if (hasCategoryCharts) {
@@ -4942,32 +4912,7 @@
         }
       }
       
-      // Populate Print Chart Legend
-      const printLegend = document.getElementById('print-chart-categories-legend');
-      if (printLegend) {
-        printLegend.innerHTML = '';
-        
-        const uniqueCatIds = new Set();
-        filtered.forEach(t => {
-          if (t.category) uniqueCatIds.add(t.category);
-        });
-        
-        if (uniqueCatIds.size > 0) {
-          uniqueCatIds.forEach(catId => {
-            const catObj = state.categories.find(c => c.id === catId) || { name: 'Bez kategorie', color: '#64748b' };
-            const legendCol = document.createElement('div');
-            legendCol.className = "flex items-center gap-1.5 min-w-0";
-            legendCol.innerHTML = `
-              <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${catObj.color}"></span>
-              <span class="truncate">${escapeHtml(catObj.name)}</span>
-            `;
-            printLegend.appendChild(legendCol);
-          });
-          printLegend.classList.remove('hidden');
-        } else {
-          printLegend.classList.add('hidden');
-        }
-      }
+
       
       // Trigger print dialog
       const originalTitle = document.title;
@@ -6032,35 +5977,37 @@
     }
 
     window.highlightChartSlice = function(idx) {
-      [categoryChartPaidInstance, categoryChartTotalInstance].forEach(chart => {
-        if (chart) {
-          try {
-            chart.setActiveElements([{ datasetIndex: 0, index: idx }]);
-            if (chart.tooltip) {
-              chart.tooltip.setActiveElements([{ datasetIndex: 0, index: idx }], { x: 0, y: 0 });
-            }
-            chart.update();
-          } catch (e) {
-            console.error("Error highlighting slice:", e);
+      if (categoryChartInstance) {
+        try {
+          categoryChartInstance.setActiveElements([
+            { datasetIndex: 0, index: idx },
+            { datasetIndex: 1, index: idx }
+          ]);
+          if (categoryChartInstance.tooltip) {
+            categoryChartInstance.tooltip.setActiveElements([
+              { datasetIndex: 0, index: idx },
+              { datasetIndex: 1, index: idx }
+            ], { x: 0, y: 0 });
           }
+          categoryChartInstance.update();
+        } catch (e) {
+          console.error("Error highlighting slice:", e);
         }
-      });
+      }
     };
     
     window.clearChartHighlight = function() {
-      [categoryChartPaidInstance, categoryChartTotalInstance].forEach(chart => {
-        if (chart) {
-          try {
-            chart.setActiveElements([]);
-            if (chart.tooltip) {
-              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-            }
-            chart.update();
-          } catch (e) {
-            console.error("Error clearing highlight:", e);
+      if (categoryChartInstance) {
+        try {
+          categoryChartInstance.setActiveElements([]);
+          if (categoryChartInstance.tooltip) {
+            categoryChartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
           }
+          categoryChartInstance.update();
+        } catch (e) {
+          console.error("Error clearing highlight:", e);
         }
-      });
+      }
     };
 
     window.filterTransactionsByCategory = function(catId) {
@@ -6106,15 +6053,12 @@
       const emptyContainer = document.getElementById('category-chart-empty');
       const wrapper = document.getElementById('category-chart-wrapper');
       
-      if (categoryChartPaidInstance) {
-        categoryChartPaidInstance.destroy();
-        categoryChartPaidInstance = null;
+      if (categoryChartInstance) {
+        categoryChartInstance.destroy();
+        categoryChartInstance = null;
       }
-      if (categoryChartTotalInstance) {
-        categoryChartTotalInstance.destroy();
-        categoryChartTotalInstance = null;
-      }
-      categoryChartInstance = null;
+      categoryChartPaidInstance = null;
+      categoryChartTotalInstance = null;
       
       const futurePayments = getFutureRecurringPaymentsThisMonth();
       let totalFuture = 0;
@@ -6145,23 +6089,10 @@
       });
       
       const totalPaidAmount = Object.values(groupedPaid).reduce((sum, val) => sum + val, 0);
-      const paidTotalEl = document.getElementById('category-chart-paid-total');
-      if (paidTotalEl) paidTotalEl.textContent = formatCurrency(totalPaidAmount);
-      
-      const groupedTotal = {};
-      const allCategoryIds = new Set([...Object.keys(groupedPaid), ...Object.keys(futureByCategory)]);
-      
-      allCategoryIds.forEach(catId => {
-        const p = groupedPaid[catId] || 0;
-        const f = futureByCategory[catId] || 0;
-        groupedTotal[catId] = p + f;
-      });
-      
       const grandTotalAmount = totalPaidAmount + totalFuture;
-      const totalTotalEl = document.getElementById('category-chart-total-total');
-      if (totalTotalEl) totalTotalEl.textContent = formatCurrency(grandTotalAmount);
       
       const categoryData = [];
+      const allCategoryIds = new Set([...Object.keys(groupedPaid), ...Object.keys(futureByCategory)]);
       allCategoryIds.forEach(catId => {
         const cat = state.categories.find(c => c.id === catId) || { name: 'Bez kategorie', color: '#64748b' };
         const paidVal = groupedPaid[catId] || 0;
@@ -6183,30 +6114,86 @@
       
       const labels = categoryData.map(c => c.name);
       const paidData = categoryData.map(c => c.paid);
-      const totalData = categoryData.map(c => c.total);
-      const backgroundColors = categoryData.map(c => c.color);
+      const futureData = categoryData.map(c => c.future);
+      const paidColors = categoryData.map(c => c.color);
+      const futureColors = categoryData.map(c => c.color + '4d'); // 30% alpha for future payments
       
       const isDark = document.documentElement.classList.contains('dark');
-      const borderColor = isDark ? '#1e293b' : '#ffffff';
       
-      const canvasPaid = document.getElementById('categoryChartPaid');
-      if (canvasPaid) {
-        const ctxPaid = canvasPaid.getContext('2d');
-        categoryChartPaidInstance = new Chart(ctxPaid, {
-          type: 'doughnut',
+      const canvas = document.getElementById('categoryChart');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        categoryChartInstance = new Chart(ctx, {
+          type: 'bar',
           data: {
             labels: labels,
-            datasets: [{
-              data: paidData,
-              backgroundColor: backgroundColors,
-              borderWidth: 2,
-              borderColor: borderColor,
-              hoverOffset: 4
-            }]
+            datasets: [
+              {
+                label: 'Zaplaceno',
+                data: paidData,
+                backgroundColor: paidColors,
+                borderWidth: 0,
+                borderRadius: { topLeft: 4, bottomLeft: 4, topRight: 0, bottomRight: 0 }
+              },
+              {
+                label: 'Budoucí platby',
+                data: futureData,
+                backgroundColor: futureColors,
+                borderWidth: 0,
+                borderRadius: { topRight: 4, bottomRight: 4, topLeft: 0, bottomLeft: 0 }
+              }
+            ]
           },
           options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+              x: {
+                stacked: true,
+                grid: {
+                  color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
+                },
+                ticks: {
+                  color: isDark ? '#94a3b8' : '#64748b',
+                  font: { size: 10, weight: '600' },
+                  callback: function(value) {
+                    return formatCurrencyNoDecimals(value);
+                  }
+                }
+              },
+              y: {
+                stacked: true,
+                grid: {
+                  display: false,
+                  drawBorder: false
+                },
+                ticks: {
+                  color: isDark ? '#f1f5f9' : '#1e293b',
+                  font: { size: 11, weight: '700' }
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#1e293b',
+                bodyColor: isDark ? '#94a3b8' : '#64748b',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 12,
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw || 0;
+                    const datasetLabel = context.dataset.label;
+                    return ` ${datasetLabel}: ${formatCurrency(val)}`;
+                  }
+                }
+              }
+            },
             onClick: (event, activeElements) => {
               if (activeElements && activeElements.length > 0) {
                 const index = activeElements[0].index;
@@ -6216,70 +6203,14 @@
             },
             onHover: (event, activeElements) => {
               event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const val = context.raw || 0;
-                    const pct = totalPaidAmount > 0 ? ((val / totalPaidAmount) * 100).toFixed(1) : 0;
-                    return ` ${context.label}: ${formatCurrency(val)} (${pct}%)`;
-                  }
-                }
-              }
-            },
-            cutout: '70%'
+            }
           }
         });
+        
+        // Populate legacy fallbacks so PDF generation won't fail
+        categoryChartPaidInstance = categoryChartInstance;
+        categoryChartTotalInstance = categoryChartInstance;
       }
-      
-      const canvasTotal = document.getElementById('categoryChartTotal');
-      if (canvasTotal) {
-        const ctxTotal = canvasTotal.getContext('2d');
-        categoryChartTotalInstance = new Chart(ctxTotal, {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: totalData,
-              backgroundColor: backgroundColors,
-              borderWidth: 2,
-              borderColor: borderColor,
-              hoverOffset: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            onClick: (event, activeElements) => {
-              if (activeElements && activeElements.length > 0) {
-                const index = activeElements[0].index;
-                const catId = categoryData[index].id;
-                filterTransactionsByCategory(catId);
-              }
-            },
-            onHover: (event, activeElements) => {
-              event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const val = context.raw || 0;
-                    const pct = grandTotalAmount > 0 ? ((val / grandTotalAmount) * 100).toFixed(1) : 0;
-                    return ` ${context.label}: ${formatCurrency(val)} (${pct}%)`;
-                  }
-                }
-              }
-            },
-            cutout: '70%'
-          }
-        });
-      }
-      
-      categoryChartInstance = categoryChartPaidInstance;
       
       const legendContainer = document.getElementById('category-chart-legend');
       legendContainer.innerHTML = '';
@@ -10063,18 +9994,8 @@
       </div>
       <div class="border border-slate-200 rounded-xl p-4 flex flex-col items-center">
         <span class="text-xs font-bold text-slate-600 mb-3 text-center w-full block border-b pb-2">Struktura výdajů (Kategorie)</span>
-        <div class="flex flex-row justify-center items-center gap-4 w-full my-auto">
-          <div class="flex flex-col items-center">
-            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1">Zaplaceno</span>
-            <img id="print-chart-categories-paid" class="max-h-[240px] object-contain hidden" alt="Zaplacené výdaje">
-          </div>
-          <div class="flex flex-col items-center">
-            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1">Celkem</span>
-            <img id="print-chart-categories-total" class="max-h-[240px] object-contain hidden" alt="Celkové výdaje">
-          </div>
-        </div>
+        <img id="print-chart-categories" class="max-h-[240px] w-full object-contain hidden" alt="Struktura výdajů">
         <div id="print-chart-categories-placeholder" class="text-xs text-slate-400 py-10">Graf není k dispozici</div>
-        <div id="print-chart-categories-legend" class="mt-4 pt-3 border-t border-slate-100 w-full grid grid-cols-3 gap-x-4 gap-y-1.5 text-[9px] font-semibold text-slate-600"></div>
       </div>
     </div>
 
