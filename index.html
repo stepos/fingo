@@ -3477,6 +3477,14 @@
       return Number(amount || 0).toLocaleString(locale, { style: 'currency', currency: currentCurrency, minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    function formatCurrencyNoDecimals(amount) {
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      const locale = locales[currentLanguage] || 'cs-CZ';
+      const currencies = { CZK: ' Kč', USD: ' $', EUR: ' €' };
+      const symbol = currencies[currentCurrency] || ' Kč';
+      return Math.round(amount || 0).toLocaleString(locale) + symbol;
+    }
+
     // Safe date parser to handle browser differences and timezone offsets
     function parseDateSafe(dateStr) {
       if (!dateStr) return new Date();
@@ -6360,13 +6368,7 @@
       emptyContainer.classList.add('hidden');
       canvas.style.display = 'block';
       
-      function formatCurrencyNoDecimals(amount) {
-        const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
-        const locale = locales[currentLanguage] || 'cs-CZ';
-        const currencies = { CZK: ' Kč', USD: ' $', EUR: ' €' };
-        const symbol = currencies[currentCurrency] || ' Kč';
-        return Math.round(amount).toLocaleString(locale) + symbol;
-      }
+
       
       const monthlyData = {};
       state.transactions.forEach(t => {
