@@ -874,8 +874,16 @@
         
         <!-- Income vs Expense Trend Chart Card -->
         <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card lg:col-span-7 flex flex-col min-h-[360px]">
-          <h4 class="font-bold text-slate-900 text-base mb-1">Vývoj financí v čase</h4>
-          <p class="text-xs text-slate-400 mb-6 font-medium">Porovnání celkových příjmů a výdajů po měsících</p>
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h4 class="font-bold text-slate-900 text-base" id="trend-chart-title">Očekávaný zůstatek (konec měsíce)</h4>
+              <p class="text-xs text-slate-400 font-medium" id="trend-chart-subtitle">Předpokládaný vývoj čistého zůstatku v tomto měsíci</p>
+            </div>
+            <div class="text-right shrink-0" id="trend-chart-value-container">
+              <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Konec měsíce</span>
+              <span class="text-lg font-black text-indigo-600 dark:text-indigo-400" id="trend-chart-final-value">0,00 Kč</span>
+            </div>
+          </div>
           
           <div class="flex-1 flex items-center justify-center relative">
             <div id="trend-chart-empty" class="hidden text-center p-6">
@@ -3100,6 +3108,7 @@
       // Dashboard Cards
       "Aktuální čistý zůstatek": { en: "Current Net Balance", de: "Aktueller Netto-Saldo" },
       "Očekávaný zůstatek (koncem měsíce):": { en: "Projected balance (end of month):", de: "Prognostizierter Saldo (Monatsende):" },
+      "Očekávaný zůstatek": { en: "Expected Balance", de: "Erwarteter Kontostand" },
       "Kompletní bilance účtu": { en: "Complete account balance", de: "Vollständiger Kontosaldo" },
       "Příjmy": { en: "Income", de: "Einnahmen" },
       "Příjmy v období": { en: "Incomes in period", de: "Einnahmen im Zeitraum" },
@@ -3112,8 +3121,8 @@
       "Podíl jednotlivých kategorií na výdajích": { en: "Share of individual categories in expenses", de: "Anteil einzelner Kategorien an den Ausgaben" },
       "Celkem výdaje": { en: "Total Expenses", de: "Gesamtausgaben" },
       "Čistá bilance": { en: "Net Balance", de: "Netto-Bilanz" },
-      "Vývoj financí v čase": { en: "Financial Trend", de: "Finanztrend" },
-      "Porovnání celkových příjmů a výdajů po měsících": { en: "Comparison of total income and expenses by month", de: "Vergleich der Einnahmen und Ausgaben nach Monaten" },
+      "Očekávaný zůstatek (konec měsíce)": { en: "Expected Balance (end of month)", de: "Erwarteter Kontostand (Monatsende)" },
+      "Předpokládaný vývoj čistého zůstatku v tomto měsíci": { en: "Projected development of net balance this month", de: "Prognostizierte Entwicklung des Netto-Saldos in diesem Monat" },
       "Aktivity": { en: "Activities", de: "Aktivitäten" },
       "Přehled transakcí za vybrané období": { en: "Overview of transactions for the selected period", de: "Übersicht der Transaktionen im Zeitraum" },
       "Zobrazit všechny": { en: "Show all", de: "Alle anzeigen" },
@@ -6271,7 +6280,7 @@
       });
     }
 
-    function getFutureExpensesForMonth(monthKey) {
+        function getFutureExpensesForMonth(monthKey) {
       const now = new Date();
       now.setHours(0, 0, 0, 0);
       
@@ -6384,7 +6393,28 @@
         trendChartInstance = null;
       }
       
-      if (state.transactions.length === 0) {
+      const select = document.getElementById('global-period-select');
+      const period = select ? select.value : '';
+      const match = period.match(/^(\d{4})-(\d{2})$/);
+      if (!match) {
+        emptyContainer.classList.remove('hidden');
+        canvas.style.display = 'none';
+        return;
+      }
+      
+      const year = parseInt(match[1]);
+      const month = parseInt(match[2]) - 1; // 0-indexed
+      const numDays = new Date(year, month + 1, 0).getDate();
+      
+      const filteredTransactions = state.transactions.filter(t => {
+        if (!t.date) return false;
+        const tDate = parseDateSafe(t.date);
+        return tDate.getFullYear() === year && tDate.getMonth() === month;
+      });
+      
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      
+      if (filteredTransactions.length === 0 && futurePayments.length === 0) {
         emptyContainer.classList.remove('hidden');
         canvas.style.display = 'none';
         return;
@@ -6393,183 +6423,85 @@
       emptyContainer.classList.add('hidden');
       canvas.style.display = 'block';
       
-
+      const dailyChanges = Array(numDays + 1).fill(0);
       
-      const monthlyData = {};
-      state.transactions.forEach(t => {
-        if (!t.date) return;
-        const monthKey = t.date.substring(0, 7);
-        
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { income: 0, expense: 0 };
-        }
-        
-        if (t.type === 'income') {
-          monthlyData[monthKey].income += t.amount;
-        } else {
-          monthlyData[monthKey].expense += t.amount;
-        }
-      });
-      
-      const sortedMonths = Object.keys(monthlyData).sort();
-      const displayMonths = sortedMonths.slice(-6);
-      
-      if (displayMonths.length === 0) {
-        emptyContainer.classList.remove('hidden');
-        canvas.style.display = 'none';
-        return;
-      }
-      
-      const labels = displayMonths.map(m => {
-        const parts = m.split('-');
-        return `${parts[1]}/${parts[0].substring(2)}`;
-      });
-      
-      function getPaidLoansForMonth(monthKey) {
-        const parts = monthKey.split('-');
-        const year = parseInt(parts[0]);
-        const month = parseInt(parts[1]) - 1;
-        
-        const startOfMonth = new Date(year, month, 1);
-        const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        
-        let sum = 0;
-        
-        (state.loans || []).forEach(loan => {
-          const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
-          
-          let loanStart = null;
-          if (String(loan.startDate).includes('-')) {
-            loanStart = parseDateSafe(loan.startDate);
+      // 1. Add actual transactions
+      filteredTransactions.forEach(t => {
+        const day = parseDateSafe(t.date).getDate();
+        if (day >= 1 && day <= numDays) {
+          const amt = Number(t.amount) || 0;
+          if (t.type === 'income') {
+            dailyChanges[day] += amt;
           } else {
-            loanStart = new Date(0);
+            dailyChanges[day] -= amt;
           }
-          const loanEnd = details.endDate;
-          
-          if (loanStart <= endOfMonth && loanEnd >= startOfMonth) {
-            const dayNum = String(loan.startDate).includes('-') 
-              ? parseDateSafe(loan.startDate).getDate() 
-              : (parseInt(loan.startDate) || 15);
-              
-            const paymentDate = new Date(year, month, dayNum);
-            paymentDate.setHours(0, 0, 0, 0);
-            
-            if (paymentDate >= loanStart && paymentDate <= loanEnd) {
-              if (paymentDate < now) {
-                sum += Number(loan.monthlyPayment);
-              }
-            }
+        }
+      });
+      
+      // 2. Add future expected payments
+      futurePayments.forEach(fp => {
+        const day = parseDateSafe(fp.date).getDate();
+        if (day >= 1 && day <= numDays) {
+          const amt = Number(fp.amount) || 0;
+          if (fp.type === 'income') {
+            dailyChanges[day] += amt;
+          } else {
+            dailyChanges[day] -= amt;
           }
-        });
-        
-        return sum;
+        }
+      });
+      
+      // 3. Compute cumulative daily balance
+      const dailyBalances = [];
+      const labels = [];
+      let currentCumulative = 0;
+      
+      for (let d = 1; d <= numDays; d++) {
+        currentCumulative += dailyChanges[d];
+        dailyBalances.push(currentCumulative);
+        labels.push(`${d}. ${month + 1}.`);
       }
       
-      const incomeDataset = [];
-      const expenseDataset = [];
-      const futureExpenseDataset = [];
-      
-      displayMonths.forEach(m => {
-        incomeDataset.push(monthlyData[m].income);
-        const paidLoans = getPaidLoansForMonth(m);
-        expenseDataset.push(monthlyData[m].expense + paidLoans);
-        futureExpenseDataset.push(getFutureExpensesForMonth(m));
-      });
+      // 4. Update the card header final value
+      const finalValueEl = document.getElementById('trend-chart-final-value');
+      if (finalValueEl) {
+        finalValueEl.innerText = formatCurrency(currentCumulative);
+      }
       
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#94a3b8' : '#64748b';
-      const gridColor = isDark ? '#334155' : '#f1f5f9';
-      
-      const chartTotalsPlugin = {
-        id: 'chartTotals',
-        afterDatasetsDraw(chart) {
-          const { ctx, data } = chart;
-          ctx.save();
-          ctx.font = 'bold 9px Inter';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          
-          const metaIncome = chart.getDatasetMeta(0);
-          const metaExpensePaid = chart.getDatasetMeta(1);
-          const metaExpenseFuture = chart.getDatasetMeta(2);
-          
-          const isIncomeVisible = chart.isDatasetVisible(0);
-          const isExpensePaidVisible = chart.isDatasetVisible(1);
-          const isExpenseFutureVisible = chart.isDatasetVisible(2);
-          
-          for (let i = 0; i < data.labels.length; i++) {
-            // Income total
-            const valIncome = data.datasets[0].data[i] || 0;
-            if (valIncome > 0 && isIncomeVisible && metaIncome.data[i]) {
-              const x = metaIncome.data[i].x;
-              const y = metaIncome.data[i].y;
-              ctx.fillStyle = '#10b981';
-              ctx.fillText(formatCurrencyNoDecimals(valIncome), x, y - 4);
-            }
-            
-            // Expense total (Paid + Future stacked)
-            const valExpensePaid = data.datasets[1].data[i] || 0;
-            const valExpenseFuture = data.datasets[2].data[i] || 0;
-            
-            let x = 0;
-            let y = 0;
-            let totalExpense = 0;
-            
-            if (isExpenseFutureVisible && valExpenseFuture > 0 && metaExpenseFuture.data[i]) {
-              x = metaExpenseFuture.data[i].x;
-              y = metaExpenseFuture.data[i].y;
-              totalExpense += valExpenseFuture;
-            }
-            if (isExpensePaidVisible && valExpensePaid > 0 && metaExpensePaid.data[i]) {
-              if (x === 0) {
-                x = metaExpensePaid.data[i].x;
-                y = metaExpensePaid.data[i].y;
-              }
-              totalExpense += valExpensePaid;
-            }
-            
-            if (totalExpense > 0 && x > 0 && y > 0) {
-              ctx.fillStyle = '#f43f5e';
-              ctx.fillText(formatCurrencyNoDecimals(totalExpense), x, y - 4);
-            }
-          }
-          ctx.restore();
-        }
-      };
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
       
       const ctx = canvas.getContext('2d');
+      
+      // Add background gradient under the curve
+      const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      if (isDark) {
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.25)'); // Indigo
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.25)'); // Indigo
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+      }
+      
       trendChartInstance = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: labels,
-          datasets: [
-            {
-              label: __('Příjmy'),
-              data: incomeDataset,
-              backgroundColor: '#10b981',
-              borderRadius: 5,
-              borderWidth: 0,
-              stack: 'income'
-            },
-            {
-              label: __('Výdaje (Zaplacené)'),
-              data: expenseDataset,
-              backgroundColor: '#f43f5e',
-              borderRadius: 5,
-              borderWidth: 0,
-              stack: 'expense'
-            },
-            {
-              label: __('Výdaje (Očekávané)'),
-              data: futureExpenseDataset,
-              backgroundColor: '#fda4af',
-              borderRadius: 5,
-              borderWidth: 0,
-              stack: 'expense'
-            }
-          ]
+          datasets: [{
+            label: __('Očekávaný zůstatek'),
+            data: dailyBalances,
+            borderColor: isDark ? '#818cf8' : '#4f46e5',
+            borderWidth: 3,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.4, // Smooth curve
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointBackgroundColor: isDark ? '#818cf8' : '#4f46e5',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2
+          }]
         },
         options: {
           responsive: true,
@@ -6580,22 +6512,23 @@
           },
           scales: {
             x: {
-              stacked: true,
               grid: {
                 display: false
               },
               ticks: {
+                maxTicksLimit: 6,
                 font: {
                   family: 'Inter',
-                  size: 10
+                  size: 10,
+                  weight: '500'
                 },
                 color: textColor
               }
             },
             y: {
-              stacked: true,
               grid: {
-                color: gridColor
+                color: gridColor,
+                drawBorder: false
               },
               ticks: {
                 font: {
@@ -6604,64 +6537,32 @@
                 },
                 color: textColor,
                 callback: function(value) {
-                  const currencies = { CZK: ' Kč', USD: ' $', EUR: ' €' };
-                  const symbol = currencies[currentCurrency] || ' Kč';
-                  const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
-                  const locale = locales[currentLanguage] || 'cs-CZ';
-                  return value.toLocaleString(locale) + symbol;
+                  return formatCurrencyNoDecimals(value);
                 }
               }
             }
           },
           plugins: {
             legend: {
-              position: 'top',
-              labels: {
-                boxWidth: 8,
-                font: {
-                  family: 'Inter',
-                  size: 10,
-                  weight: '600'
-                },
-                color: textColor
-              }
+              display: false
             },
             tooltip: {
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              titleColor: isDark ? '#ffffff' : '#1e293b',
+              bodyColor: isDark ? '#94a3b8' : '#64748b',
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 12,
               callbacks: {
                 label: function(context) {
                   const val = context.raw || 0;
-                  return ` ${context.dataset.label}: ${formatCurrency(val)}`;
-                },
-                footer: function(tooltipItems) {
-                  let income = 0;
-                  let expensePaid = 0;
-                  let expenseExpected = 0;
-                  
-                  tooltipItems.forEach(item => {
-                    const val = item.raw || 0;
-                    if (item.datasetIndex === 0) {
-                      income = val;
-                    } else if (item.datasetIndex === 1) {
-                      expensePaid = val;
-                    } else if (item.datasetIndex === 2) {
-                      expenseExpected = val;
-                    }
-                  });
-                  
-                  const totalExpense = expensePaid + expenseExpected;
-                  const balance = income - totalExpense;
-                  
-                  return [
-                    `-------------------------`,
-                    `${__('Celkem výdaje')}: ${formatCurrency(totalExpense)}`,
-                    `${__('Čistá bilance')}: ${formatCurrency(balance)}`
-                  ].join('\n');
+                  return ` ${__('Očekávaný zůstatek')}: ${formatCurrency(val)}`;
                 }
               }
             }
           }
-        },
-        plugins: [chartTotalsPlugin]
+        }
       });
     }
 
@@ -8587,7 +8488,8 @@
       }
       
       let csvContent = "\uFEFF"; // Byte Order Mark (BOM) for Excel Czech encoding
-      csvContent += "Datum;Typ;Částka;Kategorie;Popis\r\n";
+      csvContent += "Datum;Typ;Částka;Kategorie;Popis\r
+";
       
       state.transactions.forEach(t => {
         const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie' };
@@ -8598,7 +8500,8 @@
           cat.name || '',
           (t.description || '').split('"').join('""')
         ];
-        csvContent += row.join(';') + "\r\n";
+        csvContent += row.join(';') + "\r
+";
       });
       
       const now = new Date();
