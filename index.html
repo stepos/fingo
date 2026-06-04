@@ -96,7 +96,7 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      body {
+      html.dark body, body {
         background-color: white !important;
         color: black !important;
         background-image: none !important;
@@ -902,9 +902,17 @@
       <!-- Costs by Categories Section -->
       <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card">
         <div class="flex items-center justify-between mb-6">
-          <div>
-            <h4 class="font-bold text-slate-900 text-base" id="dashboard-costs-title">Náklady podle kategorií</h4>
-            <p class="text-xs text-slate-400 font-medium" id="dashboard-costs-subtitle">Přehled celkových nákladů roztříděných do kategorií</p>
+          <div class="flex items-center gap-3">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h4 class="font-bold text-slate-900 text-base" id="dashboard-costs-title">Náklady podle kategorií</h4>
+                <button id="btn-toggle-all-categories" onclick="toggleAllCategoriesExpand()" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-400 dark:hover:bg-indigo-950/60 px-2 py-1 rounded-md transition-all flex items-center gap-1 select-none">
+                  <i data-lucide="chevron-down" class="w-3 h-3" id="icon-toggle-all-categories"></i>
+                  <span id="text-toggle-all-categories">Rozbalit vše</span>
+                </button>
+              </div>
+              <p class="text-xs text-slate-400 font-medium" id="dashboard-costs-subtitle">Přehled celkových nákladů roztříděných do kategorií</p>
+            </div>
           </div>
           
           <!-- Sorting Select -->
@@ -3030,9 +3038,12 @@
     let currentLanguage = 'cs';
     let currentCurrency = 'CZK';
     let dashboardSort = { column: 'date', dir: 'desc' };
+    const expandedCategoryCosts = new Set();
     const textTranslations = {
       // Sidebar & Navigation
       "Přehled": { en: "Dashboard", de: "Übersicht" },
+      "Sbalit vše": { en: "Collapse all", de: "Alles einklappen" },
+      "Rozbalit vše": { en: "Expand all", de: "Alles ausklappen" },
       "Transakce": { en: "Transactions", de: "Transaktionen" },
       "Rozpočty": { en: "Budgets", de: "Budgets" },
       "Spořicí cíle": { en: "Savings Goals", de: "Sparziele" },
@@ -3256,7 +3267,21 @@
       "Budoucí": { en: "Future", de: "Zukunft" },
       "Celkem v historii": { en: "Total in history", de: "Gesamt in der Historie" },
       "Tento měsíc zaplaceno": { en: "Paid this month", de: "Diesen Monat bezahlt" },
-      "K zaplacení": { en: "To pay", de: "Zu bezahlen" }
+      "K zaplacení": { en: "To pay", de: "Zu bezahlen" },
+      "Smazat tuto transakci?": { en: "Delete this transaction?", de: "Diese Transaktion löschen?" },
+      "Tento krok nelze vrátit. Dojde k přepočítání celkového zůstatku a aktualizaci přehledů.": { en: "This step cannot be undone. Net balance will be recalculated and reports updated.", de: "Dieser Schritt kann nicht rückgängig gemacht werden. Der Netto-Saldo wird neu berechnet und Berichte aktualisiert." },
+      "Transakce byla úspěšně smazána": { en: "Transaction successfully deleted", de: "Transaktion erfolgreich gelöscht" },
+      "Smazat tento úvěr?": { en: "Delete this loan?", de: "Diesen Kredit löschen?" },
+      "Opravdu chcete smazat tento úvěr ze své evidence? Přidružené transakce (výdaje) v historii zůstanou zachovány.": { en: "Are you sure you want to delete this loan from your records? Associated transactions (expenses) in history will be preserved.", de: "Möchten Sie diesen Kredit wirklich aus Ihren Unterlagen löschen? Zugehörige Transaktionen (Ausgaben) im Verlauf bleiben erhalten." },
+      "Úvěr byl úspěšně smazán": { en: "Loan successfully deleted", de: "Kredit erfolgreich gelöscht" },
+      "Smazat tento trvalý příkaz?": { en: "Delete this recurring payment?", de: "Diesen Dauerauftrag löschen?" },
+      "Opravdu chcete smazat tento trvalý příkaz? Již zapsané transakce v historii zůstanou zachovány.": { en: "Are you sure you want to delete this recurring payment? Already recorded transactions in history will be preserved.", de: "Möchten Sie diesen Dauerauftrag wirklich löschen? Bereits erfasste Transaktionen in der Historie bleiben erhalten." },
+      "Pravidelná platba byla smazána": { en: "Recurring payment deleted", de: "Dauerauftrag gelöscht" },
+      "Smazat tento rozpočet?": { en: "Delete this budget?", de: "Dieses Budget löschen?" },
+      "Opravdu chcete smazat tento rozpočet? Přidružené transakce a kategorie zůstanou zachovány.": { en: "Are you sure you want to delete this budget? Associated transactions and categories will be preserved.", de: "Möchten Sie dieses Budget wirklich löschen? Zugehörige Transaktionen und Kategorien bleiben erhalten." },
+      "Rozpočet byl smazán.": { en: "Budget deleted.", de: "Budget gelöscht." },
+      "Smazat tento cíl?": { en: "Delete this goal?", de: "Dieses Ziel löschen?" },
+      "Opravdu chcete smazat tento spořicí cíl? Historie spojených transakcí zůstane zachována.": { en: "Are you sure you want to delete this savings goal? Associated transaction history will be preserved.", de: "Möchten Sie dieses Sparziel wirklich löschen? Zugehöriger Transaktionsverlauf bleibt erhalten." }
     };
 
     // Global translation helper
@@ -3838,14 +3863,22 @@
             description: `Auto-platba: ${rec.name}`
           };
           
-          state.transactions.push(newTrans);
+          // Check if transaction already exists to prevent duplicate entries from sync conflicts
+          const alreadyExists = state.transactions.some(t => 
+            t.date === transDate && 
+            t.description === `Auto-platba: ${rec.name}` && 
+            Math.abs(Number(t.amount) - Number(rec.amount)) < 0.01
+          );
           
-          processedLog.push({
-            name: rec.name,
-            type: rec.type,
-            amount: rec.amount,
-            date: transDate
-          });
+          if (!alreadyExists) {
+            state.transactions.push(newTrans);
+            processedLog.push({
+              name: rec.name,
+              type: rec.type,
+              amount: rec.amount,
+              date: transDate
+            });
+          }
           
           if (rec.frequency === 'weekly') {
             nextDueDateObj.setDate(nextDueDateObj.getDate() + 7);
@@ -5816,6 +5849,66 @@
         if (chevron) {
           chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
         }
+        if (isHidden) {
+          expandedCategoryCosts.delete(catId);
+        } else {
+          expandedCategoryCosts.add(catId);
+        }
+        updateToggleAllCategoriesButtonState();
+      }
+    };
+
+    window.toggleAllCategoriesExpand = function() {
+      triggerHapticFeedback();
+      const detailsList = document.querySelectorAll('[id^="details-"]');
+      let anyVisible = false;
+      detailsList.forEach(details => {
+        if (!details.classList.contains('hidden')) {
+          anyVisible = true;
+        }
+      });
+
+      detailsList.forEach(details => {
+        const catId = details.id.replace('details-', '');
+        const chevron = document.getElementById(`chevron-${catId}`);
+        if (anyVisible) {
+          details.classList.add('hidden');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+          expandedCategoryCosts.delete(catId);
+        } else {
+          details.classList.remove('hidden');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+          expandedCategoryCosts.add(catId);
+        }
+      });
+      updateToggleAllCategoriesButtonState();
+    };
+
+    window.updateToggleAllCategoriesButtonState = function() {
+      const btnText = document.getElementById('text-toggle-all-categories');
+      const btnIcon = document.getElementById('icon-toggle-all-categories');
+      if (!btnText) return;
+
+      const detailsList = document.querySelectorAll('[id^="details-"]');
+      let anyVisible = false;
+      detailsList.forEach(details => {
+        if (!details.classList.contains('hidden')) {
+          anyVisible = true;
+        }
+      });
+
+      if (anyVisible) {
+        btnText.innerText = __("Sbalit vše");
+        if (btnIcon) {
+          btnIcon.setAttribute('data-lucide', 'chevron-up');
+          lucide.createIcons();
+        }
+      } else {
+        btnText.innerText = __("Rozbalit vše");
+        if (btnIcon) {
+          btnIcon.setAttribute('data-lucide', 'chevron-down');
+          lucide.createIcons();
+        }
       }
     };
 
@@ -5909,6 +6002,10 @@
           ? `${__('Poslední:')} ${formatDateString(cat.latestDate)}` 
           : __('Žádné transakce');
           
+        const isExpanded = expandedCategoryCosts.has(cat.id);
+        const detailsClass = isExpanded ? "" : "hidden";
+        const chevronStyle = isExpanded ? 'style="transform: rotate(180deg);"' : '';
+
         itemEl.innerHTML = `
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3.5 min-w-0">
@@ -5923,12 +6020,12 @@
             
             <div class="flex items-center gap-2 shrink-0">
               <span class="font-black text-rose-600 dark:text-rose-400 text-sm md:text-base">${formatCurrency(cat.total)}</span>
-              <i data-lucide="chevron-down" id="chevron-${cat.id}" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+              <i data-lucide="chevron-down" id="chevron-${cat.id}" class="w-4 h-4 text-slate-400 transition-transform duration-200" ${chevronStyle}></i>
             </div>
           </div>
           
           <!-- Accordion details -->
-          <div id="details-${cat.id}" class="hidden mt-3.5 pl-14 pr-2 space-y-2 border-t border-slate-50 dark:border-slate-800/30 pt-3">
+          <div id="details-${cat.id}" class="${detailsClass} mt-3.5 pl-14 pr-2 space-y-2 border-t border-slate-50 dark:border-slate-800/30 pt-3">
             <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1 no-scrollbar">
               ${cat.transactions.map(tx => {
                 const txIcon = tx.isFuture ? 'calendar' : 'check';
@@ -5943,11 +6040,24 @@
                         <i data-lucide="${txIcon}" class="w-3 h-3"></i>
                       </span>
                       <div class="min-w-0">
-                        <p class="font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">${tx.description || tx.name || '-'}${futureBadge}</p>
+                        <p class="font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">${tx.description || tx.notes || tx.name || '-'}${futureBadge}</p>
                         <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5">${dateLabel}</p>
                       </div>
                     </div>
-                    <span class="font-bold text-slate-800 dark:text-slate-200 shrink-0 ml-4">${formatCurrency(tx.amount)}</span>
+                    
+                    <div class="flex items-center gap-2 shrink-0 ml-4">
+                      <span class="font-bold text-slate-800 dark:text-slate-200">${formatCurrency(tx.amount)}</span>
+                      ${!tx.isFuture ? `
+                        <div class="flex items-center gap-1.5 ml-2.5">
+                          <button onclick="promptEditTransaction('${tx.id}'); event.stopPropagation();" class="p-1 text-slate-400 hover:text-indigo-650 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors" title="${__('Upravit')}">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                          </button>
+                          <button onclick="promptDeleteTransaction('${tx.id}'); event.stopPropagation();" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors" title="${__('Smazat')}">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          </button>
+                        </div>
+                      ` : ''}
+                    </div>
                   </div>
                 `;
               }).join('')}
@@ -5957,6 +6067,7 @@
         listContainer.appendChild(itemEl);
       });
       
+      updateToggleAllCategoriesButtonState();
       lucide.createIcons();
     }
 
@@ -6983,8 +7094,8 @@
     function promptDeleteTransaction(id) {
       transactionIdToDelete = id;
       
-      document.getElementById('delete-modal-title').innerText = "Smazat tuto transakci?";
-      document.getElementById('delete-modal-description').innerText = "Tento krok nelze vrátit. Dojde k přepočítání celkového zůstatku a aktualizaci přehledů.";
+      document.getElementById('delete-modal-title').innerText = __("Smazat tuto transakci?");
+      document.getElementById('delete-modal-description').innerText = __("Tento krok nelze vrátit. Dojde k přepočítání celkového zůstatku a aktualizaci přehledů.");
       
       openModal('modal-delete-confirm');
       
@@ -6993,7 +7104,7 @@
           state.transactions = state.transactions.filter(t => t.id !== transactionIdToDelete);
           selectedTransactionIds = selectedTransactionIds.filter(item => item !== transactionIdToDelete);
           saveState();
-          showToast("Transakce byla úspěšně smazána");
+          showToast(__("Transakce byla úspěšně smazána"));
           closeModal('modal-delete-confirm');
           transactionIdToDelete = null;
           
@@ -7380,12 +7491,26 @@
       }
     }
 
+    let recurringIdToDelete = null;
     function deleteRecurring(id) {
       triggerHapticFeedback();
-      state.recurring = state.recurring.filter(r => r.id !== id);
-      saveState();
-      showToast("Pravidelná platba byla smazána");
-      renderRecurringList();
+      recurringIdToDelete = id;
+      
+      document.getElementById('delete-modal-title').innerText = __("Smazat tento trvalý příkaz?");
+      document.getElementById('delete-modal-description').innerText = __("Opravdu chcete smazat tento trvalý příkaz? Již zapsané transakce v historii zůstanou zachovány.");
+      
+      openModal('modal-delete-confirm');
+      
+      document.getElementById('btn-confirm-delete').onclick = function() {
+        if (recurringIdToDelete) {
+          state.recurring = state.recurring.filter(r => r.id !== recurringIdToDelete);
+          saveState();
+          showToast(__("Pravidelná platba byla smazána"));
+          closeModal('modal-delete-confirm');
+          recurringIdToDelete = null;
+          renderRecurringList();
+        }
+      };
     }
 
     // ================= CATEGORIES VIEW & CUSTOM CREATION =================
@@ -8296,8 +8421,8 @@
       triggerHapticFeedback();
       loanIdToDelete = id;
       
-      document.getElementById('delete-modal-title').innerText = "Smazat tento úvěr?";
-      document.getElementById('delete-modal-description').innerText = "Opravdu chcete smazat tento úvěr ze své evidence? Přidružené transakce (výdaje) v historii zůstanou zachovány.";
+      document.getElementById('delete-modal-title').innerText = __("Smazat tento úvěr?");
+      document.getElementById('delete-modal-description').innerText = __("Opravdu chcete smazat tento úvěr ze své evidence? Přidružené transakce (výdaje) v historii zůstanou zachovány.");
       
       openModal('modal-delete-confirm');
       
@@ -8305,7 +8430,7 @@
         if (loanIdToDelete) {
           state.loans = state.loans.filter(l => l.id !== loanIdToDelete);
           saveState();
-          showToast("Úvěr byl úspěšně smazán");
+          showToast(__("Úvěr byl úspěšně smazán"));
           closeModal('modal-delete-confirm');
           loanIdToDelete = null;
           
@@ -8599,12 +8724,37 @@
       }
     }
 
+    function startBudgetEdit(categoryId) {
+      triggerHapticFeedback();
+      const b = state.budgets.find(item => item.categoryId === categoryId);
+      if (!b) return;
+      
+      document.getElementById('budget-category').value = b.categoryId;
+      document.getElementById('budget-amount').value = b.amount;
+      
+      showToast("Upravte částku a uložte rozpočet");
+    }
+
+    let budgetCategoryIdToDelete = null;
     function deleteBudget(categoryId) {
       triggerHapticFeedback();
-      state.budgets = state.budgets.filter(b => b.categoryId !== categoryId);
-      saveState();
-      showToast("Rozpočet byl smazán.");
-      renderBudgetsView();
+      budgetCategoryIdToDelete = categoryId;
+      
+      document.getElementById('delete-modal-title').innerText = __("Smazat tento rozpočet?");
+      document.getElementById('delete-modal-description').innerText = __("Opravdu chcete smazat tento rozpočet? Přidružené transakce a kategorie zůstanou zachovány.");
+      
+      openModal('modal-delete-confirm');
+      
+      document.getElementById('btn-confirm-delete').onclick = function() {
+        if (budgetCategoryIdToDelete) {
+          state.budgets = state.budgets.filter(b => b.categoryId !== budgetCategoryIdToDelete);
+          saveState();
+          showToast(__("Rozpočet byl smazán."));
+          closeModal('modal-delete-confirm');
+          budgetCategoryIdToDelete = null;
+          renderBudgetsView();
+        }
+      };
     }
 
     function renderBudgetsView() {
@@ -8647,9 +8797,14 @@
                 </div>
                 <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm">${__(cat.name)}</h4>
               </div>
-              <button onclick="deleteBudget('${b.categoryId}')" class="text-slate-400 hover:text-rose-600 transition-colors" title="${__('Smazat rozpočet')}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="startBudgetEdit('${b.categoryId}')" class="text-slate-400 hover:text-indigo-650 transition-colors" title="${__('Upravit rozpočet')}">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                <button onclick="deleteBudget('${b.categoryId}')" class="text-slate-400 hover:text-rose-600 transition-colors" title="${__('Smazat rozpočet')}">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
             </div>
             
             <div class="flex justify-between items-baseline mb-2">
@@ -8782,12 +8937,26 @@
       }
     }
 
+    let goalIdToDelete = null;
     function deleteGoal(id) {
       triggerHapticFeedback();
-      state.savingsGoals = state.savingsGoals.filter(g => g.id !== id);
-      saveState();
-      showToast("Cíl byl smazán.");
-      renderGoalsView();
+      goalIdToDelete = id;
+      
+      document.getElementById('delete-modal-title').innerText = __("Smazat tento cíl?");
+      document.getElementById('delete-modal-description').innerText = __("Opravdu chcete smazat tento spořicí cíl? Historie spojených transakcí zůstane zachována.");
+      
+      openModal('modal-delete-confirm');
+      
+      document.getElementById('btn-confirm-delete').onclick = function() {
+        if (goalIdToDelete) {
+          state.savingsGoals = state.savingsGoals.filter(g => g.id !== goalIdToDelete);
+          saveState();
+          showToast(__("Cíl byl smazán."));
+          closeModal('modal-delete-confirm');
+          goalIdToDelete = null;
+          renderGoalsView();
+        }
+      };
     }
 
     function editGoal(id) {
