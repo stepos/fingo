@@ -97,8 +97,8 @@
         print-color-adjust: exact !important;
       }
       html.dark body, body {
-        background-color: white !important;
-        color: black !important;
+        background-color: #0b0f19 !important;
+        color: #f8fafc !important;
         background-image: none !important;
       }
       aside, nav, main, #toast-container, #ios-sync-banner, .fixed, .modal-backdrop-enter, #modal-db-startup, #modal-db-permission, #modal-delete-confirm, #modal-edit-transaction {
@@ -106,22 +106,14 @@
       }
       #print-report-container {
         display: block !important;
-        background: white !important;
-        color: black !important;
+        background: #0b0f19 !important;
+        color: #f8fafc !important;
         position: relative !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
         z-index: auto !important;
-      }
-      table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        page-break-inside: auto !important;
-      }
-      tr {
-        page-break-inside: avoid !important;
-        page-break-after: auto !important;
+        padding: 0 !important;
       }
     }
     
@@ -468,18 +460,6 @@
         </button>
       </div>
 
-      <!-- GitHub Sync Status Indicator -->
-      <div id="sidebar-github-sync-container" class="hidden mb-3 p-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 rounded-xl space-y-1.5">
-        <span class="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-center" id="sidebar-github-sync-title">Cloud Synchronizace</span>
-        <div class="flex items-center justify-center gap-1.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400" id="sidebar-github-status-text">
-          <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-          <span>Synchronizováno</span>
-        </div>
-        <button onclick="handleGitHubSyncManual()" class="w-full py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 active:scale-95">
-          <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-500"></i>
-          <span>Synchronizovat nyní</span>
-        </button>
-      </div>
 
       <div class="flex items-center justify-between p-2">
         <div class="flex items-center gap-3">
@@ -2262,62 +2242,6 @@
           </div>
         </div>
 
-        <!-- GitHub Cloud Sync Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="cloud" class="w-5 h-5 text-indigo-500"></i>
-              GitHub Cloud Synchronizace
-            </h3>
-            <p class="text-xs text-slate-400 mt-1 font-medium font-semibold">Synchronizujte databázi s tajným GitHub Gist pro automatický přenos mezi počítačem a mobilem.</p>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label for="settings-github-token" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">GitHub Personal Access Token (PAT)</label>
-              <input type="password" id="settings-github-token" placeholder="ghp_..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-            </div>
-            
-            <div>
-              <label for="settings-github-gist-id" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Gist ID</label>
-              <input type="text" id="settings-github-gist-id" placeholder="Nechte prázdné pro automatické vytvoření" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-2">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-500 font-medium">Stav synchronizace:</span>
-                <span id="settings-github-status-badge" class="inline-flex items-center gap-1.5 font-bold text-slate-400">
-                  <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Neaktivní
-                </span>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <button id="settings-github-connect-btn" onclick="handleGitHubSyncActivate()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
-                <i data-lucide="cloud-lightning" class="w-4 h-4"></i>
-                Aktivovat / Vytvořit nový Gist
-              </button>
-              
-              <!-- Manual Sync Group -->
-              <div id="settings-github-manual-sync-group" class="hidden grid grid-cols-2 gap-3">
-                <button onclick="handleGitHubSyncManualPull()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-100">
-                  <i data-lucide="cloud-download" class="w-4.5 h-4.5"></i>
-                  Stáhnout z cloudu
-                </button>
-                <button onclick="handleGitHubSyncManualPush()" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
-                  <i data-lucide="cloud-upload" class="w-4.5 h-4.5"></i>
-                  Odeslat do cloudu
-                </button>
-              </div>
-              
-              <button id="settings-github-disconnect-btn" class="hidden w-full py-3 bg-white border border-slate-200 hover:bg-slate-50 text-rose-600 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm" onclick="handleGitHubSyncDisconnect()">
-                <i data-lucide="cloud-off" class="w-4 h-4 text-rose-500"></i>
-                Odpojit cloud synchronizaci
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Data Backup Card -->
         <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
           <div>
@@ -2348,7 +2272,7 @@
         </div>
         
         <!-- PDF Export Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
+        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6 md:col-span-2">
           <div>
             <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
               <i data-lucide="file-text" class="w-5 h-5 text-indigo-500"></i>
@@ -2378,28 +2302,6 @@
             <button onclick="generatePdfReport()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
               <i data-lucide="printer" class="w-4.5 h-4.5"></i>
               Generovat PDF report
-            </button>
-          </div>
-        </div>
-        
-        <!-- Danger Zone Card -->
-        <div class="bg-white border border-rose-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6 md:col-span-2">
-          <div>
-            <h3 class="font-bold text-rose-600 text-base flex items-center gap-2">
-              <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-500"></i>
-              Nebezpečná zóna
-            </h3>
-            <p class="text-xs text-slate-400 mt-1 font-medium">Tuto operaci nelze vzít zpět. Vymažete veškerý obsah z paměti telefonu.</p>
-          </div>
-          
-          <div class="p-4 bg-rose-50/50 border border-rose-100 rounded-xl">
-            <h4 class="text-xs font-bold text-rose-800 uppercase tracking-wider mb-1">Resetovat celou aktivní databázi</h4>
-            <p class="text-xs text-rose-700 leading-relaxed mb-4 font-medium">
-              Smaže transakce, trvalé příkazy i vlastní kategorie a obnoví výchozí demo hodnoty v aktivním profilu.
-            </p>
-            <button onclick="promptResetData()" class="py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm shadow-rose-100">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-              Smazat data z aktivního profilu
             </button>
           </div>
         </div>
@@ -2490,36 +2392,7 @@
           </button>
         </div>
 
-        <!-- Cloud Sync Action -->
-        <div class="border-t border-slate-100 pt-3 mt-2">
-          <button type="button" onclick="openGitHubSyncStartup()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2 shadow-emerald-100">
-            <i data-lucide="cloud" class="w-4.5 h-4.5"></i>
-            Připojit přes GitHub Cloud
-          </button>
-        </div>
-      </div>
 
-      <!-- GitHub Setup Form (Initially Hidden) -->
-      <div id="db-setup-github-form" class="hidden space-y-3 pt-2 text-left">
-        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">GitHub Cloud Synchronizace</h4>
-        <div>
-          <label for="startup-github-token" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">GitHub Personal Access Token (PAT)</label>
-          <input type="password" id="startup-github-token" placeholder="ghp_..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-        </div>
-        <div>
-          <label for="startup-github-gist-id" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Gist ID (nepovinné)</label>
-          <input type="text" id="startup-github-gist-id" placeholder="Nechte prázdné pro vytvoření nového Gistu" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-        </div>
-        <div class="flex gap-2 pt-1.5">
-          <button type="button" onclick="submitGitHubSyncStartup()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
-            <i data-lucide="cloud-lightning" class="w-3.5 h-3.5"></i>
-            Připojit
-          </button>
-          <button type="button" onclick="cancelGitHubSyncStartup()" class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all flex items-center justify-center">
-            Zpět
-          </button>
-        </div>
-      </div>
       
       <div class="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-[11px] text-indigo-700 leading-relaxed font-semibold text-center">
         <p id="db-setup-sync-info-text">
@@ -4875,12 +4748,14 @@
         categoryPl.classList.remove('hidden');
       }
       
-      // Populate Category Summary Table
-      const catTbody = document.getElementById('print-categories-table-body');
-      if (catTbody) {
-        catTbody.innerHTML = '';
+      // Populate Category Summary List
+      const catListContainer = document.getElementById('print-categories-list');
+      if (catListContainer) {
+        catListContainer.innerHTML = '';
         
         const catSums = {};
+        const catLatest = {};
+        
         filtered.forEach(t => {
           const catId = t.category;
           const type = t.type;
@@ -4894,6 +4769,16 @@
             };
           }
           catSums[key].amount += Number(t.amount) || 0;
+          
+          if (t.date) {
+            const tTime = parseDateSafe(t.date).getTime();
+            if (!catLatest[key] || tTime > catLatest[key].time) {
+              catLatest[key] = {
+                date: t.date,
+                time: tTime
+              };
+            }
+          }
         });
         
         const catList = Object.values(catSums);
@@ -4904,7 +4789,7 @@
         incomes.sort((a, b) => b.amount - a.amount);
         expenses.sort((a, b) => b.amount - a.amount);
         
-        const sortedCats = [...incomes, ...expenses];
+        const sortedCats = [...expenses, ...incomes];
         
         const catEmptyMsg = document.getElementById('print-categories-empty');
         if (sortedCats.length === 0) {
@@ -4913,37 +4798,46 @@
           if (catEmptyMsg) catEmptyMsg.classList.add('hidden');
           
           sortedCats.forEach(c => {
-            const categoryObj = state.categories.find(cat => cat.id === c.catId) || { name: c.catId === 'all' ? 'Ostatní' : 'Bez kategorie', color: '#64748b' };
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-slate-100";
-            
+            const categoryObj = state.categories.find(cat => cat.id === c.catId) || { name: c.catId === 'all' ? 'Ostatní' : 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
             const isIncome = c.type === 'income';
-            const amountClass = isIncome ? 'text-emerald-600 font-bold' : 'text-slate-800';
-            const sign = isIncome ? '+' : '-';
-            const typeLabel = isIncome ? 'Příjem' : 'Výdaj';
             
-            let pctLabel = '-';
+            const amountClass = isIncome ? 'text-emerald-500' : 'text-rose-500';
+            const sign = isIncome ? '+' : '-';
+            
+            let pctLabel = '';
             if (!isIncome && totalExpenses > 0) {
               pctLabel = `${((c.amount / totalExpenses) * 100).toFixed(1)}%`;
             } else if (isIncome && totalIncome > 0) {
               pctLabel = `${((c.amount / totalIncome) * 100).toFixed(1)}%`;
             }
             
-            tr.innerHTML = `
-              <td class="py-2.5 font-semibold text-slate-800 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${categoryObj.color || '#64748b'}"></span>
-                <span>${escapeHtml(categoryObj.name)}</span>
-              </td>
-              <td class="py-2.5 font-medium text-slate-500">${typeLabel}</td>
-              <td class="py-2.5 text-right font-bold ${amountClass}">${sign} ${formatCurrency(c.amount)}</td>
-              <td class="py-2.5 text-right font-bold text-slate-500">${pctLabel}</td>
+            const key = `${c.catId}_${c.type}`;
+            const latestInfo = catLatest[key];
+            const dateText = latestInfo 
+              ? `${__('Poslední:')} ${formatDateString(latestInfo.date)}` 
+              : __('Žádné transakce');
+            
+            const cardEl = document.createElement('div');
+            cardEl.className = "flex items-center justify-between p-4 bg-[#111827] border border-white/5 rounded-2xl shadow-sm";
+            cardEl.innerHTML = `
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background-color: ${categoryObj.color || '#64748b'}15; color: ${categoryObj.color || '#64748b'}">
+                  <i data-lucide="${categoryObj.icon || 'help-circle'}" class="w-5 h-5"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-extrabold text-white text-sm truncate leading-snug">${escapeHtml(__(categoryObj.name))}</p>
+                  <p class="text-[10px] text-slate-400 font-semibold mt-0.5 tracking-wide">${dateText}</p>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="font-black ${amountClass} text-sm">${sign}${formatCurrency(c.amount)}</span>
+                ${pctLabel ? `<p class="text-[9px] text-slate-500 font-bold mt-0.5 tracking-wide">${pctLabel}</p>` : ''}
+              </div>
             `;
-            catTbody.appendChild(tr);
+            catListContainer.appendChild(cardEl);
           });
         }
       }
-      
-
       
       // Trigger print dialog
       const originalTitle = document.title;
@@ -4960,6 +4854,8 @@
       const pDateTimeStr = `${pYear}-${pMonth}-${pDay}_${pHours}-${pMinutes}-${pSeconds}`;
       
       document.title = `${cleanDbName}_report_${cleanPeriod}_${pDateTimeStr}`;
+      
+      lucide.createIcons();
       
       setTimeout(() => {
         window.print();
@@ -10082,66 +9978,61 @@
     }
   </script>
   <!-- ================= PRINTABLE PDF REPORT CONTAINER ================= -->
-  <div id="print-report-container" class="hidden print:block bg-white p-8 font-sans text-slate-800 w-full max-w-4xl mx-auto">
+  <div id="print-report-container" class="hidden print:block bg-[#0b0f19] p-8 font-sans text-[#f8fafc] w-full max-w-4xl mx-auto space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4 mb-6">
-      <div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">FINGO – FINANČNÍ REPORT</h1>
-        <p class="text-xs text-slate-500 font-semibold" id="print-report-date">Vygenerováno: -</p>
+    <div class="flex items-center justify-between border-b border-slate-800/80 pb-6 mb-2">
+      <div class="flex items-center gap-3">
+        <div class="px-4 py-2 bg-indigo-600 rounded-xl text-white font-black text-xl tracking-wider select-none shadow-md shadow-indigo-500/20">
+          FINGO
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold text-white tracking-wide uppercase">Finanční report</h1>
+          <p class="text-[10px] text-slate-400 font-semibold mt-0.5" id="print-report-date">Vygenerováno: -</p>
+        </div>
       </div>
       <div class="text-right">
-        <h2 class="text-sm font-bold text-slate-800" id="print-report-db-name">Soubor databáze: -</h2>
-        <p class="text-xs text-slate-500 font-semibold" id="print-report-period">Období: -</p>
+        <h2 class="text-xs font-bold text-slate-300" id="print-report-db-name">Soubor databáze: -</h2>
+        <p class="text-[10px] text-slate-400 font-semibold mt-0.5" id="print-report-period">Období: -</p>
       </div>
     </div>
 
     <!-- Summary Stats -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
-      <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Celkové příjmy</span>
-        <h3 class="text-lg font-black text-emerald-600 mt-1" id="print-stat-income">0,00 Kč</h3>
+    <div class="grid grid-cols-3 gap-4 mb-2">
+      <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 shadow-sm">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Celkové příjmy</span>
+        <h3 class="text-xl font-black text-emerald-500 mt-1.5" id="print-stat-income">0,00 Kč</h3>
       </div>
-      <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Celkové výdaje</span>
-        <h3 class="text-lg font-black text-rose-600 mt-1" id="print-stat-expenses">0,00 Kč</h3>
+      <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 shadow-sm">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Celkové výdaje</span>
+        <h3 class="text-xl font-black text-rose-500 mt-1.5" id="print-stat-expenses">0,00 Kč</h3>
       </div>
-      <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Čistá bilance</span>
-        <h3 class="text-lg font-black text-slate-900 mt-1" id="print-stat-balance">0,00 Kč</h3>
+      <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 shadow-sm">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Čistá bilance</span>
+        <h3 class="text-xl font-black text-white mt-1.5" id="print-stat-balance">0,00 Kč</h3>
       </div>
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-2 gap-6 mb-8">
-      <div class="border border-slate-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs font-bold text-slate-600 mb-3 text-center w-full block border-b pb-2">Vývoj příjmů a výdajů</span>
-        <img id="print-chart-income-expense" class="max-h-[320px] object-contain hidden" alt="Graf příjmů a výdajů">
-        <div id="print-chart-income-expense-placeholder" class="text-xs text-slate-400 py-10">Graf není k dispozici</div>
+    <div class="grid grid-cols-2 gap-6 mb-2">
+      <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 flex flex-col items-center">
+        <span class="text-xs font-bold text-slate-300 mb-3 text-center w-full block border-b border-white/5 pb-2">Vývoj financí v čase</span>
+        <img id="print-chart-income-expense" class="max-h-[280px] w-full object-contain hidden" alt="Graf vývoje financí">
+        <div id="print-chart-income-expense-placeholder" class="text-xs text-slate-500 py-12">Graf není k dispozici</div>
       </div>
-      <div class="border border-slate-200 rounded-xl p-4 flex flex-col items-center">
-        <span class="text-xs font-bold text-slate-600 mb-3 text-center w-full block border-b pb-2">Struktura výdajů (Kategorie)</span>
-        <img id="print-chart-categories" class="max-h-[240px] w-full object-contain hidden" alt="Struktura výdajů">
-        <div id="print-chart-categories-placeholder" class="text-xs text-slate-400 py-10">Graf není k dispozici</div>
+      <div class="bg-[#111827] border border-white/5 rounded-2xl p-5 flex flex-col items-center">
+        <span class="text-xs font-bold text-slate-300 mb-3 text-center w-full block border-b border-white/5 pb-2">Struktura výdajů (Celkem)</span>
+        <img id="print-chart-categories" class="max-h-[220px] w-full object-contain hidden" alt="Struktura výdajů">
+        <div id="print-chart-categories-placeholder" class="text-xs text-slate-500 py-12">Graf není k dispozici</div>
       </div>
     </div>
 
-    <!-- Categories Summary Table -->
+    <!-- Categories Summary List (iPhone App Layout) -->
     <div>
-      <h4 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b">Přehled podle kategorií</h4>
-      <table class="w-full text-left text-[11px]">
-        <thead>
-          <tr class="text-slate-500 border-b border-slate-200 uppercase tracking-wider font-bold">
-            <th class="pb-2">Kategorie</th>
-            <th class="pb-2">Typ</th>
-            <th class="pb-2 text-right">Částka (Kč)</th>
-            <th class="pb-2 text-right">Podíl</th>
-          </tr>
-        </thead>
-        <tbody id="print-categories-table-body" class="divide-y divide-slate-150">
-          <!-- Dynamically populated -->
-        </tbody>
-      </table>
-      <div id="print-categories-empty" class="hidden text-center py-6 text-slate-400 font-semibold">Žádné kategorie k zobrazení</div>
+      <h4 class="text-sm font-bold text-slate-350 mb-4 pb-2 border-b border-white/5 uppercase tracking-wider">Náklady podle kategorií</h4>
+      <div id="print-categories-list" class="grid grid-cols-2 gap-4">
+        <!-- Dynamically populated cards -->
+      </div>
+      <div id="print-categories-empty" class="hidden text-center py-12 text-slate-500 font-semibold text-sm">Žádné kategorie k zobrazení</div>
     </div>
   </div>
 
