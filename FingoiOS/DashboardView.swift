@@ -1056,106 +1056,108 @@ struct AddTransactionSheet: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    VStack(spacing: 16) {
-                        Picker("Typ", selection: $type) {
-                            Text("Výdaj").tag("expense")
-                            Text("Příjem").tag("income")
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        VStack(spacing: 16) {
+                            Picker("Typ", selection: $type) {
+                                Text("Výdaj").tag("expense")
+                                Text("Příjem").tag("income")
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal)
+                            
+                            HStack(alignment: .lastTextBaseline, spacing: 8) {
+                                TextField("0", text: $amountString)
+                                    .keyboardType(.decimalPad)
+                                    .focused($isAmountFocused)
+                                    .font(.system(size: 60, weight: .black))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(type == "income" ? .emerald : .roseColor)
+                                Text("Kč")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.vertical, 10)
                         }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal)
+                        .padding(.top, 20)
                         
-                        HStack(alignment: .lastTextBaseline, spacing: 8) {
-                            TextField("0", text: $amountString)
-                                .keyboardType(.decimalPad)
-                                .focused($isAmountFocused)
-                                .font(.system(size: 60, weight: .black))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(type == "income" ? .emerald : .roseColor)
-                            Text("Kč")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.vertical, 10)
-                    }
-                    .padding(.top, 20)
-                    
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text("Kategorie")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.gray)
-                            Spacer()
-                            Menu {
-                                ForEach(categories) { category in
-                                    Button(action: { selectedCategory = category }) {
-                                        Label(category.name, systemImage: category.icon)
+                        VStack(spacing: 0) {
+                            HStack {
+                                Text("Kategorie")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Menu {
+                                    ForEach(categories) { category in
+                                        Button(action: { selectedCategory = category }) {
+                                            Label(category.name, systemImage: category.icon)
+                                        }
+                                    }
+                                } label: {
+                                    if let cat = selectedCategory {
+                                        HStack {
+                                            Image(systemName: cat.icon)
+                                            Text(cat.name)
+                                        }
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(Color(hex: cat.color))
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 16)
+                                        .background(Color(hex: cat.color).opacity(0.15))
+                                        .cornerRadius(12)
+                                    } else {
+                                        Text("Vybrat")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.indigoColor)
                                     }
                                 }
-                            } label: {
-                                if let cat = selectedCategory {
-                                    HStack {
-                                        Image(systemName: cat.icon)
-                                        Text(cat.name)
-                                    }
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: cat.color))
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 16)
-                                    .background(Color(hex: cat.color).opacity(0.15))
-                                    .cornerRadius(12)
-                                } else {
-                                    Text("Vybrat")
-                                        .font(.system(size: 16, weight: .bold))
+                                
+                                Button(action: { showingAddCategory = true }) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 24))
                                         .foregroundColor(.indigoColor)
                                 }
+                                .padding(.leading, 8)
                             }
+                            .padding()
                             
-                            Button(action: { showingAddCategory = true }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.indigoColor)
-                            }
-                            .padding(.leading, 8)
+                            Divider().background(Color.gray.opacity(0.2)).padding(.horizontal)
+                            
+                            DatePicker("Datum", selection: $date, displayedComponents: .date)
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.gray)
+                                .colorScheme(.dark)
+                                .padding()
+                            
+                            Divider().background(Color.gray.opacity(0.2)).padding(.horizontal)
+                            
+                            TextField("Poznámka / Popis", text: $notes)
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding()
                         }
-                        .padding()
-                        
-                        Divider().background(Color.gray.opacity(0.2)).padding(.horizontal)
-                        
-                        DatePicker("Datum", selection: $date, displayedComponents: .date)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.gray)
-                            .colorScheme(.dark)
-                            .padding()
-                        
-                        Divider().background(Color.gray.opacity(0.2)).padding(.horizontal)
-                        
-                        TextField("Poznámka / Popis", text: $notes)
-                            .font(.system(size: 16))
-                            .foregroundColor(.white)
-                            .padding()
+                        .background(Color(white: 0.08))
+                        .cornerRadius(20)
+                        .padding(.horizontal)
                     }
-                    .background(Color(white: 0.08))
-                    .cornerRadius(20)
-                    .padding(.horizontal)
-                    
-                    Spacer(minLength: 40)
-                    
-                    Button(action: saveTransaction) {
-                        Text(transactionToEdit != nil ? "Uložit změny" : "Uložit transakci")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(amountString.isEmpty || selectedCategory == nil ? Color.gray : Color.indigoColor)
-                            .cornerRadius(20)
-                            .shadow(color: (amountString.isEmpty || selectedCategory == nil ? Color.clear : Color.indigoColor.opacity(0.4)), radius: 10, x: 0, y: 5)
-                    }
-                    .disabled(amountString.isEmpty || selectedCategory == nil)
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
                 }
+                
+                Button(action: saveTransaction) {
+                    Text(transactionToEdit != nil ? "Uložit změny" : "Uložit transakci")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(amountString.isEmpty || selectedCategory == nil ? Color.gray : Color.indigoColor)
+                        .cornerRadius(20)
+                        .shadow(color: (amountString.isEmpty || selectedCategory == nil ? Color.clear : Color.indigoColor.opacity(0.4)), radius: 10, x: 0, y: 5)
+                }
+                .disabled(amountString.isEmpty || selectedCategory == nil)
+                .padding(.horizontal)
+                .padding(.bottom, 20)
+                .padding(.top, 10)
+                .background(Color.black)
             }
             .background(Color.black.ignoresSafeArea())
             .navigationTitle(transactionToEdit != nil ? "Upravit transakci" : "Nová transakce")
