@@ -1,0 +1,41 @@
+{
+  "categories": [
+    { "id": "cat-jidlo", "name": "Jídlo", "color": "#ef4444", "icon": "shopping-bag" },
+    { "id": "cat-bydleni", "name": "Bydlení", "color": "#3b82f6", "icon": "home" },
+    { "id": "cat-doprava", "name": "Doprava", "color": "#eab308", "icon": "car" },
+    { "id": "cat-zabava", "name": "Zábava", "color": "#a855f7", "icon": "tv" },
+    { "id": "cat-vyplata", "name": "Výplata", "color": "#22c55e", "icon": "briefcase" },
+    { "id": "cat-uvery", "name": "Úvěrové produkty", "color": "#6366f1", "icon": "landmark" },
+    { "id": "cat-ostatni", "name": "Ostatní", "color": "#64748b", "icon": "help-circle" }
+  ],
+  "transactions": [
+    { "id": "t-1", "type": "income", "amount": 48000, "category": "cat-vyplata", "date": "relative:-25", "description": "Výplata hlavní pracovní poměr" },
+    { "id": "t-2", "type": "expense", "amount": 14500, "category": "cat-bydleni", "date": "relative:-24", "description": "Měsíční nájemné byt 2+kk" },
+    { "id": "t-3", "type": "expense", "amount": 1600, "category": "cat-jidlo", "date": "relative:-20", "description": "Týdenní nákup Albert" },
+    { "id": "t-4", "type": "expense", "amount": 1200, "category": "cat-doprava", "date": "relative:-18", "description": "Dobití Lítačky" },
+    { "id": "t-5", "type": "expense", "amount": 249, "category": "cat-zabava", "date": "relative:-15", "description": "Netflix Premium" },
+    { "id": "t-6", "type": "income", "amount": 3500, "category": "cat-ostatni", "date": "relative:-12", "description": "Prodej starého telefonu" },
+    { "id": "t-7", "type": "expense", "amount": 890, "category": "cat-jidlo", "date": "relative:-10", "description": "Večeře v restauraci s přáteli" },
+    { "id": "t-8", "type": "expense", "amount": 450, "category": "cat-zabava", "date": "relative:-5", "description": "Lístky do kina" },
+    { "id": "t-9", "type": "expense", "amount": 2300, "category": "cat-doprava", "date": "relative:-3", "description": "Tankování Shell" },
+    { "id": "t-10", "type": "expense", "amount": 1400, "category": "cat-jidlo", "date": "relative:-1", "description": "Nákup Rohlik.cz" }
+  ],
+  "recurring": [
+    { "id": "r-1", "name": "Nájemné", "type": "expense", "amount": 14500, "frequency": "monthly", "category": "cat-bydleni", "nextDueDate": "relative:2" },
+    { "id": "r-2", "name": "Netflix", "type": "expense", "amount": 249, "frequency": "monthly", "category": "cat-zabava", "nextDueDate": "relative:15" },
+    { "id": "r-3", "name": "Příspěvek na penzijní", "type": "expense", "amount": 1000, "frequency": "monthly", "category": "cat-ostatni", "nextDueDate": "relative:-1" },
+    { "id": "r-4", "name": "Výplata", "type": "income", "amount": 48000, "frequency": "monthly", "category": "cat-vyplata", "nextDueDate": "relative:5" }
+  ],
+  "loans": [
+    { "id": "l-1", "name": "Hypotéka na byt 3+kk", "type": "mortgage", "totalAmount": 4200000, "remainingAmount": 3950000, "interestRate": 5.49, "monthlyPayment": 21500, "duration": 30, "durationUnit": "years", "startDate": "2024-01-01", "notes": "Hypoteční úvěr u České spořitelny" },
+    { "id": "l-2", "name": "Autoúvěr Škoda Octavia", "type": "car_loan", "totalAmount": 550000, "remainingAmount": 340000, "interestRate": 6.89, "monthlyPayment": 8900, "duration": 5, "durationUnit": "years", "startDate": "2025-05-15", "notes": "Úvěr na auto s akontací" }
+  ],
+  "budgets": [
+    { "categoryId": "cat-jidlo", "amount": 8000 },
+    { "categoryId": "cat-zabava", "amount": 3000 }
+  ],
+  "savingsGoals": [
+    { "id": "g-1", "name": "Nové rodinné auto", "targetAmount": 300000, "currentAmount": 85000, "targetDate": "relative:800", "notes": "Na koupi nového rodinného vozu Škoda Octavia", "icon": "car" },
+    { "id": "g-2", "name": "Letní dovolená Řecko", "targetAmount": 50000, "currentAmount": 20000, "targetDate": "relative:60", "notes": "Zájezd s rodinou do Řecka", "icon": "plane" }
+  ]
+}

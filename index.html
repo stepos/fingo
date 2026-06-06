@@ -9202,6 +9202,32 @@
     }
 
     // ================= INITIALIZATION SEQUENCE =================
+
+    function resolveRelativeDates(data) {
+      if (!data) return data;
+      const today = new Date();
+      
+      const getRelativeDateStr = (offset) => {
+        const d = new Date();
+        d.setDate(today.getDate() + offset);
+        return d.toISOString().split('T')[0];
+      };
+
+      const processObject = (obj) => {
+        if (!obj || typeof obj !== 'object') return;
+        for (let key in obj) {
+          if (typeof obj[key] === 'string' && obj[key].startsWith('relative:')) {
+            const offset = parseInt(obj[key].split(':')[1]) || 0;
+            obj[key] = getRelativeDateStr(offset);
+          } else if (typeof obj[key] === 'object') {
+            processObject(obj[key]);
+          }
+        }
+      };
+
+      processObject(data);
+      return data;
+    }
     
     // Checks database configurations at startup
     async function checkDatabaseStartup() {
@@ -9267,11 +9293,39 @@
         }
       }
       
-      const modal = document.getElementById('modal-db-startup');
-      if (modal) {
-        modal.classList.remove('hidden');
-        lucide.createIcons();
+      // FIRST RUN: Auto-connect to demo_db.json
+      dbConfig.name = 'demo_db.json';
+      dbConfig.storageType = 'fallback';
+      safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
+      
+      try {
+        const response = await fetch('demo_db.json');
+        if (response.ok) {
+          const parsed = await response.json();
+          const resolved = resolveRelativeDates(parsed);
+          
+          state.transactions = resolved.transactions || [];
+          state.recurring = resolved.recurring || [];
+          state.categories = resolved.categories || [];
+          state.loans = resolved.loans || [];
+          state.budgets = resolved.budgets || [];
+          state.savingsGoals = resolved.savingsGoals || [];
+          
+          if (state.categories.length === 0) {
+            state.categories = [...defaultCategories];
+          }
+          
+          // Cache the resolved data
+          safeStorage.setItem('fingo_db_data_demo_db.json', JSON.stringify(state));
+        } else {
+          initDemoData();
+        }
+      } catch (err) {
+        console.warn("Failed to fetch demo_db.json, generating locally", err);
+        initDemoData();
       }
+      
+      selectAndOpenDatabase('demo_db.json', 'fallback');
     }
 
     async function checkForExternalFileChanges() {
