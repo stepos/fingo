@@ -2861,6 +2861,23 @@
       logDiag("Console Warn: " + args.join(' '), "warn");
     };
 
+    document.addEventListener('click', function(e) {
+      const target = e.target;
+      const path = [];
+      let current = target;
+      while (current && current !== document.body && current !== null) {
+        let name = current.tagName.toLowerCase();
+        if (current.id) name += '#' + current.id;
+        if (current.className && typeof current.className === 'string') {
+          const firstClass = current.className.split(/\s+/)[0];
+          if (firstClass) name += '.' + firstClass;
+        }
+        path.push(name);
+        current = current.parentElement;
+      }
+      logDiag("Click on: " + path.reverse().join(' > '));
+    }, true);
+
     // Safe storage wrapper to prevent crashes in sandboxed in-app browsers (like Google/Facebook App on iOS)
     const storageFallback = {};
     const safeStorage = {
