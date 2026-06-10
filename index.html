@@ -6950,11 +6950,13 @@
       }
       
       if (searchQuery) {
+        const queryWords = searchQuery.split(/\s+/).filter(w => w.length > 0);
         list = list.filter(t => {
-          const descMatch = (t.description || '').toLowerCase().includes(searchQuery);
+          const descLower = (t.description || '').toLowerCase();
           const catObj = state.categories.find(c => c.id === t.category);
-          const catMatch = catObj ? catObj.name.toLowerCase().includes(searchQuery) : false;
-          return descMatch || catMatch;
+          const catNameLower = catObj ? catObj.name.toLowerCase() : '';
+          const combined = descLower + ' ' + catNameLower;
+          return queryWords.every(word => combined.includes(word));
         });
       }
       
@@ -6991,11 +6993,13 @@
         futureList = futureList.filter(fp => fp.category === catFilter);
       }
       if (searchQuery) {
+        const queryWords = searchQuery.split(/\s+/).filter(w => w.length > 0);
         futureList = futureList.filter(fp => {
-          const descMatch = (fp.name || '').toLowerCase().includes(searchQuery);
+          const descLower = (fp.name || '').toLowerCase();
           const catObj = state.categories.find(c => c.id === fp.category);
-          const catMatch = catObj ? catObj.name.toLowerCase().includes(searchQuery) : false;
-          return descMatch || catMatch;
+          const catNameLower = catObj ? catObj.name.toLowerCase() : '';
+          const combined = descLower + ' ' + catNameLower;
+          return queryWords.every(word => combined.includes(word));
         });
       }
       futureList.sort((a, b) => parseDateSafe(a.date) - parseDateSafe(b.date));

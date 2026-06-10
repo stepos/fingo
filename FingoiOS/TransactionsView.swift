@@ -13,12 +13,30 @@ struct TransactionsView: View {
     @State private var showingAddTransaction = false
     @State private var showingEditCategories = false
     @State private var transactionToEdit: FingoTransaction? = nil
+    @State private var isSearchActive = false
+    @State private var searchText = ""
     
     var filteredTransactions: [FingoTransaction] {
         allTransactions.filter { t in
             let matchesType = filterType == "all" || t.type == filterType
             let matchesCategory = selectedCategoryFilter == nil || t.category?.id == selectedCategoryFilter?.id
-            return matchesType && matchesCategory
+            
+            var matchesSearch = true
+            if isSearchActive && !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let queryWords = searchText.lowercased()
+                    .components(separatedBy: .whitespacesAndNewlines)
+                    .filter { !$0.isEmpty }
+                
+                let notesLower = t.notes.lowercased()
+                let categoryNameLower = (t.category?.name ?? "").lowercased()
+                let combinedText = notesLower + " " + categoryNameLower
+                
+                matchesSearch = queryWords.allSatisfy { word in
+                    combinedText.contains(word)
+                }
+            }
+            
+            return matchesType && matchesCategory && matchesSearch
         }
     }
     
@@ -49,6 +67,37 @@ struct TransactionsView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
+                
+                if isSearchActive {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                        
+                        TextField("Hledat v transakcích...", text: $searchText)
+                            .foregroundColor(.white)
+                            .font(.system(size: 15))
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                        
+                        if !searchText.isEmpty {
+                            Button(action: { searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .background(Color.darkCard)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.gray.opacity(0.25), lineWidth: 1)
+                    )
+                    .padding(.horizontal)
+                    .padding(.bottom, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
                 
                 if filterType != "income" && !categorySpendings.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
@@ -171,10 +220,25 @@ struct TransactionsView: View {
             .background(Color.black.ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showingAddTransaction.toggle() }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundColor(Color.indigoColor)
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isSearchActive.toggle()
+                                if !isSearchActive {
+                                    searchText = ""
+                                }
+                            }
+                        }) {
+                            Image(systemName: isSearchActive ? "magnifyingglass.circle.fill" : "magnifyingglass")
+                                .font(.system(size: 22))
+                                .foregroundColor(isSearchActive ? Color.indigoColor : .white)
+                        }
+                        
+                        Button(action: { showingAddTransaction.toggle() }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundColor(Color.indigoColor)
+                        }
                     }
                 }
             }
