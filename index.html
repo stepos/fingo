@@ -2224,6 +2224,18 @@
 
           
           <div class="space-y-2">
+            <!-- Demo database toggle button -->
+            <button id="settings-demo-db-btn" onclick="toggleDemoDatabase(true)" class="w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0 bg-slate-300 dark:bg-slate-700" id="settings-demo-db-status-dot"></span>
+              <span id="settings-demo-db-btn-text">Demo databáze: Neaktivní</span>
+            </button>
+
+            <!-- New database button -->
+            <button onclick="createNewDatabase()" class="w-full py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
+              <i data-lucide="file-plus" class="w-4 h-4 text-indigo-500"></i>
+              <span>Nová databáze</span>
+            </button>
+
             <!-- Fallback manual download button inside settings -->
             <button id="settings-ios-sync-btn" onclick="triggerIosFileSave()" class="hidden w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
               <i data-lucide="download" class="w-4 h-4"></i>
@@ -2235,7 +2247,7 @@
               Zvolit jinou databázi (.json)
             </button>
 
-            <button onclick="promptDatabaseDisconnect()" class="w-full py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
+            <button onclick="promptDatabaseDisconnect()" class="w-full py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-350 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
               <i data-lucide="log-out" class="w-4 h-4 text-slate-500"></i>
               Zavřít databázi a vybrat jiný soubor
             </button>
@@ -3154,7 +3166,10 @@
       "Opravdu chcete smazat tento rozpočet? Přidružené transakce a kategorie zůstanou zachovány.": { en: "Are you sure you want to delete this budget? Associated transactions and categories will be preserved.", de: "Möchten Sie dieses Budget wirklich löschen? Zugehörige Transaktionen und Kategorien bleiben erhalten." },
       "Rozpočet byl smazán.": { en: "Budget deleted.", de: "Budget gelöscht." },
       "Smazat tento cíl?": { en: "Delete this goal?", de: "Dieses Ziel löschen?" },
-      "Opravdu chcete smazat tento spořicí cíl? Historie spojených transakcí zůstane zachována.": { en: "Are you sure you want to delete this savings goal? Associated transaction history will be preserved.", de: "Möchten Sie dieses Sparziel wirklich löschen? Zugehöriger Transaktionsverlauf bleibt erhalten." }
+      "Opravdu chcete smazat tento spořicí cíl? Historie spojených transakcí zůstane zachována.": { en: "Are you sure you want to delete this savings goal? Associated transaction history will be preserved.", de: "Möchten Sie dieses Sparziel wirklich löschen? Zugehöriger Transaktionsverlauf bleibt erhalten." },
+      "Nová databáze": { en: "New Database", de: "Neue Datenbank" },
+      "Demo databáze: Aktivní": { en: "Demo Database: Active", de: "Demo-Datenbank: Aktiv" },
+      "Demo databáze: Neaktivní": { en: "Demo Database: Inactive", de: "Demo-Datenbank: Inaktiv" }
     };
 
     // Global translation helper
@@ -3172,6 +3187,10 @@
       isTranslating = true;
       currentLanguage = lang;
       safeStorage.setItem('fingo_language', lang);
+      
+      if (dbConfig.name === 'demo_db.json') {
+        translateDemoDataState(lang);
+      }
       
       const langSelect = document.getElementById('language-select');
       if (langSelect) langSelect.value = lang;
@@ -3895,6 +3914,194 @@
       lucide.createIcons();
     }
 
+    const demoTranslations = {
+      "Výplata hlavní pracovní poměr": { cs: "Výplata hlavní pracovní poměr", en: "Main job salary", de: "Hauptberuf Gehalt" },
+      "Měsíční nájemné byt 2+kk": { cs: "Měsíční nájemné byt 2+kk", en: "Monthly rent apartment 2+kk", de: "Monatliche Miete Wohnung 2+kk" },
+      "Týdenní nákup Albert": { cs: "Týdenní nákup Albert", en: "Weekly grocery shopping Albert", de: "Wöchentlicher Einkauf Albert" },
+      "Dobití Lítačky": { cs: "Dobití Lítačky", en: "Public transit card top-up", de: "ÖPNV-Karte aufladen" },
+      "Netflix Premium": { cs: "Netflix Premium", en: "Netflix Premium", de: "Netflix Premium" },
+      "Prodej starého telefonu": { cs: "Prodej starého telefonu", en: "Sold old phone", de: "Altes Telefon verkauft" },
+      "Večeře v restauraci s přáteli": { cs: "Večeře v restauraci s přáteli", en: "Dinner at a restaurant with friends", de: "Abendessen im Restaurant mit Freunden" },
+      "Lístky do kina": { cs: "Lístky do kina", en: "Cinema tickets", de: "Kinokarten" },
+      "Tankování Shell": { cs: "Tankování Shell", en: "Refueling Shell", de: "Tanken Shell" },
+      "Nákup Rohlik.cz": { cs: "Nákup Rohlik.cz", en: "Grocery shopping Rohlik.cz", de: "Einkauf Rohlik.cz" },
+      "Nájemné": { cs: "Nájemné", en: "Rent", de: "Miete" },
+      "Netflix": { cs: "Netflix", en: "Netflix", de: "Netflix" },
+      "Příspěvek na penzijní": { cs: "Příspěvek na penzijní", en: "Pension contribution", de: "Rentenbeitrag" },
+      "Výplata": { cs: "Výplata", en: "Salary", de: "Gehalt" },
+      "Hypotéka na byt 3+kk": { cs: "Hypotéka na byt 3+kk", en: "Mortgage on apartment 3+kk", de: "Hypothek auf Wohnung 3+kk" },
+      "Autoúvěr Škoda Octavia": { cs: "Autoúvěr Škoda Octavia", en: "Car loan Škoda Octavia", de: "Autokredit Škoda Octavia" },
+      "Nové rodinné auto": { cs: "Nové rodinné auto", en: "New family car", de: "Neues Familienauto" },
+      "Letní dovolená Řecko": { cs: "Letní dovolená Řecko", en: "Summer holiday Greece", de: "Sommerurlaub Griechenland" },
+      "Na koupi nového rodinného vozu Škoda Octavia": { cs: "Na koupi nového rodinného vozu Škoda Octavia", en: "For purchasing a new family car Škoda Octavia", de: "Für den Kauf eines neuen Familienautos Škoda Octavia" },
+      "Zájezd s rodinou do Řecka": { cs: "Zájezd s rodinou do Řecka", en: "Trip with family to Greece", de: "Reise mit der Familie nach Griechenland" },
+      "Hypoteční úvěr u České spořitelny": { cs: "Hypoteční úvěr u České spořitelny", en: "Mortgage loan at Česká spořitelna", de: "Hypothekendarlehen bei Česká spořitelna" },
+      "Úvěr na auto s akontací": { cs: "Úvěr na auto s akontací", en: "Car loan with down payment", de: "Autokredit mit Anzahlung" }
+    };
+
+    function translateDemoDataState(lang) {
+      const translateString = (val) => {
+        if (!val || typeof val !== 'string') return val;
+        for (let originalKey in demoTranslations) {
+          const trans = demoTranslations[originalKey];
+          if (val === trans.cs || val === trans.en || val === trans.de) {
+            return trans[lang] || val;
+          }
+        }
+        return val;
+      };
+
+      if (state.transactions) {
+        state.transactions.forEach(t => {
+          t.description = translateString(t.description);
+        });
+      }
+      if (state.recurring) {
+        state.recurring.forEach(r => {
+          r.name = translateString(r.name);
+        });
+      }
+      if (state.loans) {
+        state.loans.forEach(l => {
+          l.name = translateString(l.name);
+          l.notes = translateString(l.notes);
+        });
+      }
+      if (state.savingsGoals) {
+        state.savingsGoals.forEach(g => {
+          g.name = translateString(g.name);
+          g.notes = translateString(g.notes);
+        });
+      }
+    }
+
+    async function loadDemoDatabaseData() {
+      try {
+        const response = await fetch('demo_db.json');
+        if (response.ok) {
+          const parsed = await response.json();
+          const resolved = resolveRelativeDates(parsed);
+          
+          state.transactions = resolved.transactions || [];
+          state.recurring = resolved.recurring || [];
+          state.categories = resolved.categories || [];
+          state.loans = resolved.loans || [];
+          state.budgets = resolved.budgets || [];
+          state.savingsGoals = resolved.savingsGoals || [];
+          
+          if (state.categories.length === 0) {
+            state.categories = [...defaultCategories];
+          }
+          
+          safeStorage.setItem('fingo_db_data_demo_db.json', JSON.stringify(state));
+        } else {
+          initDemoData();
+        }
+      } catch (err) {
+        console.warn("Failed to fetch demo_db.json, generating locally", err);
+        initDemoData();
+      }
+    }
+
+    async function toggleDemoDatabase(enable) {
+      triggerHapticFeedback();
+      if (enable) {
+        if (dbConfig.name !== 'demo_db.json') {
+          safeStorage.setItem('fingo_previous_real_db', JSON.stringify(dbConfig));
+        }
+        
+        dbConfig.name = 'demo_db.json';
+        dbConfig.storageType = 'fallback';
+        safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
+        
+        await loadDemoDatabaseData();
+        if (currentLanguage !== 'cs') {
+          translateDemoDataState(currentLanguage);
+        }
+        selectAndOpenDatabase('demo_db.json', 'fallback');
+      } else {
+        const prev = safeStorage.getItem('fingo_previous_real_db');
+        if (prev) {
+          try {
+            const config = JSON.parse(prev);
+            if (config && config.name && config.storageType) {
+              dbConfig.name = config.name;
+              dbConfig.storageType = config.storageType;
+              safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
+              
+              if (config.storageType === 'file' && isFileAccessSupported) {
+                const savedHandle = await retrieveFileHandle();
+                if (savedHandle) {
+                  activeFileHandle = savedHandle;
+                  const permission = await savedHandle.queryPermission({ mode: 'readwrite' });
+                  if (permission === 'granted') {
+                    const file = await savedHandle.getFile();
+                    lastFileModifiedTime = file.lastModified;
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+                    state.transactions = parsed.transactions || [];
+                    state.recurring = parsed.recurring || [];
+                    state.categories = parsed.categories || [];
+                    state.loans = parsed.loans || [];
+                    state.budgets = parsed.budgets || [];
+                    state.savingsGoals = parsed.savingsGoals || [];
+                    
+                    selectAndOpenDatabase(savedHandle.name, 'file');
+                  } else {
+                    document.getElementById('modal-db-permission').classList.remove('hidden');
+                    lucide.createIcons();
+                  }
+                } else {
+                  selectAndOpenDatabase(config.name, 'fallback');
+                }
+              } else {
+                selectAndOpenDatabase(config.name, config.storageType);
+              }
+              updateSettingsDemoButtonState();
+              return;
+            }
+          } catch (e) {
+            console.error("Failed to restore previous database", e);
+          }
+        }
+        promptDatabaseDisconnect();
+      }
+      updateSettingsDemoButtonState();
+    }
+
+    function createNewDatabase() {
+      triggerHapticFeedback();
+      if (isFileAccessSupported) {
+        createDatabaseFile();
+      } else {
+        createFallbackDatabase();
+      }
+    }
+
+    function updateSettingsDemoButtonState() {
+      const btn = document.getElementById('settings-demo-db-btn');
+      const dot = document.getElementById('settings-demo-db-status-dot');
+      const btnText = document.getElementById('settings-demo-db-btn-text');
+      if (!btn || !dot || !btnText) return;
+      
+      const isDemoActive = (dbConfig.name === 'demo_db.json');
+      
+      btn.className = "w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border";
+      dot.className = "w-2.5 h-2.5 rounded-full shrink-0";
+      
+      if (isDemoActive) {
+        btn.className = "w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400";
+        dot.className = "w-2.5 h-2.5 rounded-full shrink-0 bg-emerald-500 animate-pulse";
+        btnText.innerText = __("Demo databáze: Aktivní");
+        btn.onclick = function() { toggleDemoDatabase(false); };
+      } else {
+        btn.className = "w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/50";
+        dot.className = "w-2.5 h-2.5 rounded-full shrink-0 bg-slate-300 dark:bg-slate-700";
+        btnText.innerText = __("Demo databáze: Neaktivní");
+        btn.onclick = function() { toggleDemoDatabase(true); };
+      }
+    }
+
     // Open/initialize database
     function selectAndOpenDatabase(name, storageType, preventTabSwitch = false) {
       dbConfig.name = name;
@@ -3963,6 +4170,7 @@
       }
       populateHistoryCategoryFilter();
       updateSyncWidget();
+      updateSettingsDemoButtonState();
       showToast(`Soubor "${name}" byl úspěšně otevřen.`);
     }
 
@@ -6997,8 +7205,8 @@
       
       document.getElementById('btn-confirm-delete').onclick = function() {
         if (transactionIdToDelete) {
-          state.transactions = state.transactions.filter(t => t.id !== transactionIdToDelete);
-          selectedTransactionIds = selectedTransactionIds.filter(item => item !== transactionIdToDelete);
+          state.transactions = state.transactions.filter(t => String(t.id) !== String(transactionIdToDelete));
+          selectedTransactionIds = selectedTransactionIds.filter(item => String(item) !== String(transactionIdToDelete));
           saveState();
           showToast(__("Transakce byla úspěšně smazána"));
           closeModal('modal-delete-confirm');
@@ -7009,9 +7217,9 @@
         }
       };
     }
-
+ 
     function promptEditTransaction(id) {
-      const trans = state.transactions.find(t => t.id === id);
+      const trans = state.transactions.find(t => String(t.id) === String(id));
       if (!trans) return;
       
       document.getElementById('edit-trans-id').value = trans.id;
@@ -7026,7 +7234,7 @@
       
       openModal('modal-edit-transaction');
     }
-
+ 
     function handleEditTransactionSubmit(event) {
       event.preventDefault();
       
@@ -7042,7 +7250,7 @@
         return;
       }
       
-      const idx = state.transactions.findIndex(t => t.id === id);
+      const idx = state.transactions.findIndex(t => String(t.id) === String(id));
       if (idx !== -1) {
         state.transactions[idx] = {
           ...state.transactions[idx],
@@ -9313,6 +9521,10 @@
           
           if (state.categories.length === 0) {
             state.categories = [...defaultCategories];
+          }
+          
+          if (currentLanguage !== 'cs') {
+            translateDemoDataState(currentLanguage);
           }
           
           // Cache the resolved data
