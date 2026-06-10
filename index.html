@@ -2827,6 +2827,21 @@
 
   <!-- ========================================== JAVASCRIPT ========================================== -->
   <script>
+    window.addEventListener('error', function(e) {
+      if (typeof showToast === 'function') {
+        showToast("JS Error: " + e.message + " (" + e.filename + ":" + e.lineno + ")", "error");
+      } else {
+        alert("Startup Error: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
+      }
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      if (typeof showToast === 'function') {
+        showToast("Promise Error: " + e.reason, "error");
+      } else {
+        alert("Promise Error: " + e.reason);
+      }
+    });
+
     // Safe storage wrapper to prevent crashes in sandboxed in-app browsers (like Google/Facebook App on iOS)
     const storageFallback = {};
     const safeStorage = {
