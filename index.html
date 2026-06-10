@@ -2827,20 +2827,39 @@
 
   <!-- ========================================== JAVASCRIPT ========================================== -->
   <script>
-    window.addEventListener('error', function(e) {
-      if (typeof showToast === 'function') {
-        showToast("JS Error: " + e.message + " (" + e.filename + ":" + e.lineno + ")", "error");
-      } else {
-        alert("Startup Error: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
+    function logDiag(msg, type = 'log') {
+      const panel = document.getElementById('diag-panel');
+      if (panel) panel.classList.remove('hidden');
+      const logs = document.getElementById('diag-logs');
+      if (logs) {
+        const item = document.createElement('div');
+        item.className = type === 'error' ? 'text-rose-400 font-bold' : (type === 'warn' ? 'text-amber-400' : 'text-slate-300');
+        item.innerText = "[" + new Date().toLocaleTimeString() + "] " + msg;
+        logs.appendChild(item);
+        panel.scrollTop = panel.scrollHeight;
       }
+    }
+
+    window.addEventListener('error', function(e) {
+      logDiag("Error: " + e.message + " (" + e.filename + ":" + e.lineno + ")", "error");
     });
     window.addEventListener('unhandledrejection', function(e) {
-      if (typeof showToast === 'function') {
-        showToast("Promise Error: " + e.reason, "error");
-      } else {
-        alert("Promise Error: " + e.reason);
-      }
+      logDiag("Promise Error: " + e.reason, "error");
     });
+
+    const originalConsoleError = console.error;
+    console.error = function() {
+      const args = Array.from(arguments);
+      originalConsoleError.apply(console, args);
+      logDiag("Console Error: " + args.join(' '), "error");
+    };
+
+    const originalConsoleWarn = console.warn;
+    console.warn = function() {
+      const args = Array.from(arguments);
+      originalConsoleWarn.apply(console, args);
+      logDiag("Console Warn: " + args.join(' '), "warn");
+    };
 
     // Safe storage wrapper to prevent crashes in sandboxed in-app browsers (like Google/Facebook App on iOS)
     const storageFallback = {};
@@ -10326,6 +10345,18 @@
       </div>
       <div id="print-categories-empty" class="hidden text-center py-12 text-slate-500 font-semibold text-sm">Žádné kategorie k zobrazení</div>
     </div>
+  </div>
+
+  <!-- Diagnostics Panel -->
+  <div id="diag-panel" class="hidden fixed bottom-24 left-4 z-[9999] bg-slate-950/95 text-slate-100 border border-slate-800/80 p-4 rounded-2xl shadow-2xl max-w-sm w-full text-xs font-mono max-h-[250px] overflow-y-auto">
+    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 font-sans font-bold">
+      <span class="text-rose-500 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+        Diagnostics Console
+      </span>
+      <button onclick="document.getElementById('diag-panel').classList.add('hidden')" class="text-slate-400 hover:text-slate-200">Close</button>
+    </div>
+    <div id="diag-logs" class="space-y-1"></div>
   </div>
 
 </body>
