@@ -7032,7 +7032,7 @@
       
       const selectAllCheckbox = document.getElementById('check-all-transactions');
       if (selectAllCheckbox) {
-        selectAllCheckbox.checked = list.every(t => selectedTransactionIds.includes(t.id));
+        selectAllCheckbox.checked = list.every(t => selectedTransactionIds.map(String).includes(String(t.id)));
       }
       
       list.forEach(t => {
@@ -7040,7 +7040,7 @@
         const amountSign = t.type === 'income' ? '+' : '-';
         const amountClass = t.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
         
-        const isChecked = selectedTransactionIds.includes(t.id);
+        const isChecked = selectedTransactionIds.map(String).includes(String(t.id));
         
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/50 transition-colors group';
@@ -7283,7 +7283,7 @@
       const filtered = getFilteredTransactions(state.transactions);
       
       if (checked) {
-        selectedTransactionIds = filtered.map(t => t.id);
+        selectedTransactionIds = filtered.map(t => String(t.id));
       } else {
         selectedTransactionIds = [];
       }
@@ -7297,19 +7297,20 @@
 
     function toggleTransactionSelection(id, checked) {
       triggerHapticFeedback();
+      const strId = String(id);
       if (checked) {
-        if (!selectedTransactionIds.includes(id)) {
-          selectedTransactionIds.push(id);
+        if (!selectedTransactionIds.map(String).includes(strId)) {
+          selectedTransactionIds.push(strId);
         }
       } else {
-        selectedTransactionIds = selectedTransactionIds.filter(item => item !== id);
+        selectedTransactionIds = selectedTransactionIds.filter(item => String(item) !== strId);
       }
       
       const filtered = getFilteredTransactions(state.transactions);
       const selectAllCheckbox = document.getElementById('check-all-transactions');
       
       if (selectAllCheckbox) {
-        const isAllSelected = filtered.length > 0 && filtered.every(t => selectedTransactionIds.includes(t.id));
+        const isAllSelected = filtered.length > 0 && filtered.every(t => selectedTransactionIds.map(String).includes(String(t.id)));
         selectAllCheckbox.checked = isAllSelected;
       }
       
@@ -7360,7 +7361,7 @@
       openModal('modal-delete-confirm');
       
       document.getElementById('btn-confirm-delete').onclick = function() {
-        state.transactions = state.transactions.filter(t => !selectedTransactionIds.includes(t.id));
+        state.transactions = state.transactions.filter(t => !selectedTransactionIds.map(String).includes(String(t.id)));
         saveState();
         showToast(`Úspěšně smazáno ${len} transakcí.`);
         closeModal('modal-delete-confirm');
