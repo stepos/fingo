@@ -15,6 +15,7 @@ struct TransactionsView: View {
     @State private var transactionToEdit: FingoTransaction? = nil
     @State private var isSearchActive = false
     @State private var searchText = ""
+    @FocusState private var isSearchFieldFocused: Bool
     
     var filteredTransactions: [FingoTransaction] {
         allTransactions.filter { t in
@@ -23,12 +24,13 @@ struct TransactionsView: View {
             
             var matchesSearch = true
             if isSearchActive && !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                let queryWords = searchText.lowercased()
+                let cleanQuery = searchText.lowercased().applyingTransform(.stripDiacritics, reverse: false) ?? searchText.lowercased()
+                let queryWords = cleanQuery
                     .components(separatedBy: .whitespacesAndNewlines)
                     .filter { !$0.isEmpty }
                 
-                let notesLower = t.notes.lowercased()
-                let categoryNameLower = (t.category?.name ?? "").lowercased()
+                let notesLower = t.notes.lowercased().applyingTransform(.stripDiacritics, reverse: false) ?? t.notes.lowercased()
+                let categoryNameLower = (t.category?.name ?? "").lowercased().applyingTransform(.stripDiacritics, reverse: false) ?? (t.category?.name ?? "").lowercased()
                 let combinedText = notesLower + " " + categoryNameLower
                 
                 matchesSearch = queryWords.allSatisfy { word in
@@ -74,6 +76,7 @@ struct TransactionsView: View {
                             .foregroundColor(.gray)
                         
                         TextField("Hledat v transakcích...", text: $searchText)
+                            .focused($isSearchFieldFocused)
                             .foregroundColor(.white)
                             .font(.system(size: 15))
                             .autocorrectionDisabled()
@@ -226,6 +229,12 @@ struct TransactionsView: View {
                                 isSearchActive.toggle()
                                 if !isSearchActive {
                                     searchText = ""
+                                    isSearchFieldFocused = false
+                                } else {
+                                    // Focus keyboard automatically after anim starts
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        isSearchFieldFocused = true
+                                    }
                                 }
                             }
                         }) {
