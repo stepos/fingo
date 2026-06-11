@@ -1,0 +1,9 @@
+# Systemove soubory
+.DS_Store
+
+# Kopie Xcode projektu (skutecny projekt: /Volumes/evo980/xcode projekty/fingo)
+FingoiOS/
+
+# Lokalni zalohy a pracovni soubory
+index.backup-*.html
+.claude/
