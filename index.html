@@ -9,18 +9,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Fingo">
-  <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?w=180&h=180&fit=crop&q=80">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
   
   <!-- Google Fonts - Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind CSS CDN — připnutá verze, aby budoucí vydání nerozbilo vzhled -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <!-- Chart.js CDN — připnutá verze -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons CDN — připnutá verze -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@1.17.0/dist/umd/lucide.min.js"></script>
 
 
   <script>
@@ -373,10 +374,7 @@
         padding-bottom: 108px !important;
       }
     }
-    button, a, select, input {
-      -webkit-tap-highlight-color: transparent;
-    }
-    
+
     body, aside, nav.fixed {
       background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' fill='none' stroke='%234f46e5' stroke-width='1.2' stroke-opacity='0.05' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='translate(15, 15) scale(0.6)'%3E%3Cpath d='M3 14c0-3 2.5-5 5.5-5h13c3 0 5.5 2 5.5 5v5c0 3-2.5 5-5.5 5H8.5C5.5 24 3 22 3 19v-5z'/%3E%3Cpath d='M10 24v3M20 24v3'/%3E%3Cpath d='M27 14c2.5 0 4.5 1.5 4.5 3.5s-2 3.5-4.5 3.5'/%3E%3Cpath d='M5 14c-1.5 0-2.5-1-2.5-2.5S4 9 5.5 9'/%3E%3Cpath d='M12 9h6'/%3E%3Ccircle cx='21' cy='14' r='1' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3C/g%3E%3Cg transform='translate(100, 15) scale(0.65)'%3E%3Cpath d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/g%3E%3Cg transform='translate(15, 95) scale(0.6)'%3E%3Cellipse cx='16' cy='8' rx='8' ry='3'/%3E%3Cpath d='M8 8v6c0 1.66 3.58 3 8 3s8-1.34 8-3V8'/%3E%3Cpath d='M8 14v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6'/%3E%3C/g%3E%3Cg transform='translate(100, 95) scale(0.6)'%3E%3Cpath d='M3 21h18M3 17l6-6 4 4 8-8'/%3E%3Ccircle cx='21' cy='7' r='1' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3C/g%3E%3Ccircle cx='50' cy='70' r='1.5' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3Ccircle cx='130' cy='70' r='1.5' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3Ccircle cx='70' cy='130' r='1.5' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3Ccircle cx='70' cy='30' r='1.5' fill='%234f46e5' fill-opacity='0.05' stroke='none'/%3E%3C/svg%3E") !important;
       background-repeat: repeat !important;
@@ -520,10 +518,6 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h2 id="page-title" class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Přehled financí</h2>
             <span id="header-db-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/60 uppercase tracking-wide"></span>
-            <span id="header-github-sync-badge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/60 uppercase tracking-wide flex items-center gap-1">
-              <i data-lucide="cloud" class="w-3 h-3"></i>
-              <span id="header-github-sync-text">Cloud Sync</span>
-            </span>
           </div>
           <p id="page-subtitle" class="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">Statistiky a analýza vašich příjmů a výdajů</p>
         </div>
@@ -2403,9 +2397,8 @@
             Vytvořit novou databázi
           </button>
         </div>
+      </div>
 
-
-      
       <div class="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-[11px] text-indigo-700 leading-relaxed font-semibold text-center">
         <p id="db-setup-sync-info-text">
           Aplikace pracuje přímo s vybraným souborem na vašem disku. Veškeré změny se automaticky ukládají do tohoto souboru.
@@ -2872,18 +2865,15 @@
     // Core database settings
     let dbConfig = {
       name: '',
-      storageType: 'file' // 'file' (direct disk write), 'fallback' (iOS/Safari manual download), or 'github' (cloud sync)
+      storageType: 'file' // 'file' (direct zápis na disk), nebo 'fallback' (iOS/Safari manuální export)
     };
 
-    // GitHub Sync State
-    let githubToken = localStorage.getItem('fingo_github_token') || '';
-    let githubGistId = '';
-    let isGithubSyncing = false;
-
-    function getGitHubGistIdKey(dbName) {
-      const cleanName = (dbName || '').trim();
-      return cleanName ? `fingo_github_gist_id_${cleanName}` : 'fingo_github_gist_id';
-    }
+    // Úklid po odstraněné GitHub synchronizaci — smaže dříve uložený token a Gist ID
+    try {
+      Object.keys(localStorage)
+        .filter(k => k === 'fingo_github_token' || k.startsWith('fingo_github_gist_id'))
+        .forEach(k => localStorage.removeItem(k));
+    } catch (e) { /* localStorage nemusí být dostupné */ }
 
     // State tracks transactions, recurring payments, categories, and loans
     let state = {
@@ -2942,15 +2932,7 @@
       "Synchronizace": { en: "Sync", de: "Synchronisation" },
       "Načíst z iCloud": { en: "Load from iCloud", de: "Aus iCloud laden" },
       "Uložit do iCloud": { en: "Save to iCloud", de: "In iCloud speichern" },
-      "GitHub Cloud Synchronizace": { en: "GitHub Cloud Sync", de: "GitHub Cloud-Synchronisation" },
-      "Synchronizujte databázi s tajným GitHub Gist pro automatický přenos mezi počítačem a mobilem.": { en: "Synchronize your database with a secret GitHub Gist for automatic transfer between computer and mobile.", de: "Synchronisieren Sie Ihre Datenbank mit einem geheimen GitHub Gist für den automatischen Übertrag zwischen PC und Mobilgerät." },
-      "GitHub Personal Access Token (PAT)": { en: "GitHub Personal Access Token (PAT)", de: "GitHub Personal Access Token (PAT)" },
-      "Gist ID": { en: "Gist ID", de: "Gist ID" },
       "Stav synchronizace:": { en: "Sync Status:", de: "Synchronisationsstatus:" },
-      "Aktivovat / Vytvořit nový Gist": { en: "Activate / Create New Gist", de: "Aktivieren / Neuen Gist erstellen" },
-      "Odpojit cloud synchronizaci": { en: "Disconnect Cloud Sync", de: "Cloud-Sicherung trennen" },
-      "Připojit přes GitHub Cloud": { en: "Connect via GitHub Cloud", de: "Über GitHub Cloud verbinden" },
-      "Gist ID (nepovinné)": { en: "Gist ID (optional)", de: "Gist-ID (optional)" },
       "Připojit": { en: "Connect", de: "Verbinden" },
       "Zpět": { en: "Back", de: "Zurück" },
       "Cloud Synchronizace": { en: "Cloud Sync", de: "Cloud-Synchronisation" },
@@ -3110,10 +3092,10 @@
       "Zbývá doplatit:": { en: "Remaining balance:", de: "Restschuld:" },
       "Zbývá času:": { en: "Time remaining:", de: "Verbleibende Zeit:" },
       "Datum konce:": { en: "End Date:", de: "Enddatum:" },
-      "Splačeno": { en: "Paid", de: "Gezahlt" },
+      "Splaceno": { en: "Paid", de: "Gezahlt" },
       "zbývá": { en: "remaining", de: "verbleibend" },
       "Půjčeno:": { en: "Borrowed:", de: "Geliehen:" },
-      "Splačeno:": { en: "Repaid:", de: "Zurückgezahlt:" },
+      "Splaceno:": { en: "Repaid:", de: "Zurückgezahlt:" },
       "Zapsat splátku": { en: "Record Payment", de: "Rate verbuchen" },
       "Úvěr": { en: "Loan", de: "Kredit" },
       "Hypotéka": { en: "Mortgage", de: "Hypothek" },
@@ -3347,15 +3329,17 @@
         iconColor = 'text-indigo-500';
       }
       
+      // Zpráva se vkládá jako TEXT (ne HTML) — může obsahovat názvy zadané uživatelem
       toast.innerHTML = `
         <div class="${iconColor} shrink-0">
           <i data-lucide="${iconName}" class="w-5 h-5"></i>
         </div>
-        <p class="text-xs font-bold text-slate-700 leading-tight">${message}</p>
+        <p class="text-xs font-bold text-slate-700 leading-tight toast-message"></p>
         <button class="ml-auto text-slate-400 hover:text-slate-600 transition-colors p-0.5" onclick="this.parentElement.remove()">
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
         </button>
       `;
+      toast.querySelector('.toast-message').textContent = message;
       
       container.appendChild(toast);
       lucide.createIcons();
@@ -3370,11 +3354,45 @@
       }, 3500);
     }
 
+    // Formátuje Date jako YYYY-MM-DD v MÍSTNÍM čase.
+    // (toISOString() převádí na UTC a v ČR by před 1./2. hodinou ranní vracelo včerejší den)
+    function toLocalISODate(date) {
+      const d = (date instanceof Date) ? date : parseDateSafe(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // Přičte měsíce s oříznutím dne v měsíci (31. 1. + 1 měsíc = 28. 2., ne 3. 3.).
+    // anchorDay = původní den splatnosti, aby se po únoru vrátil zpět na 31.
+    function addMonthsClamped(date, months, anchorDay) {
+      const d = new Date(date.getTime());
+      const day = anchorDay || d.getDate();
+      d.setDate(1);
+      d.setMonth(d.getMonth() + months);
+      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      d.setDate(Math.min(day, lastDay));
+      return d;
+    }
+
+    // Posune datum o jednu periodu opakování. Vrací nový Date, nebo null pro neznámou frekvenci.
+    function advanceRecurrenceDate(date, frequency, anchorDay) {
+      if (frequency === 'weekly') {
+        const d = new Date(date.getTime());
+        d.setDate(d.getDate() + 7);
+        return d;
+      }
+      if (frequency === 'monthly') return addMonthsClamped(date, 1, anchorDay);
+      if (frequency === 'yearly') return addMonthsClamped(date, 12, anchorDay);
+      return null;
+    }
+
     // Helper to generate ISO date strings relative to today
     function getRelativeDateString(daysOffset) {
       const d = new Date();
       d.setDate(d.getDate() + daysOffset);
-      return d.toISOString().split('T')[0];
+      return toLocalISODate(d);
     }
 
     // Helper to format currency dynamically
@@ -3642,7 +3660,7 @@
 
     // Set all date inputs in the app to today or start of month
     function setTodayDateInputs() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalISODate(new Date());
       
       const transDate = document.getElementById('trans-date');
       if (transDate) transDate.value = today;
@@ -3662,7 +3680,7 @@
       
       if (globalStart) {
         const now = new Date();
-        const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        const start = toLocalISODate(new Date(now.getFullYear(), now.getMonth(), 1));
         globalStart.value = start;
       }
       
@@ -3714,8 +3732,44 @@
         { id: 'g-1', name: 'Nové rodinné auto', targetAmount: 300000, currentAmount: 85000, targetDate: '2028-12-31', notes: 'Na koupi nového rodinného vozu Škoda Octavia', icon: 'car' },
         { id: 'g-2', name: 'Letní dovolená Řecko', targetAmount: 50000, currentAmount: 20000, targetDate: '2026-08-15', notes: 'Zájezd s rodinou do Řecka', icon: 'plane' }
       ];
-      
+
       saveState();
+    }
+
+    // Prázdná databáze pro "Vytvořit novou databázi" — bez fiktivních demo transakcí
+    function initEmptyData() {
+      state.transactions = [];
+      state.recurring = [];
+      state.categories = [...defaultCategories];
+      state.loans = [];
+      state.budgets = [];
+      state.savingsGoals = [];
+      saveState();
+    }
+
+    // Zobrazí přehled automaticky zaúčtovaných pravidelných plateb
+    // (funkce dříve chyběla a její volání shazovalo celé otevření databáze)
+    function showProcessedRecurringModal(processedLog) {
+      if (!processedLog || processedLog.length === 0) return;
+      const listEl = document.getElementById('recurring-processed-list');
+      const modal = document.getElementById('modal-recurring-processed');
+      if (!listEl || !modal) return;
+
+      listEl.innerHTML = processedLog.map(item => {
+        const sign = item.type === 'income' ? '+' : '-';
+        const colorClass = item.type === 'income' ? 'text-emerald-600' : 'text-rose-600';
+        return `
+          <div class="flex items-center justify-between text-xs">
+            <div class="min-w-0 pr-2">
+              <p class="font-bold text-slate-700 truncate">${escapeHtml(item.name)}</p>
+              <p class="text-[10px] text-slate-400 font-semibold">${formatDateString(item.date)}</p>
+            </div>
+            <span class="font-bold ${colorClass} shrink-0">${sign}${formatCurrency(item.amount)}</span>
+          </div>`;
+      }).join('');
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
     }
 
     // Auto processes recurring payments that fall on or before today
@@ -3730,9 +3784,19 @@
       state.recurring.forEach(rec => {
         let nextDueDateObj = parseDateSafe(rec.nextDueDate);
         nextDueDateObj.setHours(0, 0, 0, 0);
-        
+
+        // Neznámá frekvence by způsobila nekonečnou smyčku — položku přeskočíme
+        if (!['weekly', 'monthly', 'yearly'].includes(rec.frequency)) {
+          console.warn(`Opakovaná platba "${rec.name}" má neznámou frekvenci "${rec.frequency}" — přeskakuji.`);
+          recurringToKeep.push(rec);
+          return;
+        }
+
+        // Den splatnosti, ke kterému se měsíční platby vracejí (např. 31. i po únoru)
+        const anchorDay = parseInt(rec.bookingDay, 10) || nextDueDateObj.getDate();
+
         let keepRecurring = true;
-        
+
         while (nextDueDateObj <= today) {
           // Kontrola data ukončení před zpracováním transakce
           if (rec.endDate) {
@@ -3744,7 +3808,7 @@
             }
           }
           
-          const transDate = nextDueDateObj.toISOString().split('T')[0];
+          const transDate = toLocalISODate(nextDueDateObj);
           
           const newTrans = {
             id: 't-rec-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
@@ -3775,12 +3839,12 @@
           if (rec.frequency === 'weekly') {
             nextDueDateObj.setDate(nextDueDateObj.getDate() + 7);
           } else if (rec.frequency === 'monthly') {
-            nextDueDateObj.setMonth(nextDueDateObj.getMonth() + 1);
+            nextDueDateObj = addMonthsClamped(nextDueDateObj, 1, anchorDay);
           } else if (rec.frequency === 'yearly') {
-            nextDueDateObj.setFullYear(nextDueDateObj.getFullYear() + 1);
+            nextDueDateObj = addMonthsClamped(nextDueDateObj, 12, anchorDay);
           }
-          
-          rec.nextDueDate = nextDueDateObj.toISOString().split('T')[0];
+
+          rec.nextDueDate = toLocalISODate(nextDueDateObj);
           wasModified = true;
           
           // Znovu zkontrolovat, zda posunuté příští datum již nepřekročilo datum ukončení
@@ -4106,10 +4170,7 @@
     function selectAndOpenDatabase(name, storageType, preventTabSwitch = false) {
       dbConfig.name = name;
       dbConfig.storageType = storageType;
-      
-      // Update Gist ID association for this database name
-      githubGistId = localStorage.getItem(getGitHubGistIdKey(name)) || '';
-      
+
       safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
       
       const filePrefix = currentLanguage === 'cs' ? 'Soubor: ' : (currentLanguage === 'en' ? 'File: ' : 'Datei: ');
@@ -4122,39 +4183,25 @@
       const storageTypeLabel = document.getElementById('settings-db-storage-type');
       if (storageType === 'file') {
         storageTypeLabel.innerText = 'Přímý zápis na disk (Auto-Save)';
-      } else if (storageType === 'github') {
-        storageTypeLabel.innerText = 'GitHub Cloud Synchronizace (Auto-Save)';
       } else {
         storageTypeLabel.innerText = 'Dočasná paměť (Fallback s exportem)';
       }
-      
+
       // Toggle iOS/fallback sync UI layouts
       const iosBanner = document.getElementById('ios-sync-banner');
       const settingsIosBtn = document.getElementById('settings-ios-sync-btn');
       const desktopSyncContainer = document.getElementById('desktop-sync-status-container');
       const settingsFileBadge = document.getElementById('settings-file-sync-status');
-      const githubSidebarContainer = document.getElementById('sidebar-github-sync-container');
-      
+
       if (storageType === 'fallback') {
         settingsIosBtn.classList.remove('hidden');
         desktopSyncContainer.classList.remove('hidden');
         settingsFileBadge.classList.add('hidden');
-        if (githubSidebarContainer) githubSidebarContainer.classList.add('hidden');
-      } else if (storageType === 'github') {
-        iosBanner.classList.add('hidden');
-        settingsIosBtn.classList.add('hidden');
-        desktopSyncContainer.classList.add('hidden');
-        settingsFileBadge.classList.add('hidden');
-        if (githubSidebarContainer) {
-          githubSidebarContainer.classList.remove('hidden');
-          updateGitHubSyncStatusUI('synced');
-        }
       } else {
         iosBanner.classList.add('hidden');
         settingsIosBtn.classList.add('hidden');
         desktopSyncContainer.classList.add('hidden');
         settingsFileBadge.classList.remove('hidden');
-        if (githubSidebarContainer) githubSidebarContainer.classList.add('hidden');
       }
       
       loadState();
@@ -4188,13 +4235,24 @@
     
     function createFallbackDatabase() {
       triggerHapticFeedback();
+
+      // Pod tímto názvem už mohou existovat uložená data — nepřepisovat je bez potvrzení
+      const existing = safeStorage.getItem('fingo_db_data_finance.json');
+      if (existing) {
+        const overwrite = confirm('Pod názvem „finance.json" už existují uložená data. Opravdu je chcete přepsat prázdnou databází? Tato akce je nevratná.');
+        if (!overwrite) {
+          selectAndOpenDatabase('finance.json', 'fallback');
+          return;
+        }
+      }
+
       dbConfig.name = 'finance.json';
       dbConfig.storageType = 'fallback';
-      
+
       safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
-      
-      initDemoData();
-      
+
+      initEmptyData();
+
       selectAndOpenDatabase('finance.json', 'fallback');
     }
 
@@ -4212,16 +4270,14 @@
         activeFileHandle = handle;
         await storeFileHandle(handle);
         
-        // Write initial seed data
+        // Nová databáze začíná prázdná, jen s výchozími kategoriemi
         const initialSeed = {
-          transactions: [
-            { id: 't-1', type: 'income', amount: 48000, category: 'cat-vyplata', date: getRelativeDateString(-25), description: 'Výplata hlavní pracovní poměr' },
-            { id: 't-2', type: 'expense', amount: 14500, category: 'cat-bydleni', date: getRelativeDateString(-24), description: 'Měsíční nájemné byt 2+kk' }
-          ],
-          recurring: [
-            { id: 'r-1', name: 'Nájemné', type: 'expense', amount: 14500, frequency: 'monthly', category: 'cat-bydleni', nextDueDate: getRelativeDateString(2) }
-          ],
-          categories: [...defaultCategories]
+          transactions: [],
+          recurring: [],
+          categories: [...defaultCategories],
+          loans: [],
+          budgets: [],
+          savingsGoals: []
         };
         
         const writable = await handle.createWritable();
@@ -4257,12 +4313,14 @@
         
         activeFileHandle = handle;
         await storeFileHandle(handle);
-        
+
         state.transactions = parsed.transactions || [];
         state.recurring = parsed.recurring || [];
         state.categories = parsed.categories || [];
         state.loans = parsed.loans || [];
-        
+        state.budgets = parsed.budgets || [];
+        state.savingsGoals = parsed.savingsGoals || [];
+
         if (state.categories.length === 0) {
           state.categories = [...defaultCategories];
         } else if (!state.categories.some(c => c.id === 'cat-uvery')) {
@@ -4307,7 +4365,9 @@
           state.recurring = parsed.recurring || [];
           state.categories = parsed.categories || [];
           state.loans = parsed.loans || [];
-          
+          state.budgets = parsed.budgets || [];
+          state.savingsGoals = parsed.savingsGoals || [];
+
           selectAndOpenDatabase(activeFileHandle.name, 'file');
         } else {
           showToast("Přístup k souboru byl odmítnut.", "error");
@@ -4315,361 +4375,6 @@
       } catch(err) {
         console.error(err);
         showToast("Došlo k chybě při schvalování oprávnění.", "error");
-      }
-    }
-
-    // ================= GITHUB GIST CLOUD SYNC =================
-
-    function getGitHubSyncHeaders(token) {
-      return {
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      };
-    }
-
-    function updateGitHubSyncStatusUI(status, text) {
-      const settingsBadge = document.getElementById('settings-github-status-badge');
-      const sidebarContainer = document.getElementById('sidebar-github-sync-container');
-      const sidebarText = document.getElementById('sidebar-github-status-text');
-      const headerBadge = document.getElementById('header-github-sync-badge');
-      const headerText = document.getElementById('header-github-sync-text');
-      
-      let badgeHtml = '';
-      let sidebarHtml = '';
-      let colorClass = '';
-      let isSyncing = (status === 'syncing');
-
-      if (status === 'synced') {
-        badgeHtml = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ${text || 'Synchronizováno'}`;
-        sidebarHtml = `<i data-lucide="cloud" class="w-3.5 h-3.5 text-emerald-500"></i> <span>${text || 'Synchronizováno'}</span>`;
-        colorClass = 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/60';
-        if (headerBadge) headerBadge.classList.remove('hidden');
-      } else if (status === 'syncing') {
-        badgeHtml = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span> ${text || 'Synchronizuji...'}`;
-        sidebarHtml = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-500 animate-spin"></i> <span>${text || 'Synchronizuji...'}</span>`;
-        colorClass = 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/60';
-        if (headerBadge) headerBadge.classList.remove('hidden');
-      } else if (status === 'error') {
-        badgeHtml = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> ${text || 'Chyba připojení'}`;
-        sidebarHtml = `<i data-lucide="cloud-off" class="w-3.5 h-3.5 text-rose-500"></i> <span>${text || 'Chyba připojení'}</span>`;
-        colorClass = 'bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/60';
-        if (headerBadge) headerBadge.classList.remove('hidden');
-      } else {
-        badgeHtml = `<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ${text || 'Neaktivní'}`;
-        if (headerBadge) headerBadge.classList.add('hidden');
-        if (sidebarContainer) sidebarContainer.classList.add('hidden');
-        return;
-      }
-
-      if (settingsBadge) {
-        settingsBadge.innerHTML = badgeHtml;
-        settingsBadge.className = `inline-flex items-center gap-1.5 font-bold ${colorClass.split(' ')[2]}`;
-      }
-
-      if (sidebarContainer && dbConfig.storageType === 'github') {
-        sidebarContainer.classList.remove('hidden');
-        if (sidebarText) {
-          sidebarText.innerHTML = sidebarHtml;
-          sidebarText.className = `flex items-center justify-center gap-1.5 py-1 text-[10px] font-bold ${colorClass.split(' ')[2]}`;
-        }
-      }
-
-      if (headerBadge && dbConfig.storageType === 'github') {
-        headerBadge.className = `px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide flex items-center gap-1 ${colorClass}`;
-        if (headerText) {
-          headerText.innerText = isSyncing ? 'Syncing...' : (status === 'error' ? 'Chyba Sync' : 'Cloud Sync');
-        }
-      }
-
-      // Toggle settings action buttons visibility
-      const connectBtn = document.getElementById('settings-github-connect-btn');
-      const manualGroup = document.getElementById('settings-github-manual-sync-group');
-      const disconnectBtn = document.getElementById('settings-github-disconnect-btn');
-
-      if (status === 'synced' || status === 'syncing' || status === 'error') {
-        if (githubToken && githubGistId && dbConfig.storageType === 'github') {
-          if (connectBtn) connectBtn.classList.add('hidden');
-          if (manualGroup) manualGroup.classList.remove('hidden');
-          if (disconnectBtn) disconnectBtn.classList.remove('hidden');
-        }
-      } else {
-        if (connectBtn) connectBtn.classList.remove('hidden');
-        if (manualGroup) manualGroup.classList.add('hidden');
-        if (disconnectBtn) disconnectBtn.classList.add('hidden');
-      }
-
-      lucide.createIcons();
-    }
-
-    async function createGitHubGist(token) {
-      updateGitHubSyncStatusUI('syncing', 'Zakládám Gist...');
-      try {
-        const dbName = dbConfig.name || 'finance.json';
-        const payload = {
-          description: `Fingo Database - ${dbName}`,
-          public: false,
-          files: {
-            [dbName]: {
-              content: JSON.stringify(state, null, 2)
-            }
-          }
-        };
-
-        const res = await fetch('https://api.github.com/gists', {
-          method: 'POST',
-          headers: getGitHubSyncHeaders(token),
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.message || 'Nepodařilo se vytvořit Gist');
-        }
-
-        const data = await res.json();
-        githubToken = token;
-        githubGistId = data.id;
-        localStorage.setItem('fingo_github_token', token);
-        localStorage.setItem(getGitHubGistIdKey(dbName), data.id);
-        
-        // Update standard fallback Gist ID in localStorage for compatibility
-        localStorage.setItem('fingo_github_gist_id', data.id);
-        
-        // Show in settings fields
-        const tField = document.getElementById('settings-github-token');
-        const gField = document.getElementById('settings-github-gist-id');
-        if (tField) tField.value = token;
-        if (gField) gField.value = data.id;
-
-        showToast("Záloha byla úspěšně vytvořena na GitHub Gist.");
-        selectAndOpenDatabase(dbName, 'github', true);
-        updateGitHubSyncStatusUI('synced');
-        
-        // Toggle disconnect button visibility in settings
-        const discBtn = document.getElementById('settings-github-disconnect-btn');
-        if (discBtn) discBtn.classList.remove('hidden');
-
-        return true;
-      } catch (err) {
-        console.error(err);
-        updateGitHubSyncStatusUI('error', 'Chyba založení');
-        showToast(`Chyba: ${err.message}`, 'error');
-        return false;
-      }
-    }
-
-    async function saveToGitHubGist() {
-      if (!githubToken || !githubGistId || isGithubSyncing) return;
-      isGithubSyncing = true;
-      updateGitHubSyncStatusUI('syncing', 'Ukládám...');
-
-      try {
-        const dbName = dbConfig.name || 'finance.json';
-        const payload = {
-          files: {
-            [dbName]: {
-              content: JSON.stringify(state, null, 2)
-            }
-          }
-        };
-
-        const res = await fetch(`https://api.github.com/gists/${githubGistId}`, {
-          method: 'PATCH',
-          headers: getGitHubSyncHeaders(githubToken),
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          throw new Error('Nepodařilo se uložit data na GitHub');
-        }
-
-        updateGitHubSyncStatusUI('synced');
-        isGithubSyncing = false;
-        
-        const lastSyncKey = 'fingo_db_last_sync_time_' + dbConfig.name;
-        const nowStr = new Date().toLocaleString('cs-CZ', { dateStyle: 'short', timeStyle: 'short' });
-        safeStorage.setItem(lastSyncKey, nowStr);
-      } catch (err) {
-        console.error(err);
-        isGithubSyncing = false;
-        updateGitHubSyncStatusUI('error', 'Chyba zápisu');
-      }
-    }
-
-    async function loadFromGitHubGist(token, gistId) {
-      updateGitHubSyncStatusUI('syncing', 'Stahuji...');
-      try {
-        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-          headers: getGitHubSyncHeaders(token)
-        });
-
-        if (!res.ok) {
-          throw new Error('Nepodařilo se stáhnout data z GitHubu. Zkontrolujte token a Gist ID.');
-        }
-
-        const data = await res.json();
-        
-        // Find the first JSON file in Gist
-        const filesList = Object.values(data.files);
-        const file = filesList.find(f => f.filename.endsWith('.json')) || filesList[0];
-        
-        if (!file || !file.content) {
-          throw new Error('Gist neobsahuje platný soubor databáze .json');
-        }
-
-        const dbName = file.filename || 'finance.json';
-        const parsed = JSON.parse(file.content);
-        state.transactions = parsed.transactions || [];
-        state.recurring = parsed.recurring || [];
-        state.categories = parsed.categories || [];
-        state.loans = parsed.loans || [];
-        state.budgets = parsed.budgets || [];
-        state.savingsGoals = parsed.savingsGoals || [];
-
-        githubToken = token;
-        githubGistId = gistId;
-        localStorage.setItem('fingo_github_token', token);
-        localStorage.setItem(getGitHubGistIdKey(dbName), gistId);
-        
-        // Update standard fallback Gist ID in localStorage for compatibility
-        localStorage.setItem('fingo_github_gist_id', gistId);
-        
-        // Cache locally for offline usage
-        safeStorage.setItem(`fingo_db_data_${dbName}`, JSON.stringify(state));
-
-        // Show in settings fields
-        const tField = document.getElementById('settings-github-token');
-        const gField = document.getElementById('settings-github-gist-id');
-        if (tField) tField.value = token;
-        if (gField) gField.value = gistId;
-
-        selectAndOpenDatabase(dbName, 'github', true);
-        updateGitHubSyncStatusUI('synced');
-        showToast(`Data "${dbName}" byla stažena z GitHub Gistu.`);
-
-        // Toggle disconnect button visibility in settings
-        const discBtn = document.getElementById('settings-github-disconnect-btn');
-        if (discBtn) discBtn.classList.remove('hidden');
-
-        return true;
-      } catch (err) {
-        console.error(err);
-        updateGitHubSyncStatusUI('error', 'Chyba stahování');
-        showToast(`Chyba: ${err.message}`, 'error');
-        return false;
-      }
-    }
-
-    function handleGitHubSyncActivate() {
-      triggerHapticFeedback();
-      const tokenInput = document.getElementById('settings-github-token');
-      const gistInput = document.getElementById('settings-github-gist-id');
-      if (!tokenInput) return;
-
-      const token = tokenInput.value.trim();
-      const gistId = gistInput ? gistInput.value.trim() : '';
-
-      if (!token) {
-        showToast("Zadejte platný GitHub token.", "error");
-        return;
-      }
-
-      if (gistId) {
-        loadFromGitHubGist(token, gistId);
-      } else {
-        createGitHubGist(token);
-      }
-    }
-
-    function handleGitHubSyncDisconnect() {
-      triggerHapticFeedback();
-      const dbName = dbConfig.name || 'finance.json';
-      localStorage.removeItem(getGitHubGistIdKey(dbName));
-      githubGistId = '';
-      
-      const tokenInput = document.getElementById('settings-github-token');
-      const gistInput = document.getElementById('settings-github-gist-id');
-      if (gistInput) gistInput.value = '';
-
-      updateGitHubSyncStatusUI('inactive');
-      
-      const discBtn = document.getElementById('settings-github-disconnect-btn');
-      if (discBtn) discBtn.classList.add('hidden');
-
-      showToast("GitHub synchronizace byla odpojena.");
-      
-      // Reset database config to fallback
-      dbConfig.storageType = 'fallback';
-      dbConfig.name = 'finance.json';
-      safeStorage.setItem(LAST_OPENED_KEY, JSON.stringify(dbConfig));
-      selectAndOpenDatabase('finance.json', 'fallback');
-    }
-
-    function handleGitHubSyncManualPull() {
-      triggerHapticFeedback();
-      if (!githubToken || !githubGistId) {
-        showToast("GitHub cloud není připojen.", "error");
-        return;
-      }
-      showToast("Stahuji nejnovější data z cloudu...");
-      loadFromGitHubGist(githubToken, githubGistId);
-    }
-
-    function handleGitHubSyncManualPush() {
-      triggerHapticFeedback();
-      if (!githubToken || !githubGistId) {
-        showToast("GitHub cloud není připojen.", "error");
-        return;
-      }
-      showToast("Odesílám aktuální data do cloudu...");
-      saveToGitHubGist();
-    }
-
-    // Startup Modal Form Handlers
-    function openGitHubSyncStartup() {
-      triggerHapticFeedback();
-      document.getElementById('db-setup-initial-actions').classList.add('hidden');
-      document.getElementById('db-setup-github-form').classList.remove('hidden');
-      
-      // Prefill token if available
-      const storedToken = localStorage.getItem('fingo_github_token') || '';
-      const storedGistId = localStorage.getItem('fingo_github_gist_id') || '';
-      const sToken = document.getElementById('startup-github-token');
-      const sGist = document.getElementById('startup-github-gist-id');
-      if (sToken) sToken.value = storedToken;
-      if (sGist) sGist.value = storedGistId;
-    }
-
-    function cancelGitHubSyncStartup() {
-      triggerHapticFeedback();
-      document.getElementById('db-setup-github-form').classList.add('hidden');
-      document.getElementById('db-setup-initial-actions').classList.remove('hidden');
-    }
-
-    async function submitGitHubSyncStartup() {
-      triggerHapticFeedback();
-      const tokenInput = document.getElementById('startup-github-token');
-      const gistInput = document.getElementById('startup-github-gist-id');
-      if (!tokenInput) return;
-
-      const token = tokenInput.value.trim();
-      const gistId = gistInput ? gistInput.value.trim() : '';
-
-      if (!token) {
-        showToast("Zadejte platný GitHub token.", "error");
-        return;
-      }
-
-      let success = false;
-      if (gistId) {
-        success = await loadFromGitHubGist(token, gistId);
-      } else {
-        success = await createGitHubGist(token);
-      }
-
-      if (success) {
-        document.getElementById('modal-db-startup').classList.add('hidden');
       }
     }
 
@@ -4725,6 +4430,8 @@
             return;
           } catch(err) {
             console.error("Failed to write to connected file handle", err);
+            // Zápis selhal — uživatel o tom MUSÍ vědět, jinak si myslí, že má uloženo
+            showToast("Pozor: zápis do souboru databáze selhal! Změny jsou zatím jen v prohlížeči. Zkuste soubor znovu otevřít.", "error");
           }
         }
       }
@@ -4734,12 +4441,6 @@
         hasUnsavedChanges = true;
         document.getElementById('ios-sync-banner').classList.remove('hidden');
         updateSyncWidget();
-        return;
-      }
-      
-      // 3. GitHub Gist Cloud Sync
-      if (dbConfig.storageType === 'github') {
-        saveToGitHubGist();
         return;
       }
     }
@@ -4769,8 +4470,11 @@
             state.categories.push({ id: 'cat-uvery', name: 'Úvěrové produkty', color: '#6366f1', icon: 'landmark' });
           }
         } catch(e) {
-          console.error("Failed to parse state, initializing demo data", e);
-          initDemoData();
+          console.error("Failed to parse state", e);
+          // Poškozená data NEPŘEPISOVAT — uložit záchrannou kopii a teprve pak začít znovu
+          try { safeStorage.setItem(key + '.corrupt-backup', stored); } catch(be) { /* ignore */ }
+          showToast("Uložená data se nepodařilo načíst (poškozený záznam). Záloha byla uložena, začínám s prázdnou databází.", "error");
+          initEmptyData();
         }
       } else {
         initDemoData();
@@ -4817,7 +4521,7 @@
         // Seed today's date if empty
         const fromInput = document.getElementById('pdf-export-from');
         const toInput = document.getElementById('pdf-export-to');
-        const today = new Date().toISOString().split('T')[0];
+        const today = toLocalISODate(new Date());
         if (!fromInput.value) fromInput.value = today;
         if (!toInput.value) toInput.value = today;
       } else {
@@ -4825,11 +4529,15 @@
       }
     }
 
-    const escapeHtml = (str) => String(str)
-      .split('&').join('&amp;')
-      .split('<').join('&lt;')
-      .split('>').join('&gt;')
-      .split('"').join('&quot;');
+    // Ošetření textu před vložením do innerHTML — POVINNÉ pro vše, co zadal uživatel
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .split('&').join('&amp;')
+        .split('<').join('&lt;')
+        .split('>').join('&gt;')
+        .split('"').join('&quot;')
+        .split("'").join('&#39;');
+    }
 
     function generatePdfReport() {
       triggerHapticFeedback();
@@ -5217,26 +4925,6 @@
         case 'settings':
           pageTitle.innerText = "Záloha & Správa";
           pageSubtitle.innerText = "Export, import a kompletní správa datových souborů";
-          // Populate GitHub sync fields in settings
-          const tField = document.getElementById('settings-github-token');
-          const gField = document.getElementById('settings-github-gist-id');
-          const discBtn = document.getElementById('settings-github-disconnect-btn');
-          if (tField) tField.value = githubToken;
-          if (gField) gField.value = githubGistId;
-          if (discBtn) {
-            if (githubToken && githubGistId) {
-              discBtn.classList.remove('hidden');
-            } else {
-              discBtn.classList.add('hidden');
-            }
-          }
-          if (githubToken && githubGistId && dbConfig.storageType === 'github') {
-            updateGitHubSyncStatusUI('synced');
-          } else if (githubToken && githubGistId) {
-            updateGitHubSyncStatusUI('inactive', 'Připraveno (neaktivní)');
-          } else {
-            updateGitHubSyncStatusUI('inactive');
-          }
           break;
       }
       
@@ -5346,8 +5034,8 @@
       if (select.value === 'custom') {
         customDates.classList.remove('hidden');
         const now = new Date();
-        const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-        const end = now.toISOString().split('T')[0];
+        const start = toLocalISODate(new Date(now.getFullYear(), now.getMonth(), 1));
+        const end = toLocalISODate(now);
         document.getElementById('global-start-date').value = start;
         document.getElementById('global-end-date').value = end;
       } else {
@@ -5405,8 +5093,7 @@
       }
       
       // Generate months up to 1 month into the future
-      const targetDate = new Date();
-      targetDate.setMonth(targetDate.getMonth() + 1);
+      const targetDate = addMonthsClamped(new Date(), 1);
       const maxYear = targetDate.getFullYear();
       const maxMonth = targetDate.getMonth();
       
@@ -5567,25 +5254,18 @@
           const bookingDayNum = parseInt(rec.bookingDay) || 15;
           const tempDate = new Date();
           tempDate.setDate(bookingDayNum);
-          initialDateStr = tempDate.toISOString().split('T')[0];
+          initialDateStr = toLocalISODate(tempDate);
         }
         let currentDueDate = parseDateSafe(initialDateStr);
         currentDueDate.setHours(0, 0, 0, 0);
-        
+        const anchorDay = parseInt(rec.bookingDay, 10) || currentDueDate.getDate();
+
         while (currentDueDate < startOfRange) {
-          const nextDate = new Date(currentDueDate);
-          if (rec.frequency === 'weekly') {
-            nextDate.setDate(nextDate.getDate() + 7);
-          } else if (rec.frequency === 'monthly') {
-            nextDate.setMonth(nextDate.getMonth() + 1);
-          } else if (rec.frequency === 'yearly') {
-            nextDate.setFullYear(nextDate.getFullYear() + 1);
-          } else {
-            break;
-          }
+          const nextDate = advanceRecurrenceDate(currentDueDate, rec.frequency, anchorDay);
+          if (!nextDate) break;
           currentDueDate = nextDate;
         }
-        
+
         while (currentDueDate <= endOfRange) {
           if (currentDueDate >= startOfRange) {
             if (rec.endDate) {
@@ -5595,28 +5275,20 @@
                 break;
               }
             }
-            
+
             futurePayments.push({
               id: rec.id,
               name: rec.name,
               type: rec.type,
               amount: Number(rec.amount),
               category: rec.category,
-              date: currentDueDate.toISOString().split('T')[0],
+              date: toLocalISODate(currentDueDate),
               formattedDate: currentDueDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
             });
           }
-          
-          const nextDate = new Date(currentDueDate);
-          if (rec.frequency === 'weekly') {
-            nextDate.setDate(nextDate.getDate() + 7);
-          } else if (rec.frequency === 'monthly') {
-            nextDate.setMonth(nextDate.getMonth() + 1);
-          } else if (rec.frequency === 'yearly') {
-            nextDate.setFullYear(nextDate.getFullYear() + 1);
-          } else {
-            break;
-          }
+
+          const nextDate = advanceRecurrenceDate(currentDueDate, rec.frequency, anchorDay);
+          if (!nextDate) break;
           currentDueDate = nextDate;
         }
       });
@@ -5633,21 +5305,23 @@
         const loanEnd = details.endDate;
         
         if (loanStart <= endOfRange && loanEnd >= startOfRange) {
-          const dayNum = String(loan.startDate).includes('-') 
-            ? parseDateSafe(loan.startDate).getDate() 
+          const dayNum = String(loan.startDate).includes('-')
+            ? parseDateSafe(loan.startDate).getDate()
             : (parseInt(loan.startDate) || 15);
-            
-          const paymentDate = new Date(startOfRange.getFullYear(), startOfRange.getMonth(), dayNum);
+
+          // Oříznout den na poslední den měsíce (31. v dubnu by přeteklo do května)
+          const lastDayOfMonth = new Date(startOfRange.getFullYear(), startOfRange.getMonth() + 1, 0).getDate();
+          const paymentDate = new Date(startOfRange.getFullYear(), startOfRange.getMonth(), Math.min(dayNum, lastDayOfMonth));
           paymentDate.setHours(0, 0, 0, 0);
-          
+
           if (paymentDate >= startOfRange && paymentDate <= endOfRange && paymentDate >= loanStart && paymentDate <= loanEnd) {
             futurePayments.push({
               id: `loan-${loan.id || Math.random()}`,
               name: loan.name,
               type: 'expense',
               amount: Number(loan.monthlyPayment),
-              category: loan.category || (currentLanguage === 'cs' ? 'Bydlení / Úvěry' : 'Housing / Loans'),
-              date: paymentDate.toISOString().split('T')[0],
+              category: loan.category || 'cat-uvery',
+              date: toLocalISODate(paymentDate),
               formattedDate: paymentDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
             });
           }
@@ -5770,7 +5444,7 @@
               <div class="flex items-center justify-between border-b border-white/5 pb-1.5 last:border-b-0 last:pb-0">
                 <div class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>
-                  <span class="font-bold text-slate-100">${item.name}</span>
+                  <span class="font-bold text-slate-100">${escapeHtml(item.name)}</span>
                 </div>
                 <div class="text-right">
                   <span class="font-bold ${displayColor}">${displaySign}${formatCurrency(item.amount)}</span>
@@ -5899,22 +5573,35 @@
               
               recurring.forEach(r => {
                 if (r.type === 'expense') {
-                  const amt = Number(r.amount);
-                  recMonthly += amt;
-                  
-                  const dayNum = r.bookingDay 
-                    ? (parseInt(r.bookingDay) || 15) 
+                  const amt = Number(r.amount) || 0;
+
+                  const dayNum = r.bookingDay
+                    ? (parseInt(r.bookingDay) || 15)
                     : (r.nextDueDate ? parseDateSafe(r.nextDueDate).getDate() : 15);
-                  
+
+                  // Měsíční částka podle frekvence: týdenní platba proběhne ~4,3× za měsíc,
+                  // roční se počítá jen v měsíci své splatnosti
+                  let monthAmt = amt;
+                  if (r.frequency === 'weekly') {
+                    monthAmt = amt * 52 / 12;
+                  } else if (r.frequency === 'yearly') {
+                    const dueMonth = r.nextDueDate ? parseDateSafe(r.nextDueDate).getMonth() : null;
+                    const dispMonth = match ? parseInt(match[2]) - 1 : nowVal.getMonth();
+                    monthAmt = (dueMonth === dispMonth) ? amt : 0;
+                  }
+                  if (monthAmt === 0) return;
+
+                  recMonthly += monthAmt;
+
                   if (isPastMonth) {
-                    recPaidThisMonth += amt;
+                    recPaidThisMonth += monthAmt;
                   } else if (isFutureMonth) {
-                    recWaitingThisMonth += amt;
+                    recWaitingThisMonth += monthAmt;
                   } else {
                     if (dayNum <= todayDay) {
-                      recPaidThisMonth += amt;
+                      recPaidThisMonth += monthAmt;
                     } else {
-                      recWaitingThisMonth += amt;
+                      recWaitingThisMonth += monthAmt;
                     }
                   }
                 }
@@ -6117,7 +5804,7 @@
                 <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
               </div>
               <div class="min-w-0">
-                <p class="font-extrabold text-slate-800 dark:text-slate-100 text-sm leading-snug truncate">${__(cat.name)}</p>
+                <p class="font-extrabold text-slate-800 dark:text-slate-100 text-sm leading-snug truncate">${escapeHtml(__(cat.name))}</p>
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 tracking-wide">${dateText}</p>
               </div>
             </div>
@@ -6144,7 +5831,7 @@
                         <i data-lucide="${txIcon}" class="w-3 h-3"></i>
                       </span>
                       <div class="min-w-0">
-                        <p class="font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">${tx.description || tx.notes || tx.name || '-'}${futureBadge}</p>
+                        <p class="font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">${escapeHtml(tx.description || tx.notes || tx.name || '-')}${futureBadge}</p>
                         <p class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5">${dateLabel}</p>
                       </div>
                     </div>
@@ -6289,24 +5976,17 @@
     };
 
     function findCategoryForFuturePayment(fp) {
-      let found = state.categories.find(c => c.id === fp.category || c.name === fp.category);
+      const found = state.categories.find(c => c.id === fp.category || c.name === fp.category);
       if (found) return found.id;
-      
+
+      // Starší data mohla mít místo ID kategorie zobrazovaný název
       if (fp.category === 'Bydlení / Úvěry' || fp.category === 'Housing / Loans') {
-        const bydleni = state.categories.find(c => c.id === 'cat-bydleni');
+        const bydleni = state.categories.find(c => c.id === 'cat-bydleni' || c.id === 'cat-uvery');
         if (bydleni) return bydleni.id;
       }
-      
-      const name = fp.name || '';
-      const catName = fp.category || '';
-      const matchDum = state.categories.find(c => c.id === 'cat-1780150601597' || c.name === 'Dům');
-      if (matchDum) {
-        if (name.toLowerCase().includes('dům') || catName.toLowerCase().includes('dům')) {
-          return matchDum.id;
-        }
-      }
-      
-      return 'cat-ostatni';
+
+      const fallback = state.categories.find(c => c.id === 'cat-ostatni');
+      return fallback ? fallback.id : (state.categories[0] ? state.categories[0].id : 'cat-ostatni');
     }
 
 
@@ -6504,16 +6184,16 @@
       categoryData.forEach((cat, idx) => {
         const legendItem = document.createElement('div');
         legendItem.className = 'flex items-center justify-between text-xs py-1.5 px-2 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-xl transition-all cursor-pointer -mx-2';
-        legendItem.setAttribute('onmouseenter', `highlightChartSlice(${idx})`);
-        legendItem.setAttribute('onmouseleave', 'clearChartHighlight()');
-        legendItem.setAttribute('onclick', `filterTransactionsByCategory('${cat.id}')`);
-        
+        legendItem.addEventListener('mouseenter', () => highlightChartSlice(idx));
+        legendItem.addEventListener('mouseleave', () => clearChartHighlight());
+        legendItem.addEventListener('click', () => filterTransactionsByCategory(cat.id));
+
         const futureText = cat.future > 0 ? ` (+${formatCurrency(cat.future)})` : '';
-        
+
         legendItem.innerHTML = `
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${cat.color}"></span>
-            <span class="font-semibold text-slate-700 dark:text-slate-350 truncate">${cat.name}</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-350 truncate">${escapeHtml(cat.name)}</span>
           </div>
           <div class="flex items-center gap-2 text-right shrink-0">
             <span class="font-bold text-slate-900 dark:text-slate-100">${formatCurrency(cat.paid)}<span class="text-[10px] text-slate-400 font-semibold">${futureText}</span></span>
@@ -6555,25 +6235,18 @@
           const bookingDayNum = parseInt(rec.bookingDay) || 15;
           const tempDate = new Date();
           tempDate.setDate(bookingDayNum);
-          initialDateStr = tempDate.toISOString().split('T')[0];
+          initialDateStr = toLocalISODate(tempDate);
         }
         let currentDueDate = parseDateSafe(initialDateStr);
         currentDueDate.setHours(0, 0, 0, 0);
-        
+        const anchorDay = parseInt(rec.bookingDay, 10) || currentDueDate.getDate();
+
         while (currentDueDate < startOfRange) {
-          const nextDate = new Date(currentDueDate);
-          if (rec.frequency === 'weekly') {
-            nextDate.setDate(nextDate.getDate() + 7);
-          } else if (rec.frequency === 'monthly') {
-            nextDate.setMonth(nextDate.getMonth() + 1);
-          } else if (rec.frequency === 'yearly') {
-            nextDate.setFullYear(nextDate.getFullYear() + 1);
-          } else {
-            break;
-          }
+          const nextDate = advanceRecurrenceDate(currentDueDate, rec.frequency, anchorDay);
+          if (!nextDate) break;
           currentDueDate = nextDate;
         }
-        
+
         while (currentDueDate <= endOfMonth) {
           if (currentDueDate >= startOfRange) {
             if (rec.endDate) {
@@ -6585,17 +6258,9 @@
             }
             sum += Number(rec.amount);
           }
-          
-          const nextDate = new Date(currentDueDate);
-          if (rec.frequency === 'weekly') {
-            nextDate.setDate(nextDate.getDate() + 7);
-          } else if (rec.frequency === 'monthly') {
-            nextDate.setMonth(nextDate.getMonth() + 1);
-          } else if (rec.frequency === 'yearly') {
-            nextDate.setFullYear(nextDate.getFullYear() + 1);
-          } else {
-            break;
-          }
+
+          const nextDate = advanceRecurrenceDate(currentDueDate, rec.frequency, anchorDay);
+          if (!nextDate) break;
           currentDueDate = nextDate;
         }
       });
@@ -6612,11 +6277,13 @@
         const loanEnd = details.endDate;
         
         if (loanStart <= endOfMonth && loanEnd >= startOfRange) {
-          const dayNum = String(loan.startDate).includes('-') 
-            ? parseDateSafe(loan.startDate).getDate() 
+          const dayNum = String(loan.startDate).includes('-')
+            ? parseDateSafe(loan.startDate).getDate()
             : (parseInt(loan.startDate) || 15);
-            
-          const currentDueDate = new Date(year, month, dayNum);
+
+          // Oříznout den na poslední den měsíce (31. v dubnu by přeteklo do května)
+          const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+          const currentDueDate = new Date(year, month, Math.min(dayNum, lastDayOfMonth));
           currentDueDate.setHours(0, 0, 0, 0);
           
           if (currentDueDate >= startOfRange && currentDueDate <= endOfMonth && currentDueDate >= loanStart && currentDueDate <= loanEnd) {
@@ -6889,16 +6556,11 @@
         const endDate = document.getElementById('trans-end-date').value || null;
         
         // Vypočítat příští datum splatnosti
-        let nextDueDateObj = parseDateSafe(date);
-        if (frequency === 'weekly') {
-          nextDueDateObj.setDate(nextDueDateObj.getDate() + 7);
-        } else if (frequency === 'monthly') {
-          nextDueDateObj.setMonth(nextDueDateObj.getMonth() + 1);
-        } else if (frequency === 'yearly') {
-          nextDueDateObj.setFullYear(nextDueDateObj.getFullYear() + 1);
-        }
-        const nextDueDate = nextDueDateObj.toISOString().split('T')[0];
-        
+        const startDateObj = parseDateSafe(date);
+        const anchorDay = startDateObj.getDate();
+        const nextDueDateObj = advanceRecurrenceDate(startDateObj, frequency, anchorDay) || startDateObj;
+        const nextDueDate = toLocalISODate(nextDueDateObj);
+
         const newRecurring = {
           id: 'r-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
           name: description || (type === 'income' ? 'Opakovaný příjem' : 'Opakovaný výdaj'),
@@ -6906,6 +6568,7 @@
           amount,
           frequency,
           category,
+          bookingDay: String(anchorDay),
           nextDueDate,
           endDate
         };
@@ -6938,17 +6601,20 @@
       updateDashboardAndData();
     }
 
-    function filterHistory() {
-      const searchQuery = document.getElementById('history-search').value.toLowerCase();
-      const catFilter = document.getElementById('history-cat-filter').value;
-      const sortVal = document.getElementById('history-sort').value;
-      
+    // Vrac\u00ed transakce viditeln\u00e9 v historii: filtr obdob\u00ed + kategorie + vyhled\u00e1v\u00e1n\u00ed.
+    // Pou\u017e\u00edv\u00e1 ji jak vykreslen\u00ed seznamu, tak hromadn\u00fd v\u00fdb\u011br \u2014 mus\u00ed b\u00fdt v\u017edy stejn\u00e9!
+    function getVisibleHistoryTransactions() {
+      const searchEl = document.getElementById('history-search');
+      const catEl = document.getElementById('history-cat-filter');
+      const searchQuery = searchEl ? searchEl.value.toLowerCase() : '';
+      const catFilter = catEl ? catEl.value : 'all';
+
       let list = getFilteredTransactions(state.transactions);
-      
+
       if (catFilter !== 'all') {
         list = list.filter(t => t.category === catFilter);
       }
-      
+
       if (searchQuery) {
         const cleanQuery = searchQuery.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const queryWords = cleanQuery.split(/\s+/).filter(w => w.length > 0);
@@ -6962,7 +6628,17 @@
           return queryWords.every(word => combined.includes(word));
         });
       }
-      
+
+      return list;
+    }
+
+    function filterHistory() {
+      const searchQuery = document.getElementById('history-search').value.toLowerCase();
+      const catFilter = document.getElementById('history-cat-filter').value;
+      const sortVal = document.getElementById('history-sort').value;
+
+      let list = getVisibleHistoryTransactions();
+
       list.sort((a, b) => {
         if (sortVal === 'date-desc') {
           return parseDateSafe(b.date) - parseDateSafe(a.date);
@@ -7049,11 +6725,11 @@
             <input type="checkbox" onchange="toggleTransactionSelection('${t.id}', this.checked)" ${isChecked ? 'checked' : ''} class="transaction-checkbox w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
           </td>
           <td class="py-3.5 font-medium text-slate-500 text-xs">${formatDateString(t.date)}</td>
-          <td class="py-3.5 font-semibold text-slate-800">${t.description || '-'}</td>
+          <td class="py-3.5 font-semibold text-slate-800">${escapeHtml(t.description || '-')}</td>
           <td class="py-3.5">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${__(cat.name)}
+              ${escapeHtml(__(cat.name))}
             </span>
           </td>
           <td class="${amountClass} text-right">${amountSign}${formatCurrency(t.amount)}</td>
@@ -7079,11 +6755,11 @@
               <i data-lucide="${cat.icon || 'help-circle'}" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0">
-              <p class="font-bold text-slate-800 text-sm leading-tight truncate">${t.description || '-'}</p>
+              <p class="font-bold text-slate-800 text-sm leading-tight truncate">${escapeHtml(t.description || '-')}</p>
               <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
                 <span>${formatDateString(t.date)}</span>
                 <span>•</span>
-                <span style="color: ${cat.color}">${__(cat.name)}</span>
+                <span style="color: ${cat.color}">${escapeHtml(__(cat.name))}</span>
               </div>
             </div>
           </div>
@@ -7130,33 +6806,32 @@
         const cat = state.categories.find(c => c.id === fp.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
         const amountSign = fp.type === 'income' ? '+' : '-';
         const amountClass = fp.type === 'income' ? 'text-green-600 font-bold opacity-75' : 'text-rose-600 font-bold opacity-75';
-        
-        const escapedName = (fp.name || '').split("'").join("\\'");
-        const escapedType = (fp.type || 'expense').split("'").join("\\'");
-        const escapedCategory = (fp.category || 'cat-ostatni').split("'").join("\\'");
-        const escapedDate = (fp.date || '').split("'").join("\\'");
-        
+
+        // Do onclick se předává jen ID a datum (přes encodeURIComponent),
+        // názvy zadané uživatelem nesmí nikdy skončit přímo v HTML atributu
+        const fpRef = `'${encodeURIComponent(String(fp.id || ''))}', '${encodeURIComponent(fp.date || '')}'`;
+
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/50 transition-colors group opacity-85';
         tr.innerHTML = `
           <td class="py-3 pl-1"></td>
           <td class="py-3 font-medium text-slate-450 text-xs italic">${formatDateString(fp.date)}</td>
-          <td class="py-3 font-semibold text-slate-700 italic">${fp.name || '-'} <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded ml-1 uppercase">Budoucí</span></td>
+          <td class="py-3 font-semibold text-slate-700 italic">${escapeHtml(fp.name || '-')} <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded ml-1 uppercase">Budoucí</span></td>
           <td class="py-3">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold opacity-85" style="background-color: ${cat.color}10; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${__(cat.name)}
+              ${escapeHtml(__(cat.name))}
             </span>
           </td>
           <td class="${amountClass} text-right italic">${amountSign}${formatCurrency(fp.amount)}</td>
           <td class="py-3 text-right pr-2">
-            <button onclick="bookFuturePayment('${escapedName}', ${fp.amount}, '${escapedType}', '${escapedCategory}', '${escapedDate}')" class="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 rounded-lg transition-all" title="${__('Zaúčtovat transakci')}">
+            <button onclick="bookFuturePayment(${fpRef})" class="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 rounded-lg transition-all" title="${__('Zaúčtovat transakci')}">
               Zaúčtovat
             </button>
           </td>
         `;
         desktopContainer.appendChild(tr);
-        
+
         const card = document.createElement('div');
         card.className = 'flex items-center justify-between p-4 bg-slate-50/60 rounded-xl border border-slate-100 opacity-85';
         card.innerHTML = `
@@ -7165,39 +6840,78 @@
               <i data-lucide="${cat.icon || 'help-circle'}" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0">
-              <p class="font-bold text-slate-650 text-sm leading-tight truncate italic">${fp.name || '-'}</p>
+              <p class="font-bold text-slate-650 text-sm leading-tight truncate italic">${escapeHtml(fp.name || '-')}</p>
               <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
                 <span class="italic text-indigo-500 font-extrabold">Budoucí • ${formatDateString(fp.date)}</span>
                 <span>•</span>
-                <span style="color: ${cat.color}">${__(cat.name)}</span>
+                <span style="color: ${cat.color}">${escapeHtml(__(cat.name))}</span>
               </div>
             </div>
           </div>
-          
+
           <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
             <span class="${amountClass} text-sm italic">${amountSign}${formatCurrency(fp.amount)}</span>
-            <button onclick="bookFuturePayment('${escapedName}', ${fp.amount}, '${escapedType}', '${escapedCategory}', '${escapedDate}')" class="px-2 py-1 text-[10px] font-bold text-indigo-600 active:text-white bg-indigo-50 active:bg-indigo-600 rounded-md transition-all">
+            <button onclick="bookFuturePayment(${fpRef})" class="px-2 py-1 text-[10px] font-bold text-indigo-600 active:text-white bg-indigo-50 active:bg-indigo-600 rounded-md transition-all">
               Zaúčtovat
             </button>
           </div>
         `;
         mobileContainer.appendChild(card);
       });
-      
+
       lucide.createIcons();
     }
 
-    window.bookFuturePayment = function(name, amount, type, category, date) {
+    window.bookFuturePayment = function(fpIdEncoded, fpDateEncoded) {
       triggerHapticFeedback();
-      const newTransaction = {
+      const fpId = decodeURIComponent(fpIdEncoded || '');
+      const fpDate = decodeURIComponent(fpDateEncoded || '');
+
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      const fp = futurePayments.find(p => String(p.id) === fpId && p.date === fpDate)
+              || futurePayments.find(p => String(p.id) === fpId);
+      if (!fp) {
+        showToast("Platbu se nepodařilo najít. Obnovte prosím stránku.", "error");
+        return;
+      }
+
+      const isLoan = String(fp.id).startsWith('loan-');
+      const rec = isLoan ? null : state.recurring.find(r => String(r.id) === String(fp.id));
+
+      // Stejný popis jako u automatického zaúčtování — motor opakovaných plateb
+      // pak pozná, že platba už existuje, a nevytvoří ji podruhé
+      const description = rec ? `Auto-platba: ${rec.name}` : (fp.name || 'Platba');
+
+      const alreadyExists = state.transactions.some(t =>
+        t.date === fp.date && t.description === description &&
+        Math.abs(Number(t.amount) - Number(fp.amount)) < 0.01);
+      if (alreadyExists) {
+        showToast("Tato platba už je v historii zaúčtovaná.", "error");
+        return;
+      }
+
+      state.transactions.push({
         id: 't-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-        type,
-        amount,
-        category,
-        date,
-        description: name
-      };
-      state.transactions.push(newTransaction);
+        type: fp.type,
+        amount: Number(fp.amount),
+        category: findCategoryForFuturePayment(fp),
+        date: fp.date,
+        description
+      });
+
+      // Posunout příští splatnost, aby zaúčtovaná platba nezůstala v seznamu budoucích
+      if (rec) {
+        const bookedDate = parseDateSafe(fp.date);
+        bookedDate.setHours(0, 0, 0, 0);
+        const due = parseDateSafe(rec.nextDueDate);
+        due.setHours(0, 0, 0, 0);
+        if (bookedDate.getTime() === due.getTime()) {
+          const anchorDay = parseInt(rec.bookingDay, 10) || due.getDate();
+          const next = advanceRecurrenceDate(due, rec.frequency, anchorDay);
+          if (next) rec.nextDueDate = toLocalISODate(next);
+        }
+      }
+
       saveState();
       showToast("Platba byla zaúčtována do historie");
       filterHistory();
@@ -7280,8 +6994,10 @@
 
     function toggleSelectAllTransactions(checked) {
       triggerHapticFeedback();
-      const filtered = getFilteredTransactions(state.transactions);
-      
+      // Vybírat jen skutečně VIDITELNÉ transakce (vč. vyhledávání a filtru kategorie),
+      // jinak by hromadné smazání odstranilo i záznamy, které uživatel nevidí
+      const filtered = getVisibleHistoryTransactions();
+
       if (checked) {
         selectedTransactionIds = filtered.map(t => String(t.id));
       } else {
@@ -7306,11 +7022,12 @@
         selectedTransactionIds = selectedTransactionIds.filter(item => String(item) !== strId);
       }
       
-      const filtered = getFilteredTransactions(state.transactions);
+      const filtered = getVisibleHistoryTransactions();
       const selectAllCheckbox = document.getElementById('check-all-transactions');
-      
+
       if (selectAllCheckbox) {
-        const isAllSelected = filtered.length > 0 && filtered.every(t => selectedTransactionIds.map(String).includes(String(t.id)));
+        const selectedSet = new Set(selectedTransactionIds.map(String));
+        const isAllSelected = filtered.length > 0 && filtered.every(t => selectedSet.has(String(t.id)));
         selectAllCheckbox.checked = isAllSelected;
       }
       
@@ -7413,20 +7130,25 @@
       }
       
       const nextDueDate = getNextOccurrenceOfDay(bookingDay);
-      
+
       if (editId) {
         // Edit mode
         const existingIndex = state.recurring.findIndex(r => r.id === editId);
         if (existingIndex > -1) {
+          const existing = state.recurring[existingIndex];
+          // nextDueDate přepočítat jen při změně dne/frekvence — jinak by se úprava
+          // např. částky vrátila k už zaúčtované splatnosti a platba se započítala dvakrát
+          const scheduleChanged = String(existing.bookingDay) !== String(bookingDay)
+            || existing.frequency !== frequency;
           state.recurring[existingIndex] = {
-            ...state.recurring[existingIndex],
+            ...existing,
             name,
             type,
             amount,
             frequency,
             category,
             bookingDay,
-            nextDueDate,
+            nextDueDate: scheduleChanged ? nextDueDate : (existing.nextDueDate || nextDueDate),
             endDate
           };
           saveState();
@@ -7543,12 +7265,12 @@
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/50 transition-colors group';
         tr.innerHTML = `
-          <td class="py-3.5 font-semibold text-slate-800">${r.name}</td>
+          <td class="py-3.5 font-semibold text-slate-800">${escapeHtml(r.name)}</td>
           <td class="py-3.5 text-slate-500 text-xs font-semibold uppercase tracking-wider">${__(freqText)}</td>
           <td class="py-3.5">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${__(cat.name)}
+              ${escapeHtml(__(cat.name))}
             </span>
           </td>
           <td class="py-3.5 font-medium text-slate-500 text-xs">${formatLoanBookingDay(r.bookingDay || r.nextDueDate)}</td>
@@ -7575,7 +7297,7 @@
               <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
             </div>
             <div>
-              <p class="font-bold text-slate-800 text-sm leading-none">${r.name}</p>
+              <p class="font-bold text-slate-800 text-sm leading-none">${escapeHtml(r.name)}</p>
               <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-wide">
                 <span class="text-indigo-600">${__(freqText)}</span>
                 <span>•</span>
@@ -7886,7 +7608,7 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${__(c.name)}</p>
+                  <p class="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">${escapeHtml(__(c.name))}</p>
                   ${isDefault ? `<span class="text-[8px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/80 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0">${__('Systém')}</span>` : ''}
                 </div>
                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">${count} ${__('transakcí')}</span>
@@ -8108,14 +7830,31 @@
           if (typeof parsed !== 'object' || parsed === null || !Array.isArray(parsed.transactions) || !Array.isArray(parsed.categories)) {
             throw new Error("Nahraný soubor není platný JSON objekt.");
           }
-          
-          state.transactions = parsed.transactions;
-          state.recurring = parsed.recurring || [];
-          state.categories = parsed.categories;
-          state.loans = parsed.loans || [];
-          state.budgets = parsed.budgets || [];
-          state.savingsGoals = parsed.savingsGoals || [];
-          
+
+          // Záloha současných dat — import je nevratný (přepíše vše)
+          try { safeStorage.setItem(getDbStorageKey() + '.pre-import-backup', JSON.stringify(state)); } catch(e) { /* ignore */ }
+
+          // Vyčistit záznamy: částky musí být čísla, neplatné položky se zahodí,
+          // jinak by NaN/texty rozbily součty na dashboardu
+          const toNum = (v) => { const n = Number(v); return isFinite(n) ? n : 0; };
+          const cleanItems = (arr) => (arr || []).filter(x => x && typeof x === 'object');
+
+          state.transactions = cleanItems(parsed.transactions).map(t => ({ ...t, amount: toNum(t.amount) }));
+          state.recurring = cleanItems(parsed.recurring).map(r => ({ ...r, amount: toNum(r.amount) }));
+          state.categories = cleanItems(parsed.categories);
+          state.loans = cleanItems(parsed.loans).map(l => ({
+            ...l,
+            totalAmount: toNum(l.totalAmount),
+            remainingAmount: toNum(l.remainingAmount),
+            monthlyPayment: toNum(l.monthlyPayment)
+          }));
+          state.budgets = cleanItems(parsed.budgets).map(b => ({ ...b, amount: toNum(b.amount) }));
+          state.savingsGoals = cleanItems(parsed.savingsGoals).map(g => ({
+            ...g,
+            targetAmount: toNum(g.targetAmount),
+            currentAmount: toNum(g.currentAmount)
+          }));
+
           saveState();
           showToast("Záloha byla úspěšně importována.");
           
@@ -8174,7 +7913,7 @@
       if (date < today) {
         date = getClampedDate(year, month + 1, targetDay);
       }
-      return date.toISOString().split('T')[0];
+      return toLocalISODate(date);
     }
 
     function formatLoanBookingDay(dayVal) {
@@ -8329,7 +8068,7 @@
                     <i data-lucide="${iconName}" class="w-5 h-5"></i>
                   </div>
                   <div>
-                    <h4 class="font-bold text-slate-800 text-sm leading-snug">${loan.name}</h4>
+                    <h4 class="font-bold text-slate-800 text-sm leading-snug">${escapeHtml(loan.name)}</h4>
                     <span class="inline-block px-2 py-0.5 mt-0.5 border text-[9px] font-bold uppercase rounded-md ${bgBadge}">${__(typeLabel)}</span>
                   </div>
                 </div>
@@ -8379,7 +8118,7 @@
               <!-- Progress bar -->
               <div class="mb-4">
                 <div class="flex justify-between items-center text-xs mb-1.5 font-bold">
-                  <span class="text-emerald-500">${__('Splačeno')} ${progressPercent.toFixed(1)}%</span>
+                  <span class="text-emerald-500">${__('Splaceno')} ${progressPercent.toFixed(1)}%</span>
                   <span class="text-slate-500">${formatCurrency(remaining)} ${__('zbývá')}</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-2">
@@ -8387,13 +8126,13 @@
                 </div>
                 <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1 font-medium">
                   <span>${__('Půjčeno:')} ${formatCurrency(total)}</span>
-                  <span>${__('Splačeno:')} ${formatCurrency(paid)}</span>
+                  <span>${__('Splaceno:')} ${formatCurrency(paid)}</span>
                 </div>
               </div>
               
               ${loan.notes ? `
                 <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed mb-4">
-                  ${loan.notes}
+                  ${escapeHtml(loan.notes)}
                 </div>
               ` : ''}
             </div>
@@ -8421,8 +8160,10 @@
         historyTableBody.innerHTML = '';
         historyMobileList.innerHTML = '';
         
-        // Filter transactions for category 'cat-uvery'
-        const loanTrans = (state.transactions || []).filter(t => t.type === 'expense' && t.category === 'cat-uvery');
+        // Splátky úvěrů: kategorie 'cat-uvery' + kategorie nastavené u jednotlivých úvěrů
+        const loanCategories = new Set(['cat-uvery']);
+        (state.loans || []).forEach(l => { if (l.category) loanCategories.add(l.category); });
+        const loanTrans = (state.transactions || []).filter(t => t.type === 'expense' && loanCategories.has(t.category));
         
         // Sort by date desc
         loanTrans.sort((a, b) => parseDateSafe(b.date) - parseDateSafe(a.date));
@@ -8443,7 +8184,7 @@
             tr.className = 'hover:bg-slate-50/50 transition-colors';
             tr.innerHTML = `
               <td class="py-3 font-medium text-slate-500 text-xs">${formatDateString(t.date)}</td>
-              <td class="py-3 font-semibold text-slate-800">${t.description || '-'}</td>
+              <td class="py-3 font-semibold text-slate-800">${escapeHtml(t.description || '-')}</td>
               <td class="py-3">
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wide">
                   <i data-lucide="landmark" class="w-3 h-3"></i>
@@ -8459,7 +8200,7 @@
             card.className = 'bg-slate-50 rounded-xl p-3 border border-slate-100/60 flex items-center justify-between text-xs';
             card.innerHTML = `
               <div class="space-y-1">
-                <p class="font-bold text-slate-800">${t.description || '-'}</p>
+                <p class="font-bold text-slate-800">${escapeHtml(t.description || '-')}</p>
                 <div class="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
                   <span>${formatDateString(t.date)}</span>
                   <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase font-bold text-[8px]">
@@ -8584,11 +8325,11 @@
          const start = parseDateSafe(String(loan.startDate).includes('-') ? loan.startDate : `${new Date().getFullYear()}-${new Date().getMonth()+1}-${loan.startDate}`);
          const durationMonths = loan.durationUnit === 'years' ? loan.duration * 12 : loan.duration;
          const computedEnd = new Date(start.getFullYear(), start.getMonth() + durationMonths, start.getDate());
-         endDateStr = computedEnd.toISOString().split('T')[0];
+         endDateStr = toLocalISODate(computedEnd);
        }
        const loanEndDateInput = document.getElementById('loan-end-date');
        if (loanEndDateInput) {
-         loanEndDateInput.value = endDateStr || new Date().toISOString().split('T')[0];
+         loanEndDateInput.value = endDateStr || toLocalISODate(new Date());
        }
        
        document.getElementById('loan-form-title').innerHTML = `
@@ -8617,7 +8358,7 @@
        document.getElementById('btn-submit-loan-text').innerText = "Přidat úvěr";
        document.getElementById('btn-cancel-loan-edit').classList.add('hidden');
        
-       const today = new Date().toISOString().split('T')[0];
+       const today = toLocalISODate(new Date());
        const start = document.getElementById('loan-start-date');
        if (start) start.value = '15';
        const endDateInput = document.getElementById('loan-end-date');
@@ -8643,7 +8384,7 @@
       document.getElementById('loan-payment-id').value = loan.id;
       document.getElementById('loan-payment-amount').value = loan.monthlyPayment;
       document.getElementById('loan-payment-principal').value = loan.monthlyPayment; // Default principal deduction
-      document.getElementById('loan-payment-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('loan-payment-date').value = toLocalISODate(new Date());
       document.getElementById('loan-payment-description').value = `Splátka úvěru: ${loan.name}`;
       
       document.getElementById('loan-payment-modal-subtitle').innerText = `Úvěr: ${loan.name}, předepsaná splátka: ${formatCurrency(loan.monthlyPayment)}`;
@@ -8759,6 +8500,12 @@
       let csvContent = "\uFEFF"; // Byte Order Mark (BOM) for Excel Czech encoding
       csvContent += "Datum;Typ;Částka;Kategorie;Popis\r\n";
       
+      // Pole s ; uvozovkami nebo novým řádkem se musí obalit uvozovkami, jinak rozbijí sloupce
+      const csvField = (val) => {
+        const s = String(val == null ? '' : val);
+        return /[";\r\n]/.test(s) ? '"' + s.split('"').join('""') + '"' : s;
+      };
+
       state.transactions.forEach(t => {
         const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie' };
         const row = [
@@ -8766,9 +8513,9 @@
           t.type === 'income' ? 'Příjem' : 'Výdaj',
           t.amount || 0,
           cat.name || '',
-          (t.description || '').split('"').join('""')
+          t.description || ''
         ];
-        csvContent += row.join(';') + "\\r\\n";
+        csvContent += row.map(csvField).join(';') + "\r\n";
       });
       
       const now = new Date();
@@ -8891,7 +8638,7 @@
       state.budgets.forEach(b => {
         const cat = state.categories.find(c => c.id === b.categoryId) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
         const spent = getCategoryMonthlySpending(b.categoryId);
-        const percent = Math.min(100, Math.round((spent / b.amount) * 100));
+        const percent = b.amount > 0 ? Math.min(100, Math.round((spent / b.amount) * 100)) : 0;
         const remaining = Math.max(0, b.amount - spent);
         
         let progressColor = 'bg-emerald-500';
@@ -8910,7 +8657,7 @@
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background-color: ${cat.color}">
                   <i data-lucide="${cat.icon || 'tag'}" class="w-4 h-4"></i>
                 </div>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm">${__(cat.name)}</h4>
+                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm">${escapeHtml(__(cat.name))}</h4>
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="startBudgetEdit('${b.categoryId}')" class="text-slate-400 hover:text-indigo-650 transition-colors" title="${__('Upravit rozpočet')}">
@@ -9242,7 +8989,7 @@
                   <i data-lucide="${g.icon || 'target'}" class="w-5 h-5 text-indigo-500"></i>
                 </div>
                 <div>
-                  <h4 class="font-bold text-slate-800 text-sm leading-snug">${g.name}</h4>
+                  <h4 class="font-bold text-slate-800 text-sm leading-snug">${escapeHtml(g.name)}</h4>
                   <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">${__('Cíl')}</span>
                 </div>
               </div>
@@ -9278,7 +9025,7 @@
             
             ${g.notes ? `
               <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed mb-4">
-                ${g.notes}
+                ${escapeHtml(g.notes)}
               </div>
             ` : ''}
           </div>
@@ -9347,7 +9094,7 @@
           div.className = "space-y-1";
           div.innerHTML = `
             <div class="flex items-center justify-between text-xs font-semibold">
-              <span class="text-slate-700 dark:text-slate-350">${cat.name}</span>
+              <span class="text-slate-700 dark:text-slate-350">${escapeHtml(cat.name)}</span>
               <span class="${textColor}">${formatCurrency(b.spent)} / ${formatCurrency(b.amount)} (${percentRound}%)</span>
             </div>
             <div class="w-full bg-slate-150 dark:bg-slate-700 rounded-full h-1.5">
@@ -9391,7 +9138,7 @@
             <div class="flex items-center justify-between text-xs font-semibold">
               <span class="text-slate-700 dark:text-slate-350 flex items-center gap-1.5">
                 <i data-lucide="${g.icon || 'target'}" class="w-3.5 h-3.5 text-indigo-500"></i>
-                ${g.name}
+                ${escapeHtml(g.name)}
               </span>
               <span class="text-slate-700 dark:text-slate-300">${formatCurrency(g.currentAmount)} / ${formatCurrency(g.targetAmount)} (${percentRound}%)</span>
             </div>
@@ -9429,7 +9176,7 @@
       const getRelativeDateStr = (offset) => {
         const d = new Date();
         d.setDate(today.getDate() + offset);
-        return d.toISOString().split('T')[0];
+        return toLocalISODate(d);
       };
 
       const processObject = (obj) => {
@@ -9472,38 +9219,49 @@
               const savedHandle = await retrieveFileHandle();
               if (savedHandle) {
                 activeFileHandle = savedHandle;
-                const permission = await savedHandle.queryPermission({ mode: 'readwrite' });
-                
-                if (permission === 'granted') {
-                  const file = await savedHandle.getFile();
-                  lastFileModifiedTime = file.lastModified;
-                  const text = await file.text();
-                  const parsed = JSON.parse(text);
-                  
-                  state.transactions = parsed.transactions || [];
-                  state.recurring = parsed.recurring || [];
-                  state.categories = parsed.categories || [];
-                  state.loans = parsed.loans || [];
-                  state.budgets = parsed.budgets || [];
-                  state.savingsGoals = parsed.savingsGoals || [];
-                  
-                  selectAndOpenDatabase(savedHandle.name, 'file');
-                } else {
-                  document.getElementById('modal-db-permission').classList.remove('hidden');
+                try {
+                  const permission = await savedHandle.queryPermission({ mode: 'readwrite' });
+
+                  if (permission === 'granted') {
+                    const file = await savedHandle.getFile();
+                    lastFileModifiedTime = file.lastModified;
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+
+                    state.transactions = parsed.transactions || [];
+                    state.recurring = parsed.recurring || [];
+                    state.categories = parsed.categories || [];
+                    state.loans = parsed.loans || [];
+                    state.budgets = parsed.budgets || [];
+                    state.savingsGoals = parsed.savingsGoals || [];
+
+                    selectAndOpenDatabase(savedHandle.name, 'file');
+                  } else {
+                    document.getElementById('modal-db-permission').classList.remove('hidden');
+                    lucide.createIcons();
+                  }
+                } catch (readErr) {
+                  // Chyba čtení souboru NESMÍ smazat konfiguraci a nahrát demo —
+                  // nabídneme uživateli, ať soubor vybere znovu
+                  console.error("Failed to read database file on startup", readErr);
+                  showToast("Soubor databáze se nepodařilo načíst. Vyberte jej prosím znovu.", "error");
+                  document.getElementById('modal-db-startup').classList.remove('hidden');
                   lucide.createIcons();
                 }
                 return;
               }
+              // Odkaz na soubor se ztratil (např. po vymazání dat prohlížeče) —
+              // konfiguraci zachovat a nechat uživatele soubor znovu vybrat
+              showToast("Odkaz na soubor databáze se ztratil. Vyberte soubor prosím znovu.", "error");
+              document.getElementById('modal-db-startup').classList.remove('hidden');
+              lucide.createIcons();
+              return;
             } else if (config.storageType === 'fallback') {
               selectAndOpenDatabase(config.name, 'fallback');
               return;
             } else if (config.storageType === 'github') {
-              selectAndOpenDatabase('fingo_database.json', 'github');
-              if (githubToken && githubGistId) {
-                setTimeout(() => {
-                  loadFromGitHubGist(githubToken, githubGistId);
-                }, 100);
-              }
+              // GitHub synchronizace byla odstraněna — data z mezipaměti otevřeme v lokálním režimu
+              selectAndOpenDatabase(config.name || 'finance.json', 'fallback');
               return;
             }
           }
@@ -9619,8 +9377,14 @@
       const savedCurrency = safeStorage.getItem('fingo_currency') || 'CZK';
       switchCurrency(savedCurrency);
       
-      checkDatabaseStartup();
-      
+      checkDatabaseStartup().catch(err => {
+        // Nečekaná chyba při startu nesmí nechat aplikaci prázdnou bez vysvětlení
+        console.error("Startup failed", err);
+        showToast("Při spouštění aplikace došlo k chybě. Vyberte prosím soubor databáze.", "error");
+        document.getElementById('modal-db-startup').classList.remove('hidden');
+        lucide.createIcons();
+      });
+
       // Auto-refresh when tab is focused (desktop mode with connected file handle)
       window.addEventListener('focus', checkForExternalFileChanges);
     });
@@ -9664,7 +9428,7 @@
             }
           });
           
-          const limit = Number(b.limit);
+          const limit = Number(b.amount);
           if (limit > 0 && spent > 0) {
             const spentPct = spent / limit;
             if (spentPct > monthProgress + 0.15) {
@@ -9697,17 +9461,17 @@
       const expense = filtered.reduce((acc, t) => t.type === 'expense' ? acc + t.amount : acc, 0);
       const surplus = income - expense;
       
-      if (surplus > 2000 && state.goals && state.goals.length > 0) {
-        const incompleteGoals = state.goals.filter(g => g.currentAmount < g.targetAmount);
+      if (surplus > 2000 && state.savingsGoals && state.savingsGoals.length > 0) {
+        const incompleteGoals = state.savingsGoals.filter(g => g.currentAmount < g.targetAmount);
         if (incompleteGoals.length > 0) {
           const targetGoal = incompleteGoals[0];
           let text = '';
           if (currentLanguage === 'cs') {
-            text = `Tento měsíc máte přebytek <strong>${formatCurrency(surplus)}</strong>. Zvažte jeho část převést na spořicí cíl <strong>${targetGoal.name}</strong>.`;
+            text = `Tento měsíc máte přebytek <strong>${formatCurrency(surplus)}</strong>. Zvažte jeho část převést na spořicí cíl <strong>${escapeHtml(targetGoal.name)}</strong>.`;
           } else if (currentLanguage === 'en') {
-            text = `You have a surplus of <strong>${formatCurrency(surplus)}</strong> this month. Consider moving some of it to your savings goal <strong>${targetGoal.name}</strong>.`;
+            text = `You have a surplus of <strong>${formatCurrency(surplus)}</strong> this month. Consider moving some of it to your savings goal <strong>${escapeHtml(targetGoal.name)}</strong>.`;
           } else {
-            text = `Sie haben in diesem Monat einen Überschuss von <strong>${formatCurrency(surplus)}</strong>. Überlegen Sie, einen Teil davon auf das Sparziel <strong>${targetGoal.name}</strong> zu übertragen.`;
+            text = `Sie haben in diesem Monat einen Überschuss von <strong>${formatCurrency(surplus)}</strong>. Überlegen Sie, einen Teil davon auf das Sparziel <strong>${escapeHtml(targetGoal.name)}</strong> zu übertragen.`;
           }
           
           insights.push({
@@ -9742,11 +9506,11 @@
           let text = '';
           const remainingAmount = Number(bestLoan.remainingAmount);
           if (currentLanguage === 'cs') {
-            text = `Váš úvěr <strong>${bestLoan.name}</strong> je splacen z <strong>${bestPct.toFixed(0)} %</strong>! Zbývá doplatit ${formatCurrency(remainingAmount)}.`;
+            text = `Váš úvěr <strong>${escapeHtml(bestLoan.name)}</strong> je splacen z <strong>${bestPct.toFixed(0)} %</strong>! Zbývá doplatit ${formatCurrency(remainingAmount)}.`;
           } else if (currentLanguage === 'en') {
-            text = `Your loan <strong>${bestLoan.name}</strong> is <strong>${bestPct.toFixed(0)}%</strong> paid off! Remaining balance is ${formatCurrency(remainingAmount)}.`;
+            text = `Your loan <strong>${escapeHtml(bestLoan.name)}</strong> is <strong>${bestPct.toFixed(0)}%</strong> paid off! Remaining balance is ${formatCurrency(remainingAmount)}.`;
           } else {
-            text = `Ihr Kredit <strong>${bestLoan.name}</strong> ist zu <strong>${bestPct.toFixed(0)}%</strong> abbezahlt! Restbetrag: ${formatCurrency(remainingAmount)}.`;
+            text = `Ihr Kredit <strong>${escapeHtml(bestLoan.name)}</strong> ist zu <strong>${bestPct.toFixed(0)}%</strong> abbezahlt! Restbetrag: ${formatCurrency(remainingAmount)}.`;
           }
           
           insights.push({
@@ -9762,21 +9526,21 @@
       const futurePayments = getFutureRecurringPaymentsThisMonth();
       const urgentExpenses = futurePayments.filter(fp => {
         if (fp.type !== 'expense') return false;
-        const diffTime = new Date(fp.date) - now;
+        const diffTime = parseDateSafe(fp.date) - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays >= 0 && diffDays <= 7;
       });
-      
+
       if (urgentExpenses.length > 0) {
         const item = urgentExpenses[0];
-        const dueDate = new Date(item.date).toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        const dueDate = parseDateSafe(item.date).toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
         let text = '';
         if (currentLanguage === 'cs') {
-          text = `Blíží se splátka <strong>${item.name}</strong> ve výši <strong>${formatCurrency(item.amount)}</strong> (dne ${dueDate}). Ujistěte se, že máte dostatek hotovosti.`;
+          text = `Blíží se splátka <strong>${escapeHtml(item.name)}</strong> ve výši <strong>${formatCurrency(item.amount)}</strong> (dne ${dueDate}). Ujistěte se, že máte dostatek hotovosti.`;
         } else if (currentLanguage === 'en') {
-          text = `Upcoming payment <strong>${item.name}</strong> of <strong>${formatCurrency(item.amount)}</strong> is due on ${dueDate}. Make sure you have enough funds.`;
+          text = `Upcoming payment <strong>${escapeHtml(item.name)}</strong> of <strong>${formatCurrency(item.amount)}</strong> is due on ${dueDate}. Make sure you have enough funds.`;
         } else {
-          text = `Die Zahlung <strong>${item.name}</strong> über <strong>${formatCurrency(item.amount)}</strong> ist am ${dueDate} fällig. Stellen Sie sicher, dass Ihr Konto gedeckt ist.`;
+          text = `Die Zahlung <strong>${escapeHtml(item.name)}</strong> über <strong>${formatCurrency(item.amount)}</strong> ist am ${dueDate} fällig. Stellen Sie sicher, dass Ihr Konto gedeckt ist.`;
         }
         
         insights.push({
@@ -9817,7 +9581,7 @@
       }
       
       let savingsSum = 0;
-      (state.goals || []).forEach(g => {
+      (state.savingsGoals || []).forEach(g => {
         savingsSum += Number(g.currentAmount || 0);
       });
       const savInput = document.getElementById('sim-fire-savings');
@@ -9854,7 +9618,7 @@
               <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/85 rounded-xl">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" id="sim-loan-check-${l.id}" checked onchange="calculateDebtSnowball()" class="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-900 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${l.name}</span>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${escapeHtml(l.name)}</span>
                 </div>
                 <div class="text-right">
                   <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${formatCurrency(rem)}</span>
@@ -9881,7 +9645,7 @@
               <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/85 rounded-xl">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" id="sim-consol-check-${l.id}" checked onchange="calculateConsolidation()" class="rounded border-slate-300 dark:border-slate-700 dark:bg-slate-900 text-violet-600 focus:ring-violet-500 w-4.5 h-4.5 cursor-pointer">
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${l.name}</span>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${escapeHtml(l.name)}</span>
                 </div>
                 <div class="text-right">
                   <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${formatCurrency(rem)}</span>
