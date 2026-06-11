@@ -2986,9 +2986,10 @@
       "Zatím nebyly zapsány žádné transakce.": { en: "No transactions recorded yet.", de: "Noch keine Transaktionen aufgezeichnet." },
       
       // Tables & Labels
+      // Pozn.: "Kategorie" je definováno výše (plurál pro menu/titulky) —
+      // duplicitní klíč by ho potichu přepsal singulárem
       "Datum": { en: "Date", de: "Datum" },
       "Popis": { en: "Description", de: "Beschreibung" },
-      "Kategorie": { en: "Category", de: "Kategorie" },
       "Částka": { en: "Amount", de: "Betrag" },
 
       // Transactions View
@@ -3126,7 +3127,6 @@
       "Nový trvalý příkaz": { en: "New Recurring Payment", de: "Neuer Dauerauftrag" },
       "Upravit trvalý příkaz": { en: "Edit Recurring Payment", de: "Dauerauftrag bearbeiten" },
       "Vytvořit příkaz": { en: "Create Payment", de: "Dauerauftrag erstellen" },
-      "Uložit změny": { en: "Save Changes", de: "Änderungen speichern" },
       "Upravit": { en: "Edit", de: "Bearbeiten" },
       "Smazat": { en: "Delete", de: "Löschen" },
       "Zaplaceno": { en: "Paid", de: "Bezahlt" },
@@ -3197,7 +3197,6 @@
       "Roční výnos / úrok:": { en: "Annual return / interest:", de: "Jährliche Rendite / Zinsen:" },
       "Připisování úroků:": { en: "Interest compounding:", de: "Zinsgutschrift:" },
       "Měsíčně (doporučeno)": { en: "Monthly (recommended)", de: "Monatlich (empfohlen)" },
-      "Ročně": { en: "Yearly", de: "Jährlich" },
       "Budoucí hodnota celkem:": { en: "Total future value:", de: "Zukünftiger Gesamtwert:" },
       "Celkový vklad:": { en: "Total deposits:", de: "Gesamteinzahlung:" },
       "Získané úroky:": { en: "Interest earned:", de: "Erhaltene Zinsen:" },
@@ -3222,7 +3221,202 @@
       "Nová výše úvěru:": { en: "New loan amount:", de: "Neue Kreditsumme:" },
       "Úspora na splátce:": { en: "Payment savings:", de: "Ersparnis pro Rate:" },
       "Celková úspora:": { en: "Total savings:", de: "Gesamtersparnis:" },
-      "Nezadáno": { en: "Not set", de: "Nicht angegeben" }
+      "Nezadáno": { en: "Not set", de: "Nicht angegeben" },
+
+      // Categories view
+      "Nová kategorie": { en: "New Category", de: "Neue Kategorie" },
+      "Název kategorie": { en: "Category Name", de: "Kategoriename" },
+      "Barva kategorie": { en: "Category Color", de: "Kategoriefarbe" },
+      "Vyberte barvu badge": { en: "Pick a badge color", de: "Badge-Farbe wählen" },
+      "Výběr ikony": { en: "Icon Selection", de: "Symbolauswahl" },
+      "Vytvořit kategorii": { en: "Create Category", de: "Kategorie erstellen" },
+      "Správa kategorií": { en: "Category Management", de: "Kategorienverwaltung" },
+      "Správa skupin": { en: "Group Management", de: "Gruppenverwaltung" },
+      "Přehled stávajících a vlastních skupin": { en: "Overview of existing and custom groups", de: "Übersicht bestehender und eigener Gruppen" },
+      "Celkem": { en: "Total", de: "Gesamt" },
+      "Žádné kategorie k zobrazení": { en: "No categories to display", de: "Keine Kategorien anzuzeigen" },
+      "Smazat kategorii?": { en: "Delete category?", de: "Kategorie löschen?" },
+      "Opravdu chcete tuto kategorii odstranit z databáze?": { en: "Do you really want to remove this category from the database?", de: "Möchten Sie diese Kategorie wirklich aus der Datenbank entfernen?" },
+      "Dotčené transakce v kategorii:": { en: "Affected transactions in category:", de: "Betroffene Transaktionen in der Kategorie:" },
+      "Co udělat s těmito transakcemi?": { en: "What should happen to these transactions?", de: "Was soll mit diesen Transaktionen geschehen?" },
+      "Rychlé vytvoření kategorie": { en: "Quick category creation", de: "Schnelle Kategorieerstellung" },
+      "Vytvořte novou kategorii, která se ihned vybere.": { en: "Create a new category that will be selected immediately.", de: "Erstellen Sie eine neue Kategorie, die sofort ausgewählt wird." },
+      "Vytvořit a vybrat": { en: "Create and select", de: "Erstellen und auswählen" },
+
+      // System category names (lowercase + uppercase select variants)
+      "Jídlo": { en: "Food", de: "Essen" },
+      "JÍDLO": { en: "FOOD", de: "ESSEN" },
+      "BYDLENÍ": { en: "HOUSING", de: "WOHNEN" },
+      "DOPRAVA": { en: "TRANSPORT", de: "VERKEHR" },
+      "ZÁBAVA": { en: "ENTERTAINMENT", de: "UNTERHALTUNG" },
+      "VÝPLATA": { en: "SALARY", de: "GEHALT" },
+      "ÚVĚROVÉ PRODUKTY": { en: "LOAN PRODUCTS", de: "KREDITPRODUKTE" },
+      "OSTATNÍ": { en: "OTHER", de: "SONSTIGES" },
+      "VŠECHNY KATEGORIE": { en: "ALL CATEGORIES", de: "ALLE KATEGORIEN" },
+      "+ Nová kategorie...": { en: "+ New category...", de: "+ Neue Kategorie..." },
+
+      // Sort options
+      "Kategorie A-Z": { en: "Category A-Z", de: "Kategorie A-Z" },
+      "Kategorie Z-A": { en: "Category Z-A", de: "Kategorie Z-A" },
+      "Název (A-Z)": { en: "Name (A-Z)", de: "Name (A-Z)" },
+      "Popis A-Z": { en: "Description A-Z", de: "Beschreibung A-Z" },
+      "Popis Z-A": { en: "Description Z-A", de: "Beschreibung Z-A" },
+      "Suma ⬆": { en: "Amount ⬆", de: "Betrag ⬆" },
+      "Suma ⬇": { en: "Amount ⬇", de: "Betrag ⬇" },
+
+      // Dashboard & insights
+      "Celkové příjmy": { en: "Total Income", de: "Gesamteinnahmen" },
+      "Celkové výdaje": { en: "Total Expenses", de: "Gesamtausgaben" },
+      "Chytré finanční postřehy": { en: "Smart financial insights", de: "Intelligente Finanzeinblicke" },
+      "Automatická analýza Vašich aktuálních dat a rozpočtů": { en: "Automatic analysis of your current data and budgets", de: "Automatische Analyse Ihrer aktuellen Daten und Budgets" },
+      "Vývoj financí v čase": { en: "Finances over time", de: "Finanzentwicklung im Zeitverlauf" },
+      "Struktura výdajů (Celkem)": { en: "Expense structure (Total)", de: "Ausgabenstruktur (Gesamt)" },
+      "Graf není k dispozici": { en: "Chart not available", de: "Diagramm nicht verfügbar" },
+      "Nedostatek dat pro zobrazení trendu": { en: "Not enough data to display a trend", de: "Nicht genügend Daten für einen Trend" },
+      "Budoucí a očekávané platby": { en: "Upcoming and expected payments", de: "Anstehende und erwartete Zahlungen" },
+      "Pro toto období nejsou žádné očekávané výdaje": { en: "No expected expenses for this period", de: "Keine erwarteten Ausgaben für diesen Zeitraum" },
+      "Žádné výdaje pro toto období": { en: "No expenses for this period", de: "Keine Ausgaben für diesen Zeitraum" },
+      "Tento měsíc čekající na zaplacení": { en: "Pending payment this month", de: "Diesen Monat ausstehende Zahlungen" },
+      "Blíží se splátka": { en: "Payment due soon", de: "Zahlung steht bevor" },
+      "Konec měsíce": { en: "End of month", de: "Monatsende" },
+      "Další sekce aplikace": { en: "More app sections", de: "Weitere App-Bereiche" },
+
+      // Budgets
+      "Měsíční limity útrat": { en: "Monthly spending limits", de: "Monatliche Ausgabenlimits" },
+      "Nastavit rozpočet": { en: "Set budget", de: "Budget festlegen" },
+      "Uložit limit": { en: "Save limit", de: "Limit speichern" },
+      "Přehled limitů": { en: "Limits overview", de: "Limit-Übersicht" },
+      "Sledujte, kolik peněz zbývá v jednotlivých kategoriích do konce kalendářního měsíce": { en: "Track how much money remains in each category until the end of the calendar month", de: "Verfolgen Sie, wie viel Geld in den einzelnen Kategorien bis zum Monatsende übrig bleibt" },
+      "Upravit rozpočet": { en: "Edit budget", de: "Budget bearbeiten" },
+
+      // Savings goals
+      "Název cíle": { en: "Goal name", de: "Zielname" },
+      "Cílové datum": { en: "Target date", de: "Zieldatum" },
+      "Ikona cíle": { en: "Goal icon", de: "Zielsymbol" },
+      "Vklad / Výběr na cíl": { en: "Deposit / Withdrawal for goal", de: "Einzahlung / Abhebung für das Ziel" },
+      "Vklad (+)": { en: "Deposit (+)", de: "Einzahlung (+)" },
+      "Výběr (-)": { en: "Withdrawal (-)", de: "Abhebung (-)" },
+      "Upravte výši naspořené částky pro tento cíl.": { en: "Adjust the saved amount for this goal.", de: "Passen Sie den gesparten Betrag für dieses Ziel an." },
+      "Uložit": { en: "Save", de: "Speichern" },
+      "Zrušit": { en: "Cancel", de: "Abbrechen" },
+
+      // Recurring payments
+      "Nový příkaz": { en: "New standing order", de: "Neuer Dauerauftrag" },
+      "Název platby": { en: "Payment name", de: "Zahlungsname" },
+      "Frekvence": { en: "Frequency", de: "Frequenz" },
+      "Frekvence opakování": { en: "Repeat frequency", de: "Wiederholungsfrequenz" },
+      "Datum ukončení (nepovinné)": { en: "End date (optional)", de: "Enddatum (optional)" },
+      "(Nechte prázdné pro trvalou platbu)": { en: "(Leave empty for a permanent payment)", de: "(Leer lassen für dauerhafte Zahlung)" },
+      "(Nechte prázdné pro trvalé opakování)": { en: "(Leave empty to repeat indefinitely)", de: "(Leer lassen für unbegrenzte Wiederholung)" },
+      "Aktivní příkazy": { en: "Active orders", de: "Aktive Aufträge" },
+      "Aktivní trvalé příkazy": { en: "Active standing orders", de: "Aktive Daueraufträge" },
+      "Trvalé příkazy a opakované platby": { en: "Standing orders and recurring payments", de: "Daueraufträge und wiederkehrende Zahlungen" },
+      "Žádné trvalé příkazy": { en: "No standing orders", de: "Keine Daueraufträge" },
+      "Žádné plánované platby": { en: "No scheduled payments", de: "Keine geplanten Zahlungen" },
+      "Žádné platby k zobrazení": { en: "No payments to display", de: "Keine Zahlungen anzuzeigen" },
+      "Nebyly nalezeny žádné platby": { en: "No payments found", de: "Keine Zahlungen gefunden" },
+      "Vytvořte trvalý příkaz pomocí formuláře": { en: "Create a standing order using the form", de: "Erstellen Sie einen Dauerauftrag über das Formular" },
+      "Typ platby": { en: "Payment type", de: "Zahlungsart" },
+      "Typ operace": { en: "Operation type", de: "Vorgangstyp" },
+      "Pravidelné": { en: "Recurring", de: "Wiederkehrend" },
+      "Ukončení": { en: "End", de: "Ende" },
+      "Zaúčtovat": { en: "Post", de: "Buchen" },
+      "Zaúčtovat transakci": { en: "Post transaction", de: "Transaktion buchen" },
+      "Zaúčtováno": { en: "Posted", de: "Gebucht" },
+      "Zaúčtování pravidelných plateb": { en: "Posting of recurring payments", de: "Verbuchung wiederkehrender Zahlungen" },
+      "Následující trvalé příkazy byly automaticky zapsány:": { en: "The following standing orders were posted automatically:", de: "Die folgenden Daueraufträge wurden automatisch verbucht:" },
+      "Tyto platby se při spuštění automaticky zaúčtují do historie transakcí": { en: "These payments are automatically posted to the transaction history on startup", de: "Diese Zahlungen werden beim Start automatisch in der Transaktionshistorie verbucht" },
+      "Rozumím": { en: "Got it", de: "Verstanden" },
+      "Přehled plánovaných trvalých plateb a splátek úvěrů pro vybrané období": { en: "Overview of scheduled standing payments and loan installments for the selected period", de: "Übersicht geplanter Daueraufträge und Kreditraten für den gewählten Zeitraum" },
+
+      // Loans
+      "Nový úvěr": { en: "New loan", de: "Neuer Kredit" },
+      "Nový úvěr / Hypotéka": { en: "New loan / Mortgage", de: "Neuer Kredit / Hypothek" },
+      "Přidat úvěr": { en: "Add loan", de: "Kredit hinzufügen" },
+      "Název úvěru": { en: "Loan name", de: "Kreditname" },
+      "Typ úvěru": { en: "Loan type", de: "Kreditart" },
+      "Hypotéka (Bydlení)": { en: "Mortgage (Housing)", de: "Hypothek (Wohnen)" },
+      "Jiný závazek": { en: "Other liability", de: "Sonstige Verbindlichkeit" },
+      "Úrok (% p.a.)": { en: "Interest (% p.a.)", de: "Zinsen (% p.a.)" },
+      "Zbývá doplatit (Kč)": { en: "Remaining to repay (CZK)", de: "Restschuld (CZK)" },
+      "Konec splácení (datum)": { en: "Repayment end (date)", de: "Tilgungsende (Datum)" },
+      "Kategorie výdajů pro splátky": { en: "Expense category for installments", de: "Ausgabenkategorie für Raten" },
+      "Aktivní úvěry": { en: "Active loans", de: "Aktive Kredite" },
+      "Aktivní úvěry a hypotéky": { en: "Active loans and mortgages", de: "Aktive Kredite und Hypotheken" },
+      "Přehled zbývajících splátek, časové osy a celkového dluhu": { en: "Overview of remaining installments, timeline and total debt", de: "Übersicht der Restraten, des Zeitplans und der Gesamtschuld" },
+      "Celková výše dluhu": { en: "Total debt amount", de: "Gesamtschuldenhöhe" },
+      "Splaceno celkem": { en: "Total repaid", de: "Insgesamt getilgt" },
+      "Měsíčně celkem": { en: "Monthly total", de: "Monatlich gesamt" },
+      "Splátky úvěrů a hypoték": { en: "Loan and mortgage payments", de: "Kredit- und Hypothekenraten" },
+      "Historie plateb úvěrů": { en: "Loan payment history", de: "Kreditzahlungshistorie" },
+      "Zapsat splátku úvěru": { en: "Record loan payment", de: "Kreditrate erfassen" },
+      "Zapsání pravidelné splátky do přehledů a snížení zbývající jistiny": { en: "Record a regular installment and reduce the remaining principal", de: "Regelmäßige Rate erfassen und Restschuld verringern" },
+      "Datum splátky": { en: "Payment date", de: "Zahlungsdatum" },
+      "Zaplacená částka": { en: "Amount paid", de: "Gezahlter Betrag" },
+      "Popis splátky": { en: "Payment description", de: "Ratenbeschreibung" },
+      "Částka, o kterou klesne zbývající výše úvěru (může být nižší o úrok).": { en: "Amount by which the remaining loan balance decreases (may be lower due to interest).", de: "Betrag, um den die Restschuld sinkt (kann durch Zinsen geringer sein)." },
+      "Zapsat a uložit": { en: "Record and save", de: "Erfassen und speichern" },
+      "Tato částka bude uložena jako běžná výdajová transakce.": { en: "This amount will be saved as a regular expense transaction.", de: "Dieser Betrag wird als normale Ausgabe gespeichert." },
+      "Záznamy transakcí zařazených v kategorii \"Úvěrové produkty\" a splátek jistiny": { en: "Records of transactions in the \"Loan products\" category and principal payments", de: "Transaktionen der Kategorie \"Kreditprodukte\" und Tilgungszahlungen" },
+      "Budoucí": { en: "Upcoming", de: "Zukünftig" },
+
+      // Transactions misc
+      "Upravit transakci": { en: "Edit transaction", de: "Transaktion bearbeiten" },
+      "Popis transakce": { en: "Transaction description", de: "Transaktionsbeschreibung" },
+      "Poznámka / Detaily": { en: "Note / Details", de: "Notiz / Details" },
+      "Detaily / Poznámka": { en: "Details / Note", de: "Details / Notiz" },
+      "Datum od": { en: "Date from", de: "Datum von" },
+      "Datum do": { en: "Date to", de: "Datum bis" },
+      "Zvolte období": { en: "Select period", de: "Zeitraum wählen" },
+      "Vybrat vše": { en: "Select all", de: "Alle auswählen" },
+      "Vybrané položky můžete smazat hromadně": { en: "Selected items can be deleted in bulk", de: "Ausgewählte Einträge können gesammelt gelöscht werden" },
+      "Vymazat vše": { en: "Delete all", de: "Alles löschen" },
+      "Upravte text vyhledávání nebo filtry": { en: "Adjust your search text or filters", de: "Passen Sie Suchtext oder Filter an" },
+      "Akce": { en: "Actions", de: "Aktionen" },
+      "Název": { en: "Name", de: "Name" },
+
+      // Settings / backup
+      "Správa souboru databáze": { en: "Database file management", de: "Datenbankdatei-Verwaltung" },
+      "Aktuálně připojený databázový soubor a jeho správa.": { en: "Currently connected database file and its management.", de: "Aktuell verbundene Datenbankdatei und deren Verwaltung." },
+      "Aktivní soubor:": { en: "Active file:", de: "Aktive Datei:" },
+      "Typ přístupu:": { en: "Access type:", de: "Zugriffstyp:" },
+      "Stav zápisu:": { en: "Write status:", de: "Schreibstatus:" },
+      "Ukládání na disk aktivní": { en: "Saving to disk active", de: "Speichern auf Datenträger aktiv" },
+      "Aplikace pracuje přímo s vybraným souborem na vašem disku. Veškeré změny se automaticky ukládají do tohoto souboru.": { en: "The app works directly with the selected file on your disk. All changes are saved to this file automatically.", de: "Die App arbeitet direkt mit der ausgewählten Datei auf Ihrer Festplatte. Alle Änderungen werden automatisch in dieser Datei gespeichert." },
+      "Zavřít databázi a vybrat jiný soubor": { en: "Close database and choose another file", de: "Datenbank schließen und andere Datei wählen" },
+      "Zvolit jinou databázi (.json)": { en: "Choose another database (.json)", de: "Andere Datenbank wählen (.json)" },
+      "Záloha a přenositelnost": { en: "Backup and portability", de: "Sicherung und Übertragbarkeit" },
+      "Stáhněte si zálohu aktuální databáze jako JSON nebo exportujte data do CSV.": { en: "Download a backup of the current database as JSON or export data to CSV.", de: "Laden Sie eine Sicherung der aktuellen Datenbank als JSON herunter oder exportieren Sie die Daten als CSV." },
+      "Stáhnout aktuální data (.json)": { en: "Download current data (.json)", de: "Aktuelle Daten herunterladen (.json)" },
+      "Stáhnout": { en: "Download", de: "Herunterladen" },
+      "Export do PDF za období": { en: "Export to PDF for period", de: "PDF-Export für Zeitraum" },
+      "Vygenerujte přehled transakcí a grafy za vybrané období.": { en: "Generate a transaction overview and charts for the selected period.", de: "Erstellen Sie eine Transaktionsübersicht und Diagramme für den gewählten Zeitraum." },
+      "Generovat PDF report": { en: "Generate PDF report", de: "PDF-Bericht erstellen" },
+      "Finanční report": { en: "Financial report", de: "Finanzbericht" },
+      "Vymazat celou aplikaci?": { en: "Erase the entire app?", de: "Gesamte App löschen?" },
+      "Tento krok nevratně smaže kompletní data o financích z tohoto telefonu a načte demo šablonu.": { en: "This will permanently delete all financial data from this device and load the demo template.", de: "Dieser Schritt löscht unwiderruflich alle Finanzdaten von diesem Gerät und lädt die Demo-Vorlage." },
+      "Dočasná paměť (Fallback s exportem)": { en: "Temporary memory (fallback with export)", de: "Temporärer Speicher (Fallback mit Export)" },
+      "Změny neuloženy do souboru": { en: "Changes not saved to file", de: "Änderungen nicht in Datei gespeichert" },
+      "Kliknutím stáhnete aktualizovaný soubor databáze": { en: "Click to download the updated database file", de: "Klicken Sie, um die aktualisierte Datenbankdatei herunterzuladen" },
+      "iCloud Synchronizace": { en: "iCloud Sync", de: "iCloud-Synchronisation" },
+      "Vyžadováno schválení přístupu": { en: "Access approval required", de: "Zugriffsgenehmigung erforderlich" },
+      "Pro práci se zvoleným souborem databáze a automatické ukládání změn je nutné udělit prohlížeči oprávnění.": { en: "To work with the selected database file and save changes automatically, the browser needs permission.", de: "Um mit der gewählten Datenbankdatei zu arbeiten und Änderungen automatisch zu speichern, benötigt der Browser eine Berechtigung." },
+      "Povolit přístup a pokračovat": { en: "Allow access and continue", de: "Zugriff erlauben und fortfahren" },
+      "Záloha": { en: "Backup", de: "Sicherung" },
+      "Přepnout tmavý/světlý režim": { en: "Toggle dark/light mode", de: "Dunkel-/Hellmodus umschalten" },
+
+      // Placeholders
+      "např. Cestování, Zdraví...": { en: "e.g. Travel, Health...", de: "z. B. Reisen, Gesundheit..." },
+      "např. Hypotéka KB, Auto na splátky...": { en: "e.g. Mortgage KB, Car loan...", de: "z. B. Hypothek KB, Auto auf Raten..." },
+      "např. Nový telefon, Rezerva...": { en: "e.g. New phone, Reserve...", de: "z. B. Neues Handy, Rücklage..." },
+      "např. Nájem, Netflix, Výplata...": { en: "e.g. Rent, Netflix, Salary...", de: "z. B. Miete, Netflix, Gehalt..." },
+      "např. Nákup v Lidlu...": { en: "e.g. Shopping at Lidl...", de: "z. B. Einkauf bei Lidl..." },
+      "např. kde spoříte, podrobnosti...": { en: "e.g. where you save, details...", de: "z. B. wo Sie sparen, Details..." },
+      "např. číslo účtu, variabilní symbol, fixace...": { en: "e.g. account number, reference, fixation...", de: "z. B. Kontonummer, Verwendungszweck, Zinsbindung..." },
+      "den (1-31)": { en: "day (1-31)", de: "Tag (1-31)" },
+      "např. 5.49": { en: "e.g. 5.49", de: "z. B. 5,49" },
+      "kolik ještě zbývá doplatit": { en: "how much is left to repay", de: "wie viel noch zu tilgen ist" },
+      "původně půjčená částka": { en: "originally borrowed amount", de: "ursprünglich geliehener Betrag" }
     };
 
     // Global translation helper
@@ -6906,7 +7100,7 @@
         tr.innerHTML = `
           <td class="py-3 pl-1"></td>
           <td class="py-3 font-medium text-slate-450 text-xs italic">${formatDateString(fp.date)}</td>
-          <td class="py-3 font-semibold text-slate-700 italic">${escapeHtml(fp.name || '-')} <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded ml-1 uppercase">Budoucí</span></td>
+          <td class="py-3 font-semibold text-slate-700 italic">${escapeHtml(fp.name || '-')} <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded ml-1 uppercase">${__('Budoucí')}</span></td>
           <td class="py-3">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold opacity-85" style="background-color: ${cat.color}10; color: ${cat.color}">
               <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
@@ -6932,7 +7126,7 @@
             <div class="min-w-0">
               <p class="font-bold text-slate-650 text-sm leading-tight truncate italic">${escapeHtml(fp.name || '-')}</p>
               <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
-                <span class="italic text-indigo-500 font-extrabold">Budoucí • ${formatDateString(fp.date)}</span>
+                <span class="italic text-indigo-500 font-extrabold">${__('Budoucí')} • ${formatDateString(fp.date)}</span>
                 <span>•</span>
                 <span style="color: ${cat.color}">${escapeHtml(__(cat.name))}</span>
               </div>
