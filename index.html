@@ -3419,6 +3419,12 @@
       "původně půjčená částka": { en: "originally borrowed amount", de: "ursprünglich geliehener Betrag" }
     };
 
+    // Locale pro formátování datumů podle zvoleného jazyka aplikace
+    function getAppLocale() {
+      const locales = { cs: 'cs-CZ', en: 'en-US', de: 'de-DE' };
+      return locales[currentLanguage] || 'cs-CZ';
+    }
+
     // Global translation helper
     function __(str) {
       const trimmed = (str || '').trim();
@@ -3529,6 +3535,10 @@
       
       updateHeaderDateTime();
       updateDashboardAndData();
+
+      // Názvy měsíců v přepínači období generuje getMonthLabel podle
+      // aktivního jazyka — bez znovunaplnění by zůstaly v původním jazyce
+      populatePeriodSelect();
 
       // Výsledky simulátoru (např. "13 let a 2 měsíce") se skládají v JS
       // podle aktivního jazyka — při změně jazyka je nutný přepočet
@@ -4845,7 +4855,7 @@
         toDateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
         
         const tempD = new Date(year, monthNum - 1, 1);
-        periodLabel = tempD.toLocaleDateString('cs-CZ', {month: 'long', year: 'numeric'});
+        periodLabel = tempD.toLocaleDateString(getAppLocale(), {month: 'long', year: 'numeric'});
       } else if (selectedPeriod === 'custom') {
         const inputFrom = document.getElementById('pdf-export-from').value;
         const inputTo = document.getElementById('pdf-export-to').value;
@@ -4858,7 +4868,7 @@
         
         const fromD = parseDateSafe(inputFrom);
         const toD = parseDateSafe(inputTo);
-        periodLabel = `${fromD.toLocaleDateString('cs-CZ')} - ${toD.toLocaleDateString('cs-CZ')}`;
+        periodLabel = `${fromD.toLocaleDateString(getAppLocale())} - ${toD.toLocaleDateString(getAppLocale())}`;
       } else {
         periodLabel = "Celá historie";
       }
@@ -5399,7 +5409,7 @@
       
       options.reverse();
       
-      const customLabel = currentLanguage === 'cs' ? 'Vlastní rozsah...' : (currentLanguage === 'de' ? 'Vlastní rozsah...' : 'Custom range...');
+      const customLabel = currentLanguage === 'cs' ? 'Vlastní rozsah...' : (currentLanguage === 'de' ? 'Eigener Zeitraum...' : 'Custom range...');
       
       const fillSelect = (selectEl, prevVal) => {
         if (!selectEl) return;
@@ -5567,7 +5577,7 @@
               amount: Number(rec.amount),
               category: rec.category,
               date: toLocalISODate(currentDueDate),
-              formattedDate: currentDueDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
+              formattedDate: currentDueDate.toLocaleDateString(getAppLocale())
             });
           }
 
@@ -5606,7 +5616,7 @@
               amount: Number(loan.monthlyPayment),
               category: loan.category || 'cat-uvery',
               date: toLocalISODate(paymentDate),
-              formattedDate: paymentDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US')
+              formattedDate: paymentDate.toLocaleDateString(getAppLocale())
             });
           }
         }
@@ -6061,7 +6071,7 @@
         } else if (sortBy === 'sum_asc') {
           return a.total - b.total;
         } else if (sortBy === 'name_asc') {
-          return a.name.localeCompare(b.name, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+          return a.name.localeCompare(b.name, getAppLocale());
         } else if (sortBy === 'date_desc') {
           return b.latestTime - a.latestTime;
         }
@@ -6935,15 +6945,15 @@
         } else if (sortVal === 'category-asc') {
           const catA = (state.categories.find(c => c.id === a.category) || { name: '' }).name;
           const catB = (state.categories.find(c => c.id === b.category) || { name: '' }).name;
-          return catA.localeCompare(catB, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+          return catA.localeCompare(catB, getAppLocale());
         } else if (sortVal === 'category-desc') {
           const catA = (state.categories.find(c => c.id === a.category) || { name: '' }).name;
           const catB = (state.categories.find(c => c.id === b.category) || { name: '' }).name;
-          return catB.localeCompare(catA, currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+          return catB.localeCompare(catA, getAppLocale());
         } else if (sortVal === 'description-asc') {
-          return (a.description || '').localeCompare(b.description || '', currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+          return (a.description || '').localeCompare(b.description || '', getAppLocale());
         } else if (sortVal === 'description-desc') {
-          return (b.description || '').localeCompare(a.description || '', currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+          return (b.description || '').localeCompare(a.description || '', getAppLocale());
         }
         return 0;
       });
@@ -8281,7 +8291,7 @@
       
       return {
         endDate,
-        formattedEndDate: endDate.toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US'),
+        formattedEndDate: endDate.toLocaleDateString(getAppLocale()),
         isExpired,
         remainingTimeText
       };
@@ -9817,7 +9827,7 @@
 
       if (urgentExpenses.length > 0) {
         const item = urgentExpenses[0];
-        const dueDate = parseDateSafe(item.date).toLocaleDateString(currentLanguage === 'cs' ? 'cs-CZ' : 'en-US');
+        const dueDate = parseDateSafe(item.date).toLocaleDateString(getAppLocale());
         let text = '';
         if (currentLanguage === 'cs') {
           text = `Blíží se splátka <strong>${escapeHtml(item.name)}</strong> ve výši <strong>${formatCurrency(item.amount)}</strong> (dne ${dueDate}). Ujistěte se, že máte dostatek hotovosti.`;
