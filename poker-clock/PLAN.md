@@ -39,6 +39,7 @@ Každá z volitelných funkcí (rebuy, add-on, přestávky, žetony, prize pool)
 
 ### 2. ⚙️ Editor struktury turnaje
 Tady se plánuje vše předem, s přepínači pro volitelné části:
+- **Pole „Počet hráčů"** – po zadání appka automaticky **doporučí odpočet a žetony** (viz níže). Doporučení se předvyplní, ale jde ručně přepsat.
 - Tabulka levelů: `# | Small | Big | Ante | Délka (min)`
 - **[přepínač] Přestávky** – vkládání pauz mezi levely (např. „po levelu 4 → pauza 15 min")
 - **[přepínač] Rebuy** – do kterého levelu, cena, kolik žetonů
@@ -46,6 +47,22 @@ Tady se plánuje vše předem, s přepínači pro volitelné části:
 - **[přepínač] Žetony / chip-race**
 - **[přepínač] Prize pool**
 - Generátor struktury (počet hráčů, délka turnaje, startovní stack → vygeneruje levely)
+
+#### 🤖 Doporučovač podle počtu hráčů
+Po zadání počtu hráčů (a volitelně cílové délky turnaje) appka spočítá a předvyplní:
+
+**Doporučený odpočet (struktura času):**
+- Délka jednoho levelu (např. 6–10 hráčů → 15–20 min/level, 20+ hráčů → 20–30 min)
+- Počet levelů a celkový odhad délky turnaje
+- Kdy zařadit přestávky (např. pauza po každých ~4 levelech)
+- Typ struktury: Turbo / Standard / Deepstack (lze přepnout, doporučení se přepočítá)
+
+**Doporučené žetony:**
+- Startovní stack (např. 10 000 / 20 000 podle typu)
+- Sada nominálů a barev odpovídající počtu hráčů (méně hráčů = méně nominálů)
+- Celkový počet žetonů potřebných na sadu (stack × hráči + rezerva na rebuy)
+
+> Hodnoty jsou jen návrh – uživatel může cokoli přepsat. Vzorce/tabulky doporučení doladíme při programování.
 
 ### 3. ⏱️ Hlavní TIMER (běžící turnaj)
 Velký, čitelný na dálku (TV/projektor), tmavý casino styl:
