@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Clock</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <div class="brand" data-action="home">
+      <span class="chip-icon">🃏</span>
+      <span class="brand-name">Poker Clock</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="lang-switch" id="langSwitch" title="CZ / EN">CZ</button>
+      <button class="icon-btn" id="soundToggle" title="sound">🔊</button>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- ===== VIEW: HOME ===== -->
+    <section class="view" id="view-home">
+      <div class="container">
+        <h1 data-i18n="home.title">Turnaje</h1>
+        <p class="subtitle" data-i18n="home.subtitle">Naplánuj a spusť svůj pokerový turnaj.</p>
+
+        <div class="presets">
+          <button class="preset-card" data-preset="turbo">
+            <span class="preset-emoji">⚡</span>
+            <span class="preset-name" data-i18n="preset.turbo">Turbo</span>
+            <span class="preset-desc" data-i18n="preset.turbo.desc">Rychlé levely</span>
+          </button>
+          <button class="preset-card" data-preset="standard">
+            <span class="preset-emoji">🎯</span>
+            <span class="preset-name" data-i18n="preset.standard">Standard</span>
+            <span class="preset-desc" data-i18n="preset.standard.desc">Vyvážená struktura</span>
+          </button>
+          <button class="preset-card" data-preset="deepstack">
+            <span class="preset-emoji">🏔️</span>
+            <span class="preset-name" data-i18n="preset.deepstack">Deepstack</span>
+            <span class="preset-desc" data-i18n="preset.deepstack.desc">Dlouhé levely</span>
+          </button>
+        </div>
+
+        <div class="section-head">
+          <h2 data-i18n="home.saved">Uložené turnaje</h2>
+          <button class="btn btn-primary" data-action="new" data-i18n="home.new">+ Nový turnaj</button>
+        </div>
+        <div id="tournamentList" class="tournament-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: EDITOR ===== -->
+    <section class="view" id="view-editor" hidden>
+      <div class="container">
+        <div class="section-head">
+          <h1 data-i18n="editor.title">Editor struktury</h1>
+          <div>
+            <button class="btn" data-action="home" data-i18n="common.back">← Zpět</button>
+            <button class="btn btn-gold" data-action="start" data-i18n="editor.start">▶ Spustit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="grid-2">
+            <label class="field">
+              <span data-i18n="editor.name">Název turnaje</span>
+              <input type="text" id="t-name" placeholder="Friday Game">
+            </label>
+            <label class="field">
+              <span data-i18n="editor.players">Počet hráčů</span>
+              <input type="number" id="t-players" min="2" value="9">
+            </label>
+            <label class="field">
+              <span data-i18n="editor.buyin">Buy-in</span>
+              <input type="number" id="t-buyin" min="0" value="1000">
+            </label>
+            <label class="field">
+              <span data-i18n="editor.stack">Startovní stack</span>
+              <input type="number" id="t-stack" min="0" value="10000">
+            </label>
+          </div>
+
+          <div class="reco-row">
+            <label class="field">
+              <span data-i18n="editor.structtype">Typ struktury</span>
+              <select id="t-structtype">
+                <option value="turbo" data-i18n="preset.turbo">Turbo</option>
+                <option value="standard" selected data-i18n="preset.standard">Standard</option>
+                <option value="deepstack" data-i18n="preset.deepstack">Deepstack</option>
+              </select>
+            </label>
+            <button class="btn btn-primary" id="recommendBtn" data-i18n="editor.recommend">🤖 Doporučit odpočet a žetony</button>
+          </div>
+          <div id="recoHint" class="reco-hint" hidden></div>
+        </div>
+
+        <!-- Feature toggles -->
+        <div class="card">
+          <h3 data-i18n="editor.features">Funkce</h3>
+          <div class="toggles">
+            <label class="toggle"><input type="checkbox" id="f-breaks" checked> <span data-i18n="feature.breaks">Přestávky</span></label>
+            <label class="toggle"><input type="checkbox" id="f-rebuy"> <span data-i18n="feature.rebuy">Rebuy</span></label>
+            <label class="toggle"><input type="checkbox" id="f-addon"> <span data-i18n="feature.addon">Add-on</span></label>
+            <label class="toggle"><input type="checkbox" id="f-chips" checked> <span data-i18n="feature.chips">Žetony / chip-race</span></label>
+            <label class="toggle"><input type="checkbox" id="f-prize"> <span data-i18n="feature.prize">Prize pool</span></label>
+          </div>
+        </div>
+
+        <!-- Rebuy / addon settings -->
+        <div class="card feature-block" data-feature="rebuy" hidden>
+          <h3 data-i18n="feature.rebuy">Rebuy</h3>
+          <div class="grid-3">
+            <label class="field"><span data-i18n="rebuy.until">Do levelu</span><input type="number" id="rb-until" min="1" value="6"></label>
+            <label class="field"><span data-i18n="rebuy.price">Cena</span><input type="number" id="rb-price" min="0" value="1000"></label>
+            <label class="field"><span data-i18n="rebuy.chips">Žetony</span><input type="number" id="rb-chips" min="0" value="10000"></label>
+          </div>
+        </div>
+        <div class="card feature-block" data-feature="addon" hidden>
+          <h3 data-i18n="feature.addon">Add-on</h3>
+          <div class="grid-3">
+            <label class="field"><span data-i18n="addon.atbreak">U přestávky č.</span><input type="number" id="ao-break" min="1" value="1"></label>
+            <label class="field"><span data-i18n="rebuy.price">Cena</span><input type="number" id="ao-price" min="0" value="1000"></label>
+            <label class="field"><span data-i18n="rebuy.chips">Žetony</span><input type="number" id="ao-chips" min="0" value="15000"></label>
+          </div>
+        </div>
+
+        <!-- Levels table -->
+        <div class="card">
+          <div class="section-head">
+            <h3 data-i18n="editor.levels">Levely</h3>
+            <div>
+              <button class="btn" id="addLevel" data-i18n="editor.addlevel">+ Level</button>
+              <button class="btn feature-block" data-feature="breaks" id="addBreak" data-i18n="editor.addbreak">+ Přestávka</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="levels-table">
+              <thead>
+                <tr>
+                  <th>#</th><th data-i18n="lvl.sb">SB</th><th data-i18n="lvl.bb">BB</th>
+                  <th data-i18n="lvl.ante">Ante</th><th data-i18n="lvl.min">Min</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="levelsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Chips -->
+        <div class="card feature-block" data-feature="chips" hidden>
+          <div class="section-head">
+            <h3 data-i18n="editor.chips">Žetony</h3>
+            <button class="btn" id="addChip" data-i18n="editor.addchip">+ Žeton</button>
+          </div>
+          <div id="chipsList" class="chips-list"></div>
+          <div id="chipStats" class="chip-stats"></div>
+        </div>
+
+        <!-- Prize pool -->
+        <div class="card feature-block" data-feature="prize" hidden>
+          <h3 data-i18n="feature.prize">Prize pool</h3>
+          <div id="prizeInfo" class="prize-info"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: TIMER ===== -->
+    <section class="view view-timer" id="view-timer" hidden>
+      <div class="timer-top">
+        <button class="btn" data-action="edit" data-i18n="timer.edit">⚙ Editor</button>
+        <span class="timer-tname" id="timerName"></span>
+        <span class="timer-total" id="totalElapsed">00:00:00</span>
+      </div>
+
+      <div class="timer-stage">
+        <div class="level-label"><span data-i18n="timer.level">Level</span> <span id="levelNum">1</span></div>
+        <div class="big-clock" id="bigClock">20:00</div>
+
+        <div id="blindsBox" class="blinds-box">
+          <div class="blinds-current">
+            <div class="bl"><span class="bl-k" data-i18n="lvl.sb">SB</span><span class="bl-v" id="curSB">25</span></div>
+            <div class="bl-sep">/</div>
+            <div class="bl"><span class="bl-k" data-i18n="lvl.bb">BB</span><span class="bl-v" id="curBB">50</span></div>
+            <div class="bl bl-ante"><span class="bl-k" data-i18n="lvl.ante">Ante</span><span class="bl-v" id="curAnte">0</span></div>
+          </div>
+          <div class="blinds-next"><span data-i18n="timer.next">Příští</span>: <span id="nextBlinds">50 / 100</span></div>
+        </div>
+
+        <div id="breakBox" class="break-box" hidden>
+          <div class="break-title" data-i18n="timer.break">☕ Přestávka</div>
+        </div>
+
+        <div id="rebuyBadge" class="rebuy-badge" hidden></div>
+      </div>
+
+      <div class="timer-stats" id="timerStats"></div>
+
+      <div class="timer-controls">
+        <button class="ctrl" id="prevBtn" title="prev">⏮</button>
+        <button class="ctrl ctrl-main" id="playBtn" title="play">▶</button>
+        <button class="ctrl" id="nextBtn" title="next">⏭</button>
+        <button class="ctrl" id="resetBtn" title="reset">↺</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
