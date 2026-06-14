@@ -2604,24 +2604,17 @@
       <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
         <i data-lucide="hand-coins" class="w-6 h-6"></i>
       </div>
-      <h3 class="text-lg font-bold text-slate-900 mb-1" id="loan-payment-modal-title">Zapsat splátku úvěru</h3>
-      <p class="text-xs text-slate-500 font-medium mb-4" id="loan-payment-modal-subtitle">Zapsání pravidelné splátky do přehledů a snížení zbývající jistiny</p>
-      
+      <h3 class="text-lg font-bold text-slate-900 mb-1" id="loan-payment-modal-title">Zapsat mimořádnou splátku</h3>
+      <p class="text-xs text-slate-500 font-medium mb-4" id="loan-payment-modal-subtitle">Mimořádná splátka navíc k automatické měsíční splátce</p>
+
       <form id="loan-payment-form" onsubmit="handleLoanPaymentSubmit(event)" class="space-y-4">
         <input type="hidden" id="loan-payment-id" value="">
-        
-        <!-- Transaction Payment Amount (Expense) -->
-        <div>
-          <label for="loan-payment-amount" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Zaúčtovaná splátka (Kč)</label>
-          <input type="number" id="loan-payment-amount" min="1" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-          <p class="text-[10px] text-slate-400 mt-1 font-medium">Tato částka bude uložena jako běžná výdajová transakce.</p>
-        </div>
 
-        <!-- Principal Reduction Amount -->
+        <!-- Extra Payment Amount (Expense + full principal reduction) -->
         <div>
-          <label for="loan-payment-principal" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Snížení zbývající jistiny dluhu (Kč)</label>
-          <input type="number" id="loan-payment-principal" min="0" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-          <p class="text-[10px] text-slate-400 mt-1 font-medium">Částka, o kterou klesne zbývající výše úvěru (může být nižší o úrok).</p>
+          <label for="loan-payment-amount" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kolik jste zaplatili navíc (Kč)</label>
+          <input type="number" id="loan-payment-amount" min="1" required placeholder="částka nad rámec běžné splátky" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
+          <p class="text-[10px] text-slate-400 mt-1 font-medium">Uloží se jako výdajová transakce a o stejnou částku se sníží zbývající jistina dluhu.</p>
         </div>
 
         <!-- Date & Description -->
@@ -3357,6 +3350,11 @@
       "Částka, o kterou klesne zbývající výše úvěru (může být nižší o úrok).": { en: "Amount by which the remaining loan balance decreases (may be lower due to interest).", de: "Betrag, um den die Restschuld sinkt (kann durch Zinsen geringer sein)." },
       "Zapsat a uložit": { en: "Record and save", de: "Erfassen und speichern" },
       "Tato částka bude uložena jako běžná výdajová transakce.": { en: "This amount will be saved as a regular expense transaction.", de: "Dieser Betrag wird als normale Ausgabe gespeichert." },
+      "Mimořádná splátka": { en: "Extra payment", de: "Sondertilgung" },
+      "Zapsat mimořádnou splátku": { en: "Record extra payment", de: "Sondertilgung erfassen" },
+      "Mimořádná splátka navíc k automatické měsíční splátce": { en: "Extra payment on top of the automatic monthly installment", de: "Sondertilgung zusätzlich zur automatischen Monatsrate" },
+      "Kolik jste zaplatili navíc (Kč)": { en: "How much you paid extra (USD)", de: "Wie viel Sie zusätzlich gezahlt haben (EUR)" },
+      "Uloží se jako výdajová transakce a o stejnou částku se sníží zbývající jistina dluhu.": { en: "It will be saved as an expense transaction and the remaining principal will be reduced by the same amount.", de: "Wird als Ausgabe gespeichert und die Restschuld um denselben Betrag verringert." },
       "Záznamy transakcí zařazených v kategorii \"Úvěrové produkty\" a splátek jistiny": { en: "Records of transactions in the \"Loan products\" category and principal payments", de: "Transaktionen der Kategorie \"Kreditprodukte\" und Tilgungszahlungen" },
       "Budoucí": { en: "Upcoming", de: "Zukünftig" },
 
@@ -4160,11 +4158,98 @@
       });
       
       state.recurring = recurringToKeep;
-      
+
       if (wasModified) {
         saveState();
-        showProcessedRecurringModal(processedLog);
       }
+      return processedLog;
+    }
+
+    // Auto processes monthly loan/mortgage installments due on or before today.
+    // Mirrors processRecurringPayments: creates an expense transaction (so the
+    // money actually leaves the account) and reduces the remaining principal.
+    // Per-loan progress is tracked via loan.nextPaymentDate so each month is
+    // booked exactly once. Existing loans are NOT back-filled — booking starts
+    // from the next upcoming due day.
+    function processLoanPayments() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let wasModified = false;
+      const processedLog = [];
+
+      (state.loans || []).forEach(loan => {
+        const monthly = Number(loan.monthlyPayment);
+        if (!monthly || monthly <= 0) return;
+
+        // Den zaúčtování (1-31). startDate může být číslo dne nebo datum.
+        let bookingDay;
+        if (String(loan.startDate).includes('-')) {
+          bookingDay = parseDateSafe(loan.startDate).getDate();
+        } else {
+          bookingDay = parseInt(loan.startDate, 10) || 15;
+        }
+
+        // Konec splácení — po něm se už splátky negenerují.
+        const endDetails = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
+        let endDateObj = null;
+        if (endDetails && endDetails.endDate) {
+          endDateObj = new Date(endDetails.endDate.getTime());
+          endDateObj.setHours(0, 0, 0, 0);
+        }
+
+        // Inicializace bez zpětného doúčtování: nejbližší budoucí (nebo dnešní)
+        // výskyt dne zaúčtování.
+        if (!loan.nextPaymentDate) {
+          let nd = addMonthsClamped(today, 0, bookingDay);
+          nd.setHours(0, 0, 0, 0);
+          if (nd < today) {
+            nd = addMonthsClamped(nd, 1, bookingDay);
+          }
+          loan.nextPaymentDate = toLocalISODate(nd);
+          wasModified = true;
+        }
+
+        let nextDateObj = parseDateSafe(loan.nextPaymentDate);
+        nextDateObj.setHours(0, 0, 0, 0);
+
+        while (nextDateObj <= today) {
+          if (endDateObj && nextDateObj > endDateObj) break;
+          if (Number(loan.remainingAmount) <= 0) break;
+
+          const transDate = toLocalISODate(nextDateObj);
+          const description = `Splátka úvěru: ${loan.name}`;
+
+          // Zabránit duplicitám (např. po synchronizaci nebo ruční splátce).
+          const alreadyExists = state.transactions.some(t =>
+            t.date === transDate &&
+            t.description === description &&
+            Math.abs(Number(t.amount) - monthly) < 0.01
+          );
+
+          if (!alreadyExists) {
+            state.transactions.push({
+              id: 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+              type: 'expense',
+              amount: monthly,
+              category: loan.category || 'cat-uvery',
+              date: transDate,
+              description: description
+            });
+            loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - monthly);
+            processedLog.push({ name: description, type: 'expense', amount: monthly, date: transDate });
+          }
+
+          nextDateObj = addMonthsClamped(nextDateObj, 1, bookingDay);
+          loan.nextPaymentDate = toLocalISODate(nextDateObj);
+          wasModified = true;
+        }
+      });
+
+      if (wasModified) {
+        saveState();
+      }
+      return processedLog;
     }
 
 
@@ -4503,7 +4588,9 @@
       
       document.getElementById('modal-db-startup').classList.add('hidden');
       
-      processRecurringPayments();
+      const recurringLog = processRecurringPayments();
+      const loanLog = processLoanPayments();
+      showProcessedRecurringModal([...(recurringLog || []), ...(loanLog || [])]);
       if (!preventTabSwitch) {
         switchTab('dashboard');
       } else {
@@ -8434,7 +8521,7 @@
             <!-- Pay Button -->
             <button onclick="openLoanPaymentModal('${loan.id}')" class="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm border border-indigo-100/50">
               <i data-lucide="hand-coins" class="w-4 h-4"></i>
-              ${__('Zapsat splátku')}
+              ${__('Mimořádná splátka')}
             </button>
           </div>
         `;
@@ -8669,65 +8756,66 @@
        lucide.createIcons();
      }
 
-    // Modal dialog to trigger a manual installment
+    // Modal dialog to record an EXTRA (one-off) payment on top of the
+    // automatically booked monthly installment.
     function openLoanPaymentModal(id) {
       triggerHapticFeedback();
       const loan = state.loans.find(l => l.id === id);
       if (!loan) return;
-      
+
       document.getElementById('loan-payment-id').value = loan.id;
-      document.getElementById('loan-payment-amount').value = loan.monthlyPayment;
-      document.getElementById('loan-payment-principal').value = loan.monthlyPayment; // Default principal deduction
+      document.getElementById('loan-payment-amount').value = '';
       document.getElementById('loan-payment-date').value = toLocalISODate(new Date());
-      document.getElementById('loan-payment-description').value = `Splátka úvěru: ${loan.name}`;
-      
-      document.getElementById('loan-payment-modal-subtitle').innerText = `Úvěr: ${loan.name}, předepsaná splátka: ${formatCurrency(loan.monthlyPayment)}`;
-      
+      document.getElementById('loan-payment-description').value = `Mimořádná splátka: ${loan.name}`;
+
+      document.getElementById('loan-payment-modal-subtitle').innerText =
+        `${__('Mimořádná splátka navíc k automatické měsíční splátce')} (${formatCurrency(loan.monthlyPayment)})`;
+
       openModal('modal-loan-payment');
     }
 
-    // Submits the manual installment and updates state
+    // Submits an extra payment: records it as an expense AND reduces the
+    // remaining principal by the full amount paid.
     function handleLoanPaymentSubmit(event) {
       event.preventDefault();
-      
+
       const loanId = document.getElementById('loan-payment-id').value;
       const paymentAmount = Number(document.getElementById('loan-payment-amount').value);
-      const principalAmount = Number(document.getElementById('loan-payment-principal').value);
       const date = document.getElementById('loan-payment-date').value;
       const description = document.getElementById('loan-payment-description').value.trim();
-      
+
       const loan = state.loans.find(l => l.id === loanId);
       if (!loan) {
         showToast("Úvěr nebyl nalezen.", "error");
         closeModal('modal-loan-payment');
         return;
       }
-      
-      if (isNaN(paymentAmount) || paymentAmount <= 0 || isNaN(principalAmount) || principalAmount < 0) {
-        showToast("Částky musí být platná čísla.", "error");
+
+      if (isNaN(paymentAmount) || paymentAmount <= 0) {
+        showToast("Zadejte platnou částku mimořádné splátky.", "error");
         return;
       }
-      
+
       // 1. Create transaction (expense)
       const transactionId = 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
       const newTransaction = {
         id: transactionId,
         type: 'expense',
         amount: paymentAmount,
-        category: loan.category || 'cat-bydleni',
+        category: loan.category || 'cat-uvery',
         date: date,
         description: description
       };
-      
+
       state.transactions.push(newTransaction);
-      
-      // 2. Reduce remaining principal balance
-      loan.remainingAmount = Math.max(0, loan.remainingAmount - principalAmount);
-      
+
+      // 2. An extra payment goes fully towards the principal
+      loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - paymentAmount);
+
       saveState();
       closeModal('modal-loan-payment');
-      showToast(`Splátka zaúčtována. Jistina snížena o ${formatCurrency(principalAmount)}.`);
-      
+      showToast(`Mimořádná splátka zaúčtována. Jistina snížena o ${formatCurrency(paymentAmount)}.`);
+
       if (currentTab === 'loans') {
         renderLoans();
       } else if (currentTab === 'dashboard') {
