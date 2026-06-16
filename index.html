@@ -97,18 +97,42 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      html.dark body, body {
-        background-color: #0b0f19 !important;
-        color: #f8fafc !important;
+      /* Ink-saving: light page for print regardless of app theme. The [class]
+         qualifier raises specificity above the dark-mode `html.dark body` rule,
+         which would otherwise win on source order and keep the page dark. */
+      html, html.dark { background-color: #ffffff !important; background-image: none !important; }
+      html.dark body[class], html body[class], body {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
         background-image: none !important;
+      }
+      /* Bulletproof: print nothing but the report (hides sidebar, main, mobile nav,
+         banners, modals — and any dark themed background behind them). */
+      body > *:not(#print-report-container) {
+        display: none !important;
       }
       aside, nav, main, #toast-container, #ios-sync-banner, .fixed, .modal-backdrop-enter, #modal-db-startup, #modal-db-permission, #modal-delete-confirm, #modal-edit-transaction {
         display: none !important;
       }
+      /* The mobile floating bottom nav is active because an A4 page is < 768px wide.
+         Its .mobile-floating-nav rule wins over `nav` on specificity, so hide it
+         explicitly with higher specificity. Its backdrop-filter would otherwise
+         rasterise as a solid black block when printed. */
+      html body .mobile-floating-nav,
+      html body .mobile-floating-nav * {
+        display: none !important;
+      }
+      * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+      @page { size: A4 portrait; margin: 10mm; }
+
+      /* ===== Printable financial report — white background, no ink-heavy fills ===== */
       #print-report-container {
         display: block !important;
-        background: #0b0f19 !important;
-        color: #f8fafc !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
         position: relative !important;
         left: 0 !important;
         top: 0 !important;
@@ -116,6 +140,81 @@
         z-index: auto !important;
         padding: 0 !important;
       }
+      /* Drop shadows (no ink) and flip dark surfaces to white */
+      #print-report-container [class*="shadow"] { box-shadow: none !important; }
+      #print-report-container .bg-\[\#0b0f19\],
+      #print-report-container .bg-\[\#111827\] {
+        background-color: #ffffff !important;
+        background-image: none !important;
+      }
+      /* Cards keep a thin light border for structure instead of a dark fill */
+      #print-report-container .bg-\[\#111827\] {
+        border: 1px solid #e2e8f0 !important;
+      }
+      #print-report-container .border-white\/5,
+      #print-report-container .border-slate-800\/80 {
+        border-color: #e2e8f0 !important;
+      }
+      /* White text -> near-black; muted grays stay legible gray */
+      #print-report-container .text-\[\#f8fafc\],
+      #print-report-container .text-white {
+        color: #0f172a !important;
+      }
+      #print-report-container .text-slate-300,
+      #print-report-container .text-slate-350,
+      #print-report-container .text-slate-400,
+      #print-report-container .text-slate-500 {
+        color: #475569 !important;
+      }
+      /* Keep income/expense colour coding, print-strength */
+      #print-report-container .text-emerald-500,
+      #print-report-container .text-emerald-600 { color: #047857 !important; }
+      #print-report-container .text-rose-500,
+      #print-report-container .text-rose-600 { color: #be123c !important; }
+      /* FINGO badge: outline instead of solid fill (saves ink) */
+      #print-report-container .bg-indigo-600 {
+        background-color: #ffffff !important;
+        color: #4338ca !important;
+        border: 1.5px solid #4338ca !important;
+        box-shadow: none !important;
+      }
+
+      /* ===== Compact everything onto a single A4 page ===== */
+      #print-report-container {
+        font-size: 11px !important;
+        max-width: none !important;
+      }
+      /* tighten the top-level vertical rhythm (space-y-6) */
+      #print-report-container > * + * { margin-top: 8px !important; }
+      /* shrink paddings / margins / gaps / radii */
+      #print-report-container .p-8 { padding: 0 !important; }
+      #print-report-container .p-5 { padding: 9px !important; }
+      #print-report-container .p-4 { padding: 7px !important; }
+      #print-report-container .pb-6 { padding-bottom: 6px !important; }
+      #print-report-container .py-12 { padding-top: 6px !important; padding-bottom: 6px !important; }
+      #print-report-container .mb-2,
+      #print-report-container .mb-3,
+      #print-report-container .mb-4 { margin-bottom: 5px !important; }
+      #print-report-container .mt-1\.5,
+      #print-report-container .mt-1 { margin-top: 1px !important; }
+      #print-report-container .gap-4 { gap: 7px !important; }
+      #print-report-container .gap-6 { gap: 8px !important; }
+      #print-report-container .gap-3\.5 { gap: 8px !important; }
+      #print-report-container .rounded-2xl { border-radius: 7px !important; }
+      #print-report-container .space-y-6 > * + * { margin-top: 8px !important; }
+      /* summary numbers a touch smaller */
+      #print-stat-income, #print-stat-expenses, #print-stat-balance { font-size: 15px !important; }
+      /* charts: cap height so two of them + the rest fit on one page */
+      #print-chart-income-expense { max-height: 150px !important; }
+      #print-chart-categories { max-height: 150px !important; }
+      /* category summary: 3 narrow columns instead of 2 */
+      #print-categories-list { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
+      #print-categories-list .w-10 { width: 1.9rem !important; }
+      #print-categories-list .h-10 { height: 1.9rem !important; }
+      #print-categories-list .gap-3\.5 { gap: 6px !important; }
+      /* never split a card / section across pages */
+      #print-report-container .rounded-2xl,
+      #print-report-container .grid > div { break-inside: avoid; page-break-inside: avoid; }
     }
     
     /* Dark Mode Custom Styles */
@@ -2195,7 +2294,7 @@
               <i data-lucide="folder-open" class="w-5 h-5 text-indigo-500"></i>
               Správa souboru databáze
             </h3>
-            <p class="text-xs text-slate-400 mt-1 font-medium">Aktuálně připojený databázový soubor a jeho správa.</p>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Aktuálně připojený databázový soubor, jeho správa a záloha.</p>
           </div>
           
           <div class="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-3">
@@ -2218,67 +2317,47 @@
 
           
           <div class="space-y-2">
-            <!-- Demo database toggle button -->
-            <button id="settings-demo-db-btn" onclick="toggleDemoDatabase(true)" class="w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-              <span class="w-2.5 h-2.5 rounded-full shrink-0 bg-slate-300 dark:bg-slate-700" id="settings-demo-db-status-dot"></span>
-              <span id="settings-demo-db-btn-text">Demo databáze: Neaktivní</span>
-            </button>
-
-            <!-- New database button -->
+            <!-- New database -->
             <button onclick="createNewDatabase()" class="w-full py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
               <i data-lucide="file-plus" class="w-4 h-4 text-indigo-500"></i>
               <span>Nová databáze</span>
             </button>
 
-            <!-- Fallback manual download button inside settings -->
+            <!-- Fallback manual download button inside settings (hidden, toggled for iOS) -->
             <button id="settings-ios-sync-btn" onclick="triggerIosFileSave()" class="hidden w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
               <i data-lucide="download" class="w-4 h-4"></i>
               Stáhnout aktuální data (.json)
             </button>
 
+            <!-- Open database -->
             <button onclick="changeDatabaseFile()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
-              <i data-lucide="folder-sync" class="w-4 h-4"></i>
-              Zvolit jinou databázi (.json)
+              <i data-lucide="folder-open" class="w-4 h-4"></i>
+              Otevřít databázi
             </button>
 
-            <button onclick="promptDatabaseDisconnect()" class="w-full py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-350 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
-              <i data-lucide="log-out" class="w-4 h-4 text-slate-500"></i>
-              Zavřít databázi a vybrat jiný soubor
+            <!-- Backup database (JSON) -->
+            <button onclick="exportState()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
+              <i data-lucide="database-backup" class="w-4 h-4"></i>
+              Zálohovat databázi
             </button>
-          </div>
-        </div>
 
-        <!-- Data Backup Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="database-backup" class="w-5 h-5 text-indigo-500"></i>
-              Záloha a přenositelnost
-            </h3>
-            <p class="text-xs text-slate-400 mt-1 font-medium font-semibold">Stáhněte si zálohu aktuální databáze jako JSON nebo exportujte data do CSV.</p>
-          </div>
-          
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button onclick="exportState()" class="flex-1 py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              Export JSON
-            </button>
-            
-            <button onclick="exportTransactionsToCsv()" class="flex-1 py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
+            <!-- Export CSV -->
+            <button onclick="exportTransactionsToCsv()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
               <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
               Export CSV
             </button>
-            
-            <button onclick="triggerImportFileInput()" class="flex-1 py-3.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
-              <i data-lucide="upload" class="w-4 h-4"></i>
-              Import JSON
-            </button>
             <input type="file" id="import-file-input" onchange="handleImportFile(event)" accept=".json" class="hidden">
+
+            <!-- Demo database toggle -->
+            <button id="settings-demo-db-btn" onclick="toggleDemoDatabase(true)" class="w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0 bg-slate-300 dark:bg-slate-700" id="settings-demo-db-status-dot"></span>
+              <span id="settings-demo-db-btn-text">Demo databáze: Neaktivní</span>
+            </button>
           </div>
         </div>
-        
+
         <!-- PDF Export Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6 md:col-span-2">
+        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
           <div>
             <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
               <i data-lucide="file-text" class="w-5 h-5 text-indigo-500"></i>
@@ -3401,6 +3480,9 @@
       "Pro práci se zvoleným souborem databáze a automatické ukládání změn je nutné udělit prohlížeči oprávnění.": { en: "To work with the selected database file and save changes automatically, the browser needs permission.", de: "Um mit der gewählten Datenbankdatei zu arbeiten und Änderungen automatisch zu speichern, benötigt der Browser eine Berechtigung." },
       "Povolit přístup a pokračovat": { en: "Allow access and continue", de: "Zugriff erlauben und fortfahren" },
       "Záloha": { en: "Backup", de: "Sicherung" },
+      "Otevřít databázi": { en: "Open database", de: "Datenbank öffnen" },
+      "Zálohovat databázi": { en: "Back up database", de: "Datenbank sichern" },
+      "Aktuálně připojený databázový soubor, jeho správa a záloha.": { en: "The currently connected database file, its management and backup.", de: "Die aktuell verbundene Datenbankdatei, ihre Verwaltung und Sicherung." },
       "Přepnout tmavý/světlý režim": { en: "Toggle dark/light mode", de: "Dunkel-/Hellmodus umschalten" },
 
       // Placeholders
@@ -4920,6 +5002,98 @@
         .split("'").join('&#39;');
     }
 
+    // Build a print-friendly image of a dashboard chart by rendering a FRESH chart
+    // (same data) with a light/print theme onto an off-screen canvas — never touching
+    // the live chart. Because it draws from `config.data` (not the on-screen canvas),
+    // it works even if the dashboard was never painted, and renders synchronously
+    // (animation off + draw()), so it is reliable in background tabs too.
+    function getPrintChartImage(srcChart) {
+      let tmp = null, dataUrl = null;
+      try {
+        if (!srcChart || !srcChart.config) return null;
+        const bw = (srcChart.canvas && srcChart.canvas.width) || 600;
+        const bh = (srcChart.canvas && srcChart.canvas.height) || 300;
+        const clientW = srcChart.canvas && srcChart.canvas.clientWidth;
+        const dpr = clientW ? Math.max(1, bw / clientW) : 2;
+        const fs = Math.round(10 * dpr);
+        const fsSmall = Math.round(9 * dpr);
+
+        const cv = document.createElement('canvas');
+        cv.width = bw;
+        cv.height = bh;
+
+        const isLine = srcChart.config.type === 'line';
+
+        // Reuse the data, shallow-cloning datasets so print recolouring can't leak
+        // back into the live chart.
+        const srcData = srcChart.config.data || {};
+        const data = {
+          labels: (srcData.labels || []).slice(),
+          datasets: (srcData.datasets || []).map(ds => Object.assign({}, ds))
+        };
+        if (isLine) {
+          data.datasets.forEach(ds => {
+            ds.borderColor = '#4f46e5';
+            ds.backgroundColor = 'rgba(79, 70, 229, 0.10)';
+            ds.pointBackgroundColor = '#4f46e5';
+            ds.pointBorderColor = '#ffffff';
+            ds.borderWidth = Math.max(2, Math.round(1.5 * dpr));
+          });
+        }
+
+        const valueFmt = function (value) { try { return formatCurrencyNoDecimals(value); } catch (e) { return value; } };
+        const gridLight = { color: 'rgba(0, 0, 0, 0.10)' };
+        let scales;
+        if (isLine) {
+          scales = {
+            x: { grid: { display: false }, ticks: { color: '#334155', font: { size: fsSmall }, maxTicksLimit: 6 } },
+            y: { grid: gridLight, ticks: { color: '#334155', font: { size: fsSmall }, callback: valueFmt } }
+          };
+        } else {
+          scales = {
+            x: { stacked: true, grid: gridLight, ticks: { color: '#334155', font: { size: fsSmall }, callback: valueFmt } },
+            y: { stacked: true, grid: { display: false }, ticks: { color: '#1e293b', font: { size: fs, weight: '700' } } }
+          };
+        }
+
+        const whiteBg = {
+          id: 'printWhiteBg',
+          beforeDraw(c) {
+            const cx = c.ctx;
+            cx.save();
+            cx.globalCompositeOperation = 'destination-over';
+            cx.fillStyle = '#ffffff';
+            cx.fillRect(0, 0, c.width, c.height);
+            cx.restore();
+          }
+        };
+
+        tmp = new Chart(cv, {
+          type: srcChart.config.type,
+          data: data,
+          options: {
+            responsive: false,
+            animation: false,
+            maintainAspectRatio: false,
+            devicePixelRatio: 1,
+            indexAxis: (srcChart.config.options && srcChart.config.options.indexAxis) || 'x',
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: scales
+          },
+          plugins: [whiteBg]
+        });
+        tmp.update('none');
+        tmp.draw();
+        dataUrl = cv.toDataURL('image/png');
+      } catch (e) {
+        console.error('Print chart generation failed', e);
+        try { dataUrl = srcChart.toBase64Image(); } catch (e2) { dataUrl = null; }
+      } finally {
+        if (tmp) { try { tmp.destroy(); } catch (e) {} }
+      }
+      return dataUrl;
+    }
+
     function generatePdfReport() {
       triggerHapticFeedback();
       
@@ -5012,7 +5186,7 @@
       
       if (typeof trendChartInstance !== 'undefined' && trendChartInstance) {
         try {
-          incomeExpenseImg.src = trendChartInstance.toBase64Image();
+          incomeExpenseImg.src = getPrintChartImage(trendChartInstance);
           incomeExpenseImg.classList.remove('hidden');
           incomeExpensePl.classList.add('hidden');
         } catch(e) {
@@ -5028,7 +5202,7 @@
       let hasCategoryCharts = false;
       if (typeof categoryChartInstance !== 'undefined' && categoryChartInstance) {
         try {
-          categoryImg.src = categoryChartInstance.toBase64Image();
+          categoryImg.src = getPrintChartImage(categoryChartInstance);
           categoryImg.classList.remove('hidden');
           hasCategoryCharts = true;
         } catch(e) {
@@ -5485,8 +5659,11 @@
       while (y < maxYear || (y === maxYear && m <= maxMonth)) {
         const value = `${y}-${String(m + 1).padStart(2, '0')}`;
         const label = getMonthLabel(y, m);
-        options.push({ value, label });
-        
+        // End-of-month balance only for past and the current month (not future).
+        const isFutureMonth = (y > currentYear) || (y === currentYear && m > currentMonth);
+        const balance = isFutureMonth ? null : getMonthEndBalance(y, m);
+        options.push({ value, label, balance });
+
         m++;
         if (m > 11) {
           m = 0;
@@ -5504,8 +5681,14 @@
         options.forEach(opt => {
           const option = document.createElement('option');
           option.value = opt.value;
-          option.innerText = opt.label;
           option.className = "dark:bg-slate-900 text-slate-700 dark:text-slate-350 font-semibold";
+          if (opt.balance !== null && opt.balance !== undefined) {
+            // Past & current months: show end-of-month balance, green/red by sign.
+            option.innerText = `${opt.label}  (${formatCurrencyNoDecimals(opt.balance)})`;
+            option.style.color = opt.balance < 0 ? '#dc2626' : '#16a34a';
+          } else {
+            option.innerText = opt.label;
+          }
           selectEl.appendChild(option);
         });
         
@@ -5595,40 +5778,57 @@
     function getFutureRecurringPaymentsThisMonth() {
       const select = document.getElementById('global-period-select');
       if (!select) return [];
-      
-      const period = select.value;
+      const match = (select.value || '').match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        return getFutureRecurringPaymentsForMonth(parseInt(match[1]), parseInt(match[2]) - 1);
+      }
+      const now = new Date();
+      return getFutureRecurringPaymentsForMonth(now.getFullYear(), now.getMonth());
+    }
+
+    // Projected balance at the end of a given month: net of that month's actual
+    // transactions plus the expected future recurring/loan payments. Returns the
+    // same figure the trend chart shows as "konec měsíce".
+    function getMonthEndBalance(year, month) {
+      let net = 0;
+      (state.transactions || []).forEach(t => {
+        if (!t.date) return;
+        const d = parseDateSafe(t.date);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          const amt = Number(t.amount) || 0;
+          net += (t.type === 'income') ? amt : -amt;
+        }
+      });
+      getFutureRecurringPaymentsForMonth(year, month).forEach(p => {
+        net += (p.type === 'income') ? Number(p.amount) : -Number(p.amount);
+      });
+      return net;
+    }
+
+    function getFutureRecurringPaymentsForMonth(year, month) {
       const now = new Date();
       now.setHours(0, 0, 0, 0);
-      
-      let startOfRange = new Date();
-      let endOfRange = new Date();
-      
-      const match = period.match(/^(\d{4})-(\d{2})$/);
-      if (match) {
-        const year = parseInt(match[1]);
-        const month = parseInt(match[2]) - 1;
-        
-        const startOfMonth = new Date(year, month, 1);
-        const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
-        
-        if (endOfMonth < now) {
-          return [];
-        }
-        
-        if (year === now.getFullYear() && month === now.getMonth()) {
-          startOfRange = new Date(now);
-          endOfRange = endOfMonth;
-        } else {
-          startOfRange = startOfMonth;
-          endOfRange = endOfMonth;
-        }
-      } else {
-        startOfRange = new Date(now);
-        endOfRange = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+      // Past months have no future (expected) payments left.
+      if (endOfMonth < now) {
+        return [];
       }
-      
+
+      let startOfRange;
+      let endOfRange;
+      if (year === now.getFullYear() && month === now.getMonth()) {
+        startOfRange = new Date(now);
+        endOfRange = endOfMonth;
+      } else {
+        startOfRange = startOfMonth;
+        endOfRange = endOfMonth;
+      }
+
       const futurePayments = [];
-      
+
       (state.recurring || []).forEach(rec => {
         let initialDateStr = rec.nextDueDate;
         if (!initialDateStr) {
@@ -5849,8 +6049,13 @@
       document.getElementById('stat-total-expense').innerText = formatCurrency(expense);
       
       const periodSelect = document.getElementById('global-period-select');
-      const selectedPeriodText = periodSelect.options[periodSelect.selectedIndex].text;
-      
+      // Use the clean month label (the option text now also carries the end-of-month
+      // balance, which must not leak into these descriptions).
+      const selPeriodMatch = (periodSelect.value || '').match(/^(\d{4})-(\d{2})$/);
+      const selectedPeriodText = selPeriodMatch
+        ? getMonthLabel(parseInt(selPeriodMatch[1]), parseInt(selPeriodMatch[2]) - 1)
+        : periodSelect.options[periodSelect.selectedIndex].text;
+
       const incomeDescPrefix = currentLanguage === 'cs' ? 'Příjmy – ' : (currentLanguage === 'en' ? 'Income – ' : 'Einnahmen – ');
       const expenseDescPrefix = currentLanguage === 'cs' ? 'Výdaje – ' : (currentLanguage === 'en' ? 'Expenses – ' : 'Ausgaben – ');
       
