@@ -288,6 +288,7 @@
     html.dark #modal-db-startup .bg-white,
     html.dark #modal-db-permission .bg-white,
     html.dark #modal-delete-confirm .bg-white,
+    html.dark #modal-propagate-edit .bg-white,
     html.dark #modal-edit-transaction .bg-white,
     html.dark #modal-loan-payment .bg-white,
     html.dark #modal-goal-deposit .bg-white,
@@ -628,6 +629,25 @@
       
       <!-- Right Header Actions (Filters + User Info Card) -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+        <!-- Report export menu (PDF / Excel) -->
+        <div class="relative w-full sm:w-auto shrink-0" id="report-menu-wrapper">
+          <button type="button" onclick="toggleReportMenu(event)" class="w-full sm:w-auto flex items-center justify-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-sm transition-all active:scale-95">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span>Report</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+          </button>
+          <div id="report-menu" class="hidden absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-60 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-1.5">
+            <button type="button" onclick="exportReportFromMenu('pdf')" class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <i data-lucide="file-text" class="w-4 h-4 text-rose-500"></i>
+              <span>Export do PDF</span>
+            </button>
+            <button type="button" onclick="exportReportFromMenu('csv')" class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+              <span>Export do Excelu (CSV)</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Language Switcher -->
         <div class="relative bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-xl shadow-sm w-full sm:w-auto shrink-0">
           <select id="language-select" onchange="translatePage(this.value)" class="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
@@ -1926,7 +1946,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-fire-expenses" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Cílové měsíční výdaje v rentě:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-expenses-val">0 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-fire-expenses', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-amber-500 cursor-text px-1 rounded" id="sim-fire-expenses-val">0 Kč</span>
               </div>
               <input type="range" id="sim-fire-expenses" min="10000" max="250000" step="5000" value="50000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
@@ -1935,7 +1955,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-fire-savings" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Stávající zainvestované úspory:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-savings-val">0 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-fire-savings', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-amber-500 cursor-text px-1 rounded" id="sim-fire-savings-val">0 Kč</span>
               </div>
               <input type="range" id="sim-fire-savings" min="0" max="10000000" step="50000" value="500000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
@@ -1944,7 +1964,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-fire-monthly" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Měsíční úspory / investice:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-monthly-val">0 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-fire-monthly', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-amber-500 cursor-text px-1 rounded" id="sim-fire-monthly-val">0 Kč</span>
               </div>
               <input type="range" id="sim-fire-monthly" min="0" max="150000" step="2000" value="10000" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
@@ -1953,7 +1973,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-fire-yield" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Očekávaný roční výnos portfolia:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-fire-yield-val">7 %</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-fire-yield', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-amber-500 cursor-text px-1 rounded" id="sim-fire-yield-val">7 %</span>
               </div>
               <input type="range" id="sim-fire-yield" min="0" max="100" step="0.5" value="7" oninput="calculateFIRE()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
@@ -2001,7 +2021,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-debt-extra" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Celková měsíční splátka navíc:</label>
-                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="sim-debt-extra-val">0 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-debt-extra', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-indigo-500 cursor-text px-1 rounded" id="sim-debt-extra-val">0 Kč</span>
               </div>
               <input type="range" id="sim-debt-extra" min="0" max="50000" step="1000" value="5000" oninput="calculateDebtSnowball()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
             </div>
@@ -2061,7 +2081,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-compound-initial" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Počáteční vklad:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-compound-initial-val">100 000 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-compound-initial', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-emerald-500 cursor-text px-1 rounded" id="sim-compound-initial-val">100 000 Kč</span>
               </div>
               <input type="range" id="sim-compound-initial" min="0" max="10000000" step="10000" value="100000" oninput="calculateCompound()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
@@ -2070,7 +2090,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-compound-monthly" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Měsíční příspěvek:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-compound-monthly-val">5 000 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-compound-monthly', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-emerald-500 cursor-text px-1 rounded" id="sim-compound-monthly-val">5 000 Kč</span>
               </div>
               <input type="range" id="sim-compound-monthly" min="0" max="100000" step="1000" value="5000" oninput="calculateCompound()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
@@ -2079,7 +2099,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-compound-years" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Doba investování (roky):</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-compound-years-val">20 let</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-compound-years', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-emerald-500 cursor-text px-1 rounded" id="sim-compound-years-val">20 let</span>
               </div>
               <input type="range" id="sim-compound-years" min="1" max="50" step="1" value="20" oninput="calculateCompound()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
@@ -2088,7 +2108,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-compound-yield" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Roční výnos / úrok:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-compound-yield-val">8 %</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-compound-yield', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-emerald-500 cursor-text px-1 rounded" id="sim-compound-yield-val">8 %</span>
               </div>
               <input type="range" id="sim-compound-yield" min="0" max="100" step="0.5" value="8" oninput="calculateCompound()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
@@ -2152,7 +2172,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-loan-amount" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Výše úvěru:</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-loan-amount-val">1 000 000 Kč</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-loan-amount', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-indigo-500 cursor-text px-1 rounded" id="sim-loan-amount-val">1 000 000 Kč</span>
               </div>
               <input type="range" id="sim-loan-amount" min="10000" max="20000000" step="50000" value="1000000" oninput="calculateSimpleLoan()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
             </div>
@@ -2161,7 +2181,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-loan-rate" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Úroková sazba (% p.a.):</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-loan-rate-val">5 %</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-loan-rate', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-indigo-500 cursor-text px-1 rounded" id="sim-loan-rate-val">5 %</span>
               </div>
               <input type="range" id="sim-loan-rate" min="0.1" max="25" step="0.1" value="5" oninput="calculateSimpleLoan()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
             </div>
@@ -2170,7 +2190,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label for="sim-loan-years" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Doba splácení (roky):</label>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-loan-years-val">20 let</span>
+                <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-loan-years', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-indigo-500 cursor-text px-1 rounded" id="sim-loan-years-val">20 let</span>
               </div>
               <input type="range" id="sim-loan-years" min="1" max="40" step="1" value="20" oninput="calculateSimpleLoan()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
             </div>
@@ -2227,7 +2247,7 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <label for="sim-consolidation-extra" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Peníze navíc:</label>
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-extra-val">0 Kč</span>
+                  <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-consolidation-extra', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-violet-500 cursor-text px-1 rounded" id="sim-consolidation-extra-val">0 Kč</span>
                 </div>
                 <input type="range" id="sim-consolidation-extra" min="0" max="2000000" step="10000" value="0" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
               </div>
@@ -2236,7 +2256,7 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <label for="sim-consolidation-rate" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Nová úroková sazba (% p.a.):</label>
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-rate-val">5.5 %</span>
+                  <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-consolidation-rate', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-violet-500 cursor-text px-1 rounded" id="sim-consolidation-rate-val">5.5 %</span>
                 </div>
                 <input type="range" id="sim-consolidation-rate" min="0.1" max="25" step="0.1" value="5.5" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
               </div>
@@ -2245,7 +2265,7 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <label for="sim-consolidation-years" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Nová doba splácení (roky):</label>
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="sim-consolidation-years-val">10 let</span>
+                  <span contenteditable="true" inputmode="decimal" onblur="handleCalcInput('sim-consolidation-years', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none border-b border-dashed border-slate-300 dark:border-slate-600 focus:border-violet-500 cursor-text px-1 rounded" id="sim-consolidation-years-val">10 let</span>
                 </div>
                 <input type="range" id="sim-consolidation-years" min="1" max="30" step="1" value="10" oninput="calculateConsolidation()" class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
               </div>
@@ -2287,7 +2307,7 @@
 
     <!-- ================= VIEW: SETTINGS ================= -->
     <section id="view-settings" class="view-section hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="max-w-2xl mx-auto">
         <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
           <div>
             <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
@@ -2356,41 +2376,6 @@
           </div>
         </div>
 
-        <!-- PDF Export Card -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card space-y-6">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="file-text" class="w-5 h-5 text-indigo-500"></i>
-              Export do PDF za období
-            </h3>
-            <p class="text-xs text-slate-400 mt-1 font-medium font-semibold">Vygenerujte přehled transakcí a grafy za vybrané období.</p>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label for="pdf-export-period" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Zvolte období</label>
-              <select id="pdf-export-period" onchange="togglePdfCustomDates()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold text-slate-700">
-              </select>
-            </div>
-            
-            <div id="pdf-custom-dates-container" class="hidden grid grid-cols-2 gap-4">
-              <div>
-                <label for="pdf-export-from" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum od</label>
-                <input type="date" id="pdf-export-from" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-              </div>
-              <div>
-                <label for="pdf-export-to" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Datum do</label>
-                <input type="date" id="pdf-export-to" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
-              </div>
-            </div>
-
-            <button onclick="generatePdfReport()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-100">
-              <i data-lucide="printer" class="w-4.5 h-4.5"></i>
-              Generovat PDF report
-            </button>
-          </div>
-        </div>
-        
       </div>
     </section>
 
@@ -2504,6 +2489,27 @@
         </button>
         <button id="btn-confirm-delete" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-rose-100">
           Smazat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPAGATE EDIT TO RECURRING SERIES -->
+  <div id="modal-propagate-edit" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop-enter"></div>
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-6 relative z-10 modal-content-enter">
+      <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+        <i data-lucide="git-merge" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-2" id="propagate-edit-title">Přepsat i jinde?</h3>
+      <p class="text-sm text-slate-500 leading-relaxed mb-6 font-medium" id="propagate-edit-description">-</p>
+
+      <div class="flex items-center gap-3 justify-end">
+        <button onclick="confirmPropagateEdit(false)" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors">
+          Jen tuto
+        </button>
+        <button onclick="confirmPropagateEdit(true)" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-indigo-100">
+          Přepsat všude
         </button>
       </div>
     </div>
@@ -2749,7 +2755,7 @@
         <!-- Icon Choice -->
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Výběr ikony</label>
-          <div class="grid grid-cols-6 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-36 overflow-y-auto no-scrollbar" id="quick-icon-picker-grid">
+          <div class="grid grid-cols-6 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-48 overflow-y-auto" id="quick-icon-picker-grid">
             <!-- Choices populated in JS -->
           </div>
           <input type="hidden" id="quick-cat-icon" value="shopping-bag">
@@ -2976,9 +2982,34 @@
     let hasUnsavedChanges = false;
 
     const iconChoices = [
-      'shopping-bag', 'home', 'car', 'tv', 'briefcase', 'help-circle',
-      'heart', 'coffee', 'plane', 'book', 'gift', 'shield',
-      'utensils', 'plug', 'film', 'dumbbell', 'graduation-cap', 'wrench'
+      // Nákupy a obecné
+      'shopping-bag', 'shopping-cart', 'store', 'package', 'tag', 'gift', 'shirt', 'watch', 'gem', 'glasses',
+      // Jídlo a pití
+      'utensils', 'coffee', 'pizza', 'apple', 'carrot', 'cake', 'ice-cream', 'cookie', 'soup', 'sandwich',
+      'wine', 'beer', 'martini', 'cup-soda', 'milk', 'wheat', 'drumstick', 'grape', 'banana', 'popcorn',
+      // Zvířata
+      'dog', 'cat', 'bird', 'fish', 'rabbit', 'turtle', 'snail', 'bug', 'rat', 'squirrel',
+      'paw-print', 'bone', 'feather', 'egg',
+      // Bydlení a domácnost
+      'home', 'bed', 'sofa', 'armchair', 'bath', 'shower-head', 'lamp', 'lightbulb', 'plug', 'washing-machine',
+      'key', 'door-open', 'cooking-pot', 'refrigerator', 'flame', 'droplets', 'wifi',
+      // Doprava
+      'car', 'car-front', 'bus', 'train', 'bike', 'plane', 'ship', 'truck', 'fuel', 'rocket', 'sailboat', 'caravan',
+      // Peníze a finance
+      'wallet', 'banknote', 'coins', 'credit-card', 'piggy-bank', 'landmark', 'receipt', 'hand-coins',
+      'trending-up', 'trending-down', 'percent', 'calculator', 'circle-dollar-sign',
+      // Zdraví
+      'heart', 'heart-pulse', 'pill', 'stethoscope', 'activity', 'dumbbell', 'cross', 'syringe', 'bandage', 'brain', 'hand-heart', 'eye',
+      // Rodina a vzdělání
+      'baby', 'users', 'user', 'graduation-cap', 'school', 'backpack', 'smile', 'book', 'book-open',
+      // Zábava a volný čas
+      'tv', 'film', 'music', 'headphones', 'gamepad-2', 'ticket', 'palette', 'camera', 'party-popper', 'guitar', 'clapperboard', 'dices', 'volleyball', 'tent',
+      // Příroda
+      'tree-pine', 'tree-deciduous', 'trees', 'flower', 'flower-2', 'leaf', 'sprout', 'sun', 'cloud', 'mountain', 'snowflake', 'umbrella',
+      // Práce a nářadí
+      'briefcase', 'wrench', 'hammer', 'laptop', 'monitor', 'smartphone', 'printer', 'scissors', 'paintbrush', 'hard-hat', 'ruler', 'drill',
+      // Ostatní
+      'help-circle', 'shield', 'globe', 'map-pin', 'calendar', 'clock', 'star'
     ];
 
     let currentTab = 'dashboard';
@@ -2991,6 +3022,9 @@
       "Přehled": { en: "Dashboard", de: "Übersicht" },
       "Sbalit vše": { en: "Collapse all", de: "Alles einklappen" },
       "Rozbalit vše": { en: "Expand all", de: "Alles ausklappen" },
+      "Sdílet výpis v PDF": { en: "Share statement as PDF", de: "Auszug als PDF teilen" },
+      "Výpis kategorie": { en: "Category statement", de: "Kategorie-Auszug" },
+      "Vybrané období": { en: "Selected period", de: "Ausgewählter Zeitraum" },
       "Transakce": { en: "Transactions", de: "Transaktionen" },
       "Rozpočty": { en: "Budgets", de: "Budgets" },
       "Spořicí cíle": { en: "Savings Goals", de: "Sparziele" },
@@ -3483,6 +3517,9 @@
       "Otevřít databázi": { en: "Open database", de: "Datenbank öffnen" },
       "Zálohovat databázi": { en: "Back up database", de: "Datenbank sichern" },
       "Aktuálně připojený databázový soubor, jeho správa a záloha.": { en: "The currently connected database file, its management and backup.", de: "Die aktuell verbundene Datenbankdatei, ihre Verwaltung und Sicherung." },
+      "Report": { en: "Report", de: "Bericht" },
+      "Export do PDF": { en: "Export to PDF", de: "Als PDF exportieren" },
+      "Export do Excelu (CSV)": { en: "Export to Excel (CSV)", de: "Als Excel (CSV) exportieren" },
       "Přepnout tmavý/světlý režim": { en: "Toggle dark/light mode", de: "Dunkel-/Hellmodus umschalten" },
 
       // Placeholders
@@ -3824,8 +3861,11 @@
       if (!select) return;
       
       select.innerHTML = '';
-      const categories = state.categories || [];
-      
+      // Sort categories alphabetically (Czech locale, diacritics-aware).
+      const categories = [...(state.categories || [])].sort((a, b) =>
+        (a.name || '').localeCompare((b.name || ''), getAppLocale(), { sensitivity: 'base' })
+      );
+
       categories.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat.id;
@@ -5094,10 +5134,39 @@
       return dataUrl;
     }
 
+    // ===== Header "Report" export menu (PDF / Excel CSV) =====
+    window.toggleReportMenu = function(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('report-menu');
+      if (menu) menu.classList.toggle('hidden');
+    };
+
+    function closeReportMenu() {
+      const menu = document.getElementById('report-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('report-menu-wrapper');
+      if (wrapper && !wrapper.contains(e.target)) closeReportMenu();
+    });
+
+    window.exportReportFromMenu = function(kind) {
+      closeReportMenu();
+      if (kind === 'pdf') {
+        generatePdfReport();
+      } else if (kind === 'csv') {
+        exportTransactionsToCsv();
+      }
+    };
+
     function generatePdfReport() {
       triggerHapticFeedback();
-      
-      const periodSelect = document.getElementById('pdf-export-period');
+
+      // The report export lives in the dashboard header now, so it follows the
+      // global period selector (Období) rather than a separate dropdown.
+      const periodSelect = document.getElementById('global-period-select');
+      if (!periodSelect) return;
       const selectedPeriod = periodSelect.value;
       
       let fromDateStr = '';
@@ -5118,8 +5187,8 @@
         const tempD = new Date(year, monthNum - 1, 1);
         periodLabel = tempD.toLocaleDateString(getAppLocale(), {month: 'long', year: 'numeric'});
       } else if (selectedPeriod === 'custom') {
-        const inputFrom = document.getElementById('pdf-export-from').value;
-        const inputTo = document.getElementById('pdf-export-to').value;
+        const inputFrom = document.getElementById('global-start-date').value;
+        const inputTo = document.getElementById('global-end-date').value;
         if (!inputFrom || !inputTo) {
           showToast("Prosím vyplňte obě data (Od a Do) pro vlastní rozsah.", "error");
           return;
@@ -5147,18 +5216,29 @@
         });
       }
       
-      // Calculate Stats
-      let totalIncome = 0;
-      let totalExpenses = 0;
-      
+      // Upcoming (not-yet-booked) payments for the selected period. Only the current /
+      // future month returns any; past months return []. Included so the report shows
+      // the same "expected" figures as the dashboard.
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      const resolveCatId = (ref) => {
+        if (!ref) return ref;
+        if (state.categories.some(cat => cat.id === ref)) return ref;
+        const byName = state.categories.find(cat => cat.name === ref);
+        return byName ? byName.id : ref;
+      };
+
+      // Calculate Stats (paid + upcoming → totals)
+      let incomePaid = 0, incomeFuture = 0, expensePaid = 0, expenseFuture = 0;
       filtered.forEach(t => {
-        if (t.type === 'income') {
-          totalIncome += Number(t.amount) || 0;
-        } else {
-          totalExpenses += Number(t.amount) || 0;
-        }
+        const amt = Number(t.amount) || 0;
+        if (t.type === 'income') incomePaid += amt; else expensePaid += amt;
       });
-      
+      futurePayments.forEach(fp => {
+        const amt = Number(fp.amount) || 0;
+        if (fp.type === 'income') incomeFuture += amt; else expenseFuture += amt;
+      });
+      const totalIncome = incomePaid + incomeFuture;
+      const totalExpenses = expensePaid + expenseFuture;
       const balance = totalIncome - totalExpenses;
       
       // Fill UI fields
@@ -5224,70 +5304,61 @@
       if (catListContainer) {
         catListContainer.innerHTML = '';
         
-        const catSums = {};
-        const catLatest = {};
-        
+        const catData = {};
+
         filtered.forEach(t => {
-          const catId = t.category;
-          const type = t.type;
-          const key = `${catId}_${type}`;
-          
-          if (!catSums[key]) {
-            catSums[key] = {
-              catId: catId,
-              type: type,
-              amount: 0
-            };
-          }
-          catSums[key].amount += Number(t.amount) || 0;
-          
+          const key = `${t.category}_${t.type}`;
+          if (!catData[key]) catData[key] = { catId: t.category, type: t.type, paid: 0, future: 0, latestDate: '', latestTime: 0 };
+          catData[key].paid += Number(t.amount) || 0;
           if (t.date) {
             const tTime = parseDateSafe(t.date).getTime();
-            if (!catLatest[key] || tTime > catLatest[key].time) {
-              catLatest[key] = {
-                date: t.date,
-                time: tTime
-              };
-            }
+            if (tTime > catData[key].latestTime) { catData[key].latestTime = tTime; catData[key].latestDate = t.date; }
           }
         });
-        
-        const catList = Object.values(catSums);
-        
-        const incomes = catList.filter(c => c.type === 'income');
-        const expenses = catList.filter(c => c.type === 'expense');
-        
-        incomes.sort((a, b) => b.amount - a.amount);
-        expenses.sort((a, b) => b.amount - a.amount);
-        
+
+        // Add upcoming (before-due) payments per category.
+        futurePayments.forEach(fp => {
+          const cid = resolveCatId(fp.category);
+          const key = `${cid}_${fp.type}`;
+          if (!catData[key]) catData[key] = { catId: cid, type: fp.type, paid: 0, future: 0, latestDate: '', latestTime: 0 };
+          catData[key].future += Number(fp.amount) || 0;
+        });
+
+        const catList = Object.values(catData).map(c => ({ ...c, amount: c.paid + c.future }));
+        const incomes = catList.filter(c => c.type === 'income').sort((a, b) => b.amount - a.amount);
+        const expenses = catList.filter(c => c.type === 'expense').sort((a, b) => b.amount - a.amount);
         const sortedCats = [...expenses, ...incomes];
-        
+
         const catEmptyMsg = document.getElementById('print-categories-empty');
         if (sortedCats.length === 0) {
           if (catEmptyMsg) catEmptyMsg.classList.remove('hidden');
         } else {
           if (catEmptyMsg) catEmptyMsg.classList.add('hidden');
-          
+
           sortedCats.forEach(c => {
             const categoryObj = state.categories.find(cat => cat.id === c.catId) || { name: c.catId === 'all' ? 'Ostatní' : 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
             const isIncome = c.type === 'income';
-            
+
             const amountClass = isIncome ? 'text-emerald-500' : 'text-rose-500';
             const sign = isIncome ? '+' : '-';
-            
+
             let pctLabel = '';
             if (!isIncome && totalExpenses > 0) {
               pctLabel = `${((c.amount / totalExpenses) * 100).toFixed(1)}%`;
             } else if (isIncome && totalIncome > 0) {
               pctLabel = `${((c.amount / totalIncome) * 100).toFixed(1)}%`;
             }
-            
-            const key = `${c.catId}_${c.type}`;
-            const latestInfo = catLatest[key];
-            const dateText = latestInfo 
-              ? `${__('Poslední:')} ${formatDateString(latestInfo.date)}` 
-              : __('Žádné transakce');
-            
+
+            // Breakdown subheadings: paid vs. before-due (shown only when there are
+            // upcoming payments — i.e. for the current/future month).
+            const subHtml = c.future > 0
+              ? `<p class="text-[9px] font-semibold mt-0.5 tracking-wide leading-snug">
+                   <span class="text-slate-400">${__('Zaplaceno')}:</span> <span class="text-white">${formatCurrency(c.paid)}</span>
+                   <span class="text-slate-500"> · </span>
+                   <span class="text-slate-400">${__('Před splatností')}:</span> <span class="text-amber-500">${formatCurrency(c.future)}</span>
+                 </p>`
+              : `<p class="text-[10px] text-slate-400 font-semibold mt-0.5 tracking-wide">${c.latestDate ? `${__('Poslední:')} ${formatDateString(c.latestDate)}` : __('Žádné transakce')}</p>`;
+
             const cardEl = document.createElement('div');
             cardEl.className = "flex items-center justify-between p-4 bg-[#111827] border border-white/5 rounded-2xl shadow-sm";
             cardEl.innerHTML = `
@@ -5297,7 +5368,7 @@
                 </div>
                 <div class="min-w-0">
                   <p class="font-extrabold text-white text-sm truncate leading-snug">${escapeHtml(__(categoryObj.name))}</p>
-                  <p class="text-[10px] text-slate-400 font-semibold mt-0.5 tracking-wide">${dateText}</p>
+                  ${subHtml}
                 </div>
               </div>
               <div class="text-right shrink-0">
@@ -6401,9 +6472,15 @@
             </div>
           </div>
           
-          <!-- Accordion details -->
+          <!-- Accordion details: full height so every item shows (screenshot-friendly) -->
           <div id="details-${cat.id}" class="${detailsClass} mt-3.5 pl-14 pr-2 space-y-2 border-t border-slate-50 dark:border-slate-800/30 pt-3">
-            <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1 no-scrollbar">
+            <div class="flex justify-end -mt-1 mb-1.5">
+              <button onclick="generateCategoryPdf('${cat.id}'); event.stopPropagation();" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-3 py-1.5 rounded-lg transition-colors">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                ${__('Sdílet výpis v PDF')}
+              </button>
+            </div>
+            <div class="space-y-2 pr-1">
               ${cat.transactions.map(tx => {
                 const txIcon = tx.isFuture ? 'calendar' : 'check';
                 const txIconColor = tx.isFuture ? 'text-indigo-500' : 'text-emerald-500';
@@ -6447,6 +6524,113 @@
       updateToggleAllCategoriesButtonState();
       lucide.createIcons();
     }
+
+    // Per-category PDF statement: all transactions of one category (paid + future)
+    // for the selected period, with month/period header and totals. Reuses the
+    // print container + the ink-saving print CSS, then triggers the browser's
+    // print dialog (Save/Share as PDF). The container is restored afterwards.
+    window.generateCategoryPdf = function(catId) {
+      triggerHapticFeedback();
+      const cat = state.categories.find(c => c.id === catId);
+      const container = document.getElementById('print-report-container');
+      if (!cat || !container) return;
+
+      const filteredTransactions = getFilteredTransactions(state.transactions);
+      const futurePayments = getFutureRecurringPaymentsThisMonth();
+      const catActual = filteredTransactions.filter(t => t.category === catId && t.type === 'expense');
+      const catFuture = futurePayments.filter(fp => fp.category === catId && fp.type === 'expense');
+
+      const items = [
+        ...catActual.map(t => ({ ...t, isFuture: false })),
+        ...catFuture.map(fp => ({ ...fp, isFuture: true }))
+      ].sort((a, b) => parseDateSafe(a.date) - parseDateSafe(b.date));
+
+      const paidSum = catActual.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+      const futureSum = catFuture.reduce((acc, fp) => acc + (Number(fp.amount) || 0), 0);
+      const total = paidSum + futureSum;
+
+      const periodVal = (document.getElementById('global-period-select') || {}).value || '';
+      const pMatch = periodVal.match(/^(\d{4})-(\d{2})$/);
+      const periodLabel = pMatch ? getMonthLabel(parseInt(pMatch[1]), parseInt(pMatch[2]) - 1) : __('Vybrané období');
+
+      const rowsHtml = items.length ? items.map(tx => {
+        const badge = tx.isFuture ? ` <span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded-md ml-1.5 uppercase tracking-wide">${__('Budoucí')}</span>` : '';
+        return `
+          <div class="flex items-center justify-between py-2 border-b border-white/5 text-xs" style="break-inside:avoid;">
+            <div class="min-w-0 pr-4">
+              <p class="font-bold text-white leading-tight">${escapeHtml(tx.description || tx.notes || tx.name || '-')}${badge}</p>
+              <p class="text-[10px] text-slate-400 font-semibold mt-0.5">${formatDateString(tx.date)}</p>
+            </div>
+            <span class="font-black text-rose-500 text-sm shrink-0">${formatCurrency(tx.amount)}</span>
+          </div>`;
+      }).join('') : `<p class="text-center text-slate-500 py-8 text-sm font-semibold">${__('Žádné transakce')}</p>`;
+
+      const statementHtml = `
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-6 mb-2">
+          <div class="flex items-center gap-3">
+            <div class="px-4 py-2 bg-indigo-600 rounded-xl text-white font-black text-xl tracking-wider select-none">FINGO</div>
+            <div>
+              <h1 class="text-lg font-extrabold text-white tracking-wide uppercase">${__('Výpis kategorie')}</h1>
+              <p class="text-[10px] text-slate-400 font-semibold mt-0.5">${__('Vygenerováno:')} ${new Date().toLocaleString('cs-CZ')}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <h2 class="text-xs font-bold text-slate-300">${__('Soubor databáze:')} ${escapeHtml(dbConfig.name || 'finance.json')}</h2>
+            <p class="text-[10px] text-slate-400 font-semibold mt-0.5">${__('Období:')} ${escapeHtml(periodLabel)}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style="background-color: ${cat.color}15; color: ${cat.color}">
+            <i data-lucide="${cat.icon}" class="w-6 h-6"></i>
+          </div>
+          <h2 class="text-2xl font-black text-white">${escapeHtml(__(cat.name))}</h2>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-2">
+          <div class="bg-[#111827] border border-white/5 rounded-2xl p-5">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${__('Celkem')}</span>
+            <h3 class="text-xl font-black text-rose-500 mt-1.5">${formatCurrency(total)}</h3>
+          </div>
+          <div class="bg-[#111827] border border-white/5 rounded-2xl p-5">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${__('Zaplaceno')}</span>
+            <h3 class="text-xl font-black text-white mt-1.5">${formatCurrency(paidSum)}</h3>
+          </div>
+          <div class="bg-[#111827] border border-white/5 rounded-2xl p-5">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${__('Budoucí')}</span>
+            <h3 class="text-xl font-black text-white mt-1.5">${formatCurrency(futureSum)}</h3>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-bold text-slate-350 mb-2 pb-2 border-b border-white/5 uppercase tracking-wider">${__('Transakce')} (${items.length})</h4>
+          <div class="space-y-1">${rowsHtml}</div>
+        </div>
+      `;
+
+      const savedHTML = container.innerHTML;
+      const savedTitle = document.title;
+      container.innerHTML = statementHtml;
+
+      const cleanName = (__(cat.name) || 'kategorie').replace(new RegExp('[^a-zA-Z0-9čČďĎěĚňŇřŘšŠťŤůŮúÚýÝžŽáÁíÍéÉóÓ _-]', 'g'), '').trim();
+      document.title = `${cleanName}_vypis_${periodLabel}`.replace(/\s+/g, '_');
+      lucide.createIcons();
+
+      let restored = false;
+      const restore = () => {
+        if (restored) return;
+        restored = true;
+        container.innerHTML = savedHTML;
+        document.title = savedTitle;
+        lucide.createIcons();
+        window.removeEventListener('afterprint', restore);
+      };
+      window.addEventListener('afterprint', restore);
+      setTimeout(() => {
+        window.print();
+        setTimeout(restore, 10000); // safety net if afterprint never fires
+      }, 300);
+    };
 
     window.handleHistoryHeaderClick = function(col) {
       triggerHapticFeedback();
@@ -7562,6 +7746,7 @@
       
       const idx = state.transactions.findIndex(t => String(t.id) === String(id));
       if (idx !== -1) {
+        const originalTrans = { ...state.transactions[idx] };
         state.transactions[idx] = {
           ...state.transactions[idx],
           type,
@@ -7575,8 +7760,79 @@
         closeModal('modal-edit-transaction');
         filterHistory();
         updateDashboardAndData();
+
+        // If this transaction belongs to a recurring ("Auto-platba") series, offer to
+        // apply the new category to the recurring template and the rest of the series.
+        maybeOfferPropagationAfterEdit(originalTrans, category);
       }
     }
+
+    let pendingCategoryPropagation = null;
+
+    // After editing a transaction's category, detect whether it belongs to a recurring
+    // series (auto-booked from a "trvalá platba", linked via the "Auto-platba: NAME"
+    // description) and, if so, offer to propagate the new category to the recurring
+    // template (future payments) and the rest of the booked series (retroactively).
+    function maybeOfferPropagationAfterEdit(originalTrans, newCategory) {
+      if (!originalTrans || originalTrans.category === newCategory) return;
+
+      const desc = originalTrans.description || '';
+      const match = desc.match(/^Auto-platba:\s*(.+)$/);
+      if (!match) return; // only auto-booked recurring transactions form a series
+
+      const recName = match[1].trim();
+      const recTemplate = (state.recurring || []).find(r => r.name === recName) || null;
+      const siblingIds = (state.transactions || [])
+        .filter(t => String(t.id) !== String(originalTrans.id) && (t.description || '') === desc)
+        .map(t => String(t.id));
+
+      // Nothing else carries this series → no need to ask.
+      if (!recTemplate && siblingIds.length === 0) return;
+
+      pendingCategoryPropagation = {
+        recName,
+        newCategory,
+        recId: recTemplate ? recTemplate.id : null,
+        siblingIds
+      };
+
+      const newCatName = (state.categories.find(c => c.id === newCategory) || {}).name || newCategory;
+      const targets = [];
+      if (recTemplate) targets.push(`v trvalé platbě „${recName}"`);
+      if (siblingIds.length) {
+        const n = siblingIds.length;
+        const word = n === 1 ? 'transakci' : 'transakcí';
+        targets.push(`u ${n} ${n === 1 ? 'další' : 'dalších'} ${word} této série`);
+      }
+      const where = targets.join(' a ');
+      document.getElementById('propagate-edit-description').innerText =
+        `Tato transakce patří k trvalé platbě „${recName}". Nastavit novou kategorii „${escapeHtml(__(newCatName))}" také ${where}? (Zpětně i pro budoucí platby.)`;
+
+      openModal('modal-propagate-edit');
+    }
+
+    window.confirmPropagateEdit = function(applyEverywhere) {
+      const p = pendingCategoryPropagation;
+      closeModal('modal-propagate-edit');
+      pendingCategoryPropagation = null;
+      if (!p || !applyEverywhere) return;
+
+      // Future payments / projections read the recurring template's category.
+      if (p.recId != null) {
+        const rec = (state.recurring || []).find(r => String(r.id) === String(p.recId));
+        if (rec) rec.category = p.newCategory;
+      }
+      // Past booked transactions of the same series (retroactive).
+      const sibSet = new Set(p.siblingIds);
+      (state.transactions || []).forEach(t => {
+        if (sibSet.has(String(t.id))) t.category = p.newCategory;
+      });
+
+      saveState();
+      filterHistory();
+      updateDashboardAndData();
+      showToast(`Kategorie přepsána v celé sérii „${p.recName}"`);
+    };
 
     function toggleSelectAllTransactions(checked) {
       triggerHapticFeedback();
@@ -7984,9 +8240,18 @@
       document.getElementById('cat-form-title').innerText = "Upravit kategorii";
       document.getElementById('cat-form-actions-create').classList.add('hidden');
       document.getElementById('cat-form-actions-edit').classList.remove('hidden');
-      
+
       if (window.innerWidth < 768) {
         switchCatSubTab('form');
+      } else {
+        // Desktop: the edit form sits in the (short, sticky) left column at the top.
+        // When the user clicks a category further down the grid, the form populates but
+        // is scrolled out of view — making it look like nothing happened. Bring it into
+        // view and focus the name field so the edit is obvious.
+        const formCol = document.getElementById('cat-form-column');
+        if (formCol) formCol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const nameEl = document.getElementById('cat-name');
+        if (nameEl) { try { nameEl.focus({ preventScroll: true }); } catch (e) {} }
       }
     }
 
@@ -10445,6 +10710,46 @@
       }
     }
 
+    // Lets the user type a value directly into a calculator slider's number display.
+    // Parses the typed text (handles Czech "1 234,56 Kč"/"%"/"let" formatting), clamps
+    // it to the slider's range, writes it to the slider and re-runs the calculation.
+    // Money/rate sliders allow exact values (step → any); whole-step sliders (years)
+    // stay whole.
+    window.handleCalcInput = function(sliderId, el) {
+      const slider = document.getElementById(sliderId);
+      if (!slider) return;
+      const raw = (el.innerText || el.textContent || '').replace(/\s/g, '').replace(/[^\d,.\-]/g, '').replace(',', '.');
+      let num = parseFloat(raw);
+      if (isNaN(num)) { slider.dispatchEvent(new Event('input')); return; } // revert to current value
+      const min = parseFloat(slider.min), max = parseFloat(slider.max);
+      if (!isNaN(min) && num < min) num = min;
+      if (!isNaN(max) && num > max) num = max;
+      if (parseFloat(slider.step) === 1) {
+        num = Math.round(num); // whole-number sliders (e.g. years)
+      } else {
+        slider.step = 'any'; // money / rate: don't snap typed values to the coarse step
+      }
+      slider.value = num;
+      slider.dispatchEvent(new Event('input')); // re-run the calc + reformat the display
+    };
+
+    // Select the whole value when an editable calculator field is focused, so the user
+    // can immediately type a new number over it.
+    document.addEventListener('focusin', function(e) {
+      const el = e.target;
+      if (el && el.id && /^sim-.+-val$/.test(el.id) && el.getAttribute('contenteditable') === 'true') {
+        setTimeout(() => {
+          try {
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          } catch (_) {}
+        }, 0);
+      }
+    });
+
     function calculateCompound() {
       const initial = Number(document.getElementById('sim-compound-initial').value);
       const monthly = Number(document.getElementById('sim-compound-monthly').value);
@@ -10464,7 +10769,7 @@
         yearText = years === 1 ? 'Jahr' : 'Jahre';
       }
       document.getElementById('sim-compound-years-val').innerText = `${years} ${yearText}`;
-      document.getElementById('sim-compound-yield-val').innerText = `${(yieldRate * 100).toFixed(1)} %`;
+      document.getElementById('sim-compound-yield-val').innerText = `${(Math.round(yieldRate * 10000) / 100)} %`;
       
       const months = years * 12;
       let total = initial;
@@ -10502,7 +10807,7 @@
       const months = years * 12;
       
       document.getElementById('sim-loan-amount-val').innerText = formatCurrency(amount);
-      document.getElementById('sim-loan-rate-val').innerText = `${Number(document.getElementById('sim-loan-rate').value).toFixed(1)} %`;
+      document.getElementById('sim-loan-rate-val').innerText = `${(Math.round(Number(document.getElementById('sim-loan-rate').value) * 100) / 100)} %`;
       
       let yearText = '';
       if (currentLanguage === 'cs') {
@@ -10536,7 +10841,7 @@
       const newYears = Number(document.getElementById('sim-consolidation-years').value);
       
       document.getElementById('sim-consolidation-extra-val').innerText = formatCurrency(extraCash);
-      document.getElementById('sim-consolidation-rate-val').innerText = `${newRate.toFixed(1)} %`;
+      document.getElementById('sim-consolidation-rate-val').innerText = `${(Math.round(newRate * 100) / 100)} %`;
       
       let yearText = '';
       if (currentLanguage === 'cs') {
