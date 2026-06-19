@@ -108,7 +108,7 @@
       }
       /* Bulletproof: print nothing but the report (hides sidebar, main, mobile nav,
          banners, modals — and any dark themed background behind them). */
-      body > *:not(#print-report-container) {
+      body > *:not(#print-report-container):not(#print-statement-container) {
         display: none !important;
       }
       aside, nav, main, #toast-container, #ios-sync-banner, .fixed, .modal-backdrop-enter, #modal-db-startup, #modal-db-permission, #modal-delete-confirm, #modal-edit-transaction {
@@ -129,6 +129,8 @@
       @page { size: A4 portrait; margin: 10mm; }
 
       /* ===== Printable financial report — white background, no ink-heavy fills ===== */
+      /* Při tisku VÝPISU dostane body třídu .printing-statement a report se skryje. */
+      body.printing-statement #print-report-container { display: none !important; }
       #print-report-container {
         display: block !important;
         background: #ffffff !important;
@@ -140,6 +142,49 @@
         z-index: auto !important;
         padding: 0 !important;
       }
+
+      /* ===== Tiskový výpis filtrovaných transakcí (čistý, šetří inkoust) ===== */
+      /* Skrytý při běžném tisku reportu; zobrazí se jen v režimu .printing-statement. */
+      #print-statement-container { display: none !important; }
+      body.printing-statement #print-statement-container {
+        display: block !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        z-index: auto !important;
+        padding: 0 !important;
+        font-size: 11px !important;
+      }
+      #print-statement-container table { width: 100% !important; border-collapse: collapse !important; }
+      #print-statement-container thead { display: table-header-group !important; }
+      #print-statement-container tr { page-break-inside: avoid !important; }
+      #print-statement-container th, #print-statement-container td {
+        padding: 4px 6px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        text-align: left !important;
+      }
+      #print-statement-container th {
+        font-size: 9px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: #64748b !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+      }
+      #print-statement-container .stmt-amount { text-align: right !important; white-space: nowrap !important; font-variant-numeric: tabular-nums !important; }
+      #print-statement-container .stmt-income { color: #047857 !important; font-weight: 700 !important; }
+      #print-statement-container .stmt-expense { color: #be123c !important; font-weight: 700 !important; }
+      #print-statement-container .stmt-group-row td {
+        background: #f1f5f9 !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        font-size: 9px !important;
+        letter-spacing: 0.05em !important;
+        color: #334155 !important;
+      }
+
       /* Drop shadows (no ink) and flip dark surfaces to white */
       #print-report-container [class*="shadow"] { box-shadow: none !important; }
       #print-report-container .bg-\[\#0b0f19\],
@@ -644,6 +689,10 @@
             <button type="button" onclick="exportReportFromMenu('csv')" class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
               <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
               <span>Export do Excelu (CSV)</span>
+            </button>
+            <button type="button" onclick="exportReportFromMenu('print')" class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <i data-lucide="printer" class="w-4 h-4 text-indigo-500"></i>
+              <span>Tisk výpisu (filtrované)</span>
             </button>
           </div>
         </div>
@@ -3033,6 +3082,13 @@
       "Vybrané období": { en: "Selected period", de: "Ausgewählter Zeitraum" },
       "Ostatní období": { en: "Other periods", de: "Andere Zeiträume" },
       "Výsledky hledání": { en: "Search results", de: "Suchergebnisse" },
+      "Tisk výpisu (filtrované)": { en: "Print statement (filtered)", de: "Auszug drucken (gefiltert)" },
+      "Výpis transakcí": { en: "Transaction statement", de: "Transaktionsauszug" },
+      "Součty za období": { en: "Period totals", de: "Summen für den Zeitraum" },
+      "Saldo": { en: "Balance", de: "Saldo" },
+      "Hledání": { en: "Search", de: "Suche" },
+      "Vygenerováno": { en: "Generated", de: "Erstellt" },
+      "Období": { en: "Period", de: "Zeitraum" },
       "položek": { en: "items", de: "Einträge" },
       "Celá historie": { en: "All history", de: "Gesamte Historie" },
       "Transakce": { en: "Transactions", de: "Transaktionen" },
@@ -5167,8 +5223,115 @@
         generatePdfReport();
       } else if (kind === 'csv') {
         exportTransactionsToCsv();
+      } else if (kind === 'print') {
+        printTransactionStatement();
       }
     };
+
+    // Čistý tiskový výpis aktuálně filtrovaných transakcí (hledání + kategorie +
+    // období). Generuje se rovnou ve světlých barvách, optimalizovaný pro tiskárnu.
+    function printTransactionStatement() {
+      triggerHapticFeedback();
+
+      const container = document.getElementById('print-statement-container');
+      if (!container) return;
+
+      const list = getVisibleHistoryTransactions().slice().sort((a, b) => parseDateSafe(b.date) - parseDateSafe(a.date));
+
+      // Info o aktivním filtru pro záhlaví
+      const searchEl = document.getElementById('history-search');
+      const catEl = document.getElementById('history-cat-filter');
+      const searchQuery = searchEl ? searchEl.value.trim() : '';
+      const catFilter = catEl ? catEl.value : 'all';
+      const filterParts = [];
+      filterParts.push(`${__('Období')}: ${escapeHtml(getCurrentPeriodLabel())}`);
+      if (catFilter && catFilter !== 'all') {
+        const cat = state.categories.find(c => c.id === catFilter);
+        if (cat) filterParts.push(`${__('Kategorie')}: ${escapeHtml(__(cat.name))}`);
+      }
+      if (searchQuery) {
+        filterParts.push(`${__('Hledání')}: „${escapeHtml(searchQuery)}"`);
+      }
+
+      const income = list.filter(t => t.type === 'income').reduce((s, t) => s + (Number(t.amount) || 0), 0);
+      const expense = list.filter(t => t.type === 'expense').reduce((s, t) => s + (Number(t.amount) || 0), 0);
+      const net = income - expense;
+
+      const rowsHtml = list.map(t => {
+        const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie' };
+        const sign = t.type === 'income' ? '+' : '-';
+        const cls = t.type === 'income' ? 'stmt-income' : 'stmt-expense';
+        return `<tr>
+          <td style="white-space:nowrap;color:#475569;">${formatDateString(t.date)}</td>
+          <td>${escapeHtml(t.description || '-')}</td>
+          <td style="color:#475569;">${escapeHtml(__(cat.name))}</td>
+          <td class="stmt-amount ${cls}">${sign}${formatCurrency(t.amount)}</td>
+        </tr>`;
+      }).join('');
+
+      const emptyHtml = `<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:14px;">${__('Nebyly nalezeny žádné platby')}</td></tr>`;
+
+      const genStr = `${__('Vygenerováno')}: ${new Date().toLocaleString(getAppLocale())}`;
+
+      container.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #cbd5e1;padding-bottom:10px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:20px;font-weight:900;letter-spacing:0.04em;color:#4338ca;">FINGO</div>
+            <div style="font-size:15px;font-weight:800;color:#0f172a;margin-top:2px;">${__('Výpis transakcí')}</div>
+            <div style="font-size:10px;color:#64748b;margin-top:3px;line-height:1.5;">${filterParts.join(' · ')}</div>
+          </div>
+          <div style="text-align:right;font-size:10px;color:#64748b;line-height:1.5;">
+            <div>${escapeHtml(dbConfig.name || 'finance.json')}</div>
+            <div>${genStr}</div>
+            <div>${itemCountLabel(list.length)}</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>${__('Datum')}</th>
+              <th>${__('Popis')}</th>
+              <th>${__('Kategorie')}</th>
+              <th class="stmt-amount">${__('Částka')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.length ? rowsHtml : emptyHtml}
+          </tbody>
+          <tfoot>
+            <tr class="stmt-group-row">
+              <td colspan="2">${__('Součty za období')}</td>
+              <td class="stmt-amount stmt-income">+${formatCurrency(income)}</td>
+              <td class="stmt-amount stmt-expense">-${formatCurrency(expense)}</td>
+            </tr>
+            <tr class="stmt-group-row">
+              <td colspan="3">${__('Saldo')}</td>
+              <td class="stmt-amount ${net >= 0 ? 'stmt-income' : 'stmt-expense'}">${net >= 0 ? '+' : '-'}${formatCurrency(Math.abs(net))}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      // Režim tisku výpisu: CSS .printing-statement zobrazí jen tento kontejner
+      // a skryje report. Kontejner zůstává 'hidden' na obrazovce (přebije print CSS).
+      document.body.classList.add('printing-statement');
+
+      // Název PDF souboru (přes document.title) ve stejném duchu jako report
+      const originalTitle = document.title;
+      const cleanDbName = (dbConfig.name || 'finance').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
+      const now = new Date();
+      const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      document.title = `${cleanDbName}_vypis_${stamp}`;
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.title = originalTitle;
+          document.body.classList.remove('printing-statement');
+        }, 800);
+      }, 200);
+    }
 
     function generatePdfReport() {
       triggerHapticFeedback();
@@ -11126,6 +11289,9 @@
       }
     }
   </script>
+  <!-- ================= PRINTABLE TRANSACTION STATEMENT (filtrované položky) ================= -->
+  <div id="print-statement-container" class="hidden" aria-hidden="true"></div>
+
   <!-- ================= PRINTABLE PDF REPORT CONTAINER ================= -->
   <div id="print-report-container" class="hidden print:block bg-[#0b0f19] p-8 font-sans text-[#f8fafc] w-full max-w-4xl mx-auto space-y-6">
     <!-- Header -->
