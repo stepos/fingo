@@ -1210,6 +1210,9 @@
             <!-- Souhrn za celé hledání (jen při aktivním vyhledávání) -->
             <div id="history-search-summary" class="hidden flex-col items-start gap-1 px-3 py-2.5 mb-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40"></div>
 
+            <!-- Hlavička první skupiny (vybrané období) – nad volbou Vybrat vše, jen při hledání -->
+            <div id="history-primary-group-header" class="hidden"></div>
+
             <!-- Select All Checkbox Wrapper -->
             <div class="flex items-center justify-between pb-3 text-xs text-slate-500 font-bold border-b border-slate-100 mb-2 px-1">
               <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -7625,14 +7628,33 @@
       return parts.join('');
     }
 
+    // Barvy hlavičky skupiny: vybrané období = indigo akcent, ostatní = šedá.
+    function historyGroupHeaderClasses(group) {
+      const isPrimary = group.variant === 'primary';
+      return {
+        rowBg: isPrimary ? 'bg-indigo-50/70 dark:bg-indigo-950/30' : 'bg-slate-100/70 dark:bg-slate-800/40',
+        accent: isPrimary ? 'border-indigo-400 dark:border-indigo-500' : 'border-slate-300 dark:border-slate-600',
+        titleColor: isPrimary ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-300'
+      };
+    }
+
+    // Hlavička skupiny jako samostatný blok (div) — pro první skupinu, která se
+    // vykresluje nad volbou "Vybrat vše", mimo tabulku.
+    function historyGroupHeaderDiv(group) {
+      const { rowBg, accent, titleColor } = historyGroupHeaderClasses(group);
+      const div = document.createElement('div');
+      div.className = `flex flex-col gap-0.5 px-3 py-2.5 mb-2 border-l-4 ${accent} ${rowBg} rounded-r-lg`;
+      div.innerHTML = `
+        <span class="text-xs font-black uppercase tracking-wider ${titleColor}">${escapeHtml(group.title)}</span>
+        <div class="flex items-center gap-3 text-[11px]">${historyGroupSummaryHtml(group.transactions)}</div>
+      `;
+      return div;
+    }
+
     // Vloží hlavičku skupiny (s názvem a součty) do tabulky i karet.
-    // Vybrané období dostane jemný indigo akcent, ostatní neutrální šedou.
     function appendHistoryGroupHeader(desktopContainer, mobileContainer, group) {
       const summary = historyGroupSummaryHtml(group.transactions);
-      const isPrimary = group.variant === 'primary';
-      const rowBg = isPrimary ? 'bg-indigo-50/70 dark:bg-indigo-950/30' : 'bg-slate-100/70 dark:bg-slate-800/40';
-      const accent = isPrimary ? 'border-indigo-400 dark:border-indigo-500' : 'border-slate-300 dark:border-slate-600';
-      const titleColor = isPrimary ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-300';
+      const { rowBg, accent, titleColor } = historyGroupHeaderClasses(group);
 
       const headTr = document.createElement('tr');
       headTr.className = rowBg;
@@ -7695,13 +7717,21 @@
       }
 
       const theadEl = document.getElementById('history-thead');
+      const primaryHeaderEl = document.getElementById('history-primary-group-header');
       if (Array.isArray(groups)) {
-        // Popisky sloupců se přesouvají pod první skupinovou hlavičku.
+        // Pořadí: hlavička 1. skupiny (nad "Vybrat vše") → Vybrat vše → popisky → transakce.
         if (theadEl) theadEl.classList.add('hidden');
+        if (primaryHeaderEl) { primaryHeaderEl.innerHTML = ''; primaryHeaderEl.classList.add('hidden'); }
+        const nonEmpty = groups.filter(g => g.transactions && g.transactions.length > 0);
         let columnHeaderInserted = false;
-        groups.forEach(group => {
-          if (!group.transactions || group.transactions.length === 0) return;
-          appendHistoryGroupHeader(desktopContainer, mobileContainer, group);
+        nonEmpty.forEach((group, idx) => {
+          if (idx === 0 && primaryHeaderEl) {
+            // První skupina: hlavička jako samostatný blok nad volbou Vybrat vše.
+            primaryHeaderEl.appendChild(historyGroupHeaderDiv(group));
+            primaryHeaderEl.classList.remove('hidden');
+          } else {
+            appendHistoryGroupHeader(desktopContainer, mobileContainer, group);
+          }
           if (!columnHeaderInserted) {
             desktopContainer.appendChild(buildHistoryColumnHeaderRow());
             columnHeaderInserted = true;
@@ -7713,6 +7743,7 @@
         });
       } else {
         if (theadEl) theadEl.classList.remove('hidden');
+        if (primaryHeaderEl) { primaryHeaderEl.innerHTML = ''; primaryHeaderEl.classList.add('hidden'); }
         list.forEach(t => {
           desktopContainer.appendChild(buildHistoryRowTr(t));
           mobileContainer.appendChild(buildHistoryCardEl(t));
