@@ -1208,7 +1208,7 @@
             </div>
 
             <!-- Souhrn za celé hledání (jen při aktivním vyhledávání) -->
-            <div id="history-search-summary" class="hidden flex items-center justify-between flex-wrap gap-2 px-3 py-2.5 mb-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40"></div>
+            <div id="history-search-summary" class="hidden flex-col items-start gap-1 px-3 py-2.5 mb-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40"></div>
 
             <!-- Select All Checkbox Wrapper -->
             <div class="flex items-center justify-between pb-3 text-xs text-slate-500 font-bold border-b border-slate-100 mb-2 px-1">
@@ -1222,7 +1222,7 @@
             <!-- Desktop View: Table -->
             <div class="hidden md:block overflow-x-auto">
               <table class="w-full text-left text-sm select-none">
-                <thead>
+                <thead id="history-thead">
                   <tr class="text-slate-400 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider">
                     <th class="pb-3 w-8"></th>
                     <th class="pb-3 font-semibold cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('date')">
@@ -7453,13 +7453,14 @@
         const inPeriod = list.filter(t => periodIds.has(String(t.id)));
         const otherPeriod = list.filter(t => !periodIds.has(String(t.id)));
 
-        // Celkový souhrn za celé hledání nad tabulkou.
+        // Celkový souhrn za celé hledání nad tabulkou — název nad sumou.
         if (summaryEl) {
           summaryEl.innerHTML = `
             <span class="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">${__('Výsledky hledání')}</span>
             <div class="flex items-center gap-3 text-xs">${historyGroupSummaryHtml(list)}</div>
           `;
           summaryEl.classList.remove('hidden');
+          summaryEl.classList.add('flex');
           if (currentLanguage !== 'cs') translatePage(currentLanguage);
         }
 
@@ -7468,7 +7469,7 @@
           { title: __('Ostatní období'), transactions: otherPeriod, variant: 'neutral' }
         ]);
       } else {
-        if (summaryEl) summaryEl.classList.add('hidden');
+        if (summaryEl) { summaryEl.classList.add('hidden'); summaryEl.classList.remove('flex'); }
         renderHistoryList(list);
       }
 
@@ -7637,7 +7638,7 @@
       headTr.className = rowBg;
       headTr.innerHTML = `
         <td colspan="6" class="py-2.5 px-3 border-l-4 ${accent}">
-          <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex flex-col gap-0.5">
             <span class="text-xs font-black uppercase tracking-wider ${titleColor}">${escapeHtml(group.title)}</span>
             <div class="flex items-center gap-3 text-[11px]">${summary}</div>
           </div>
@@ -7652,6 +7653,22 @@
         <div class="flex items-center gap-3 text-[11px] flex-wrap">${summary}</div>
       `;
       mobileContainer.appendChild(headCard);
+    }
+
+    // Řádek s popisky sloupců vkládaný do těla tabulky (po první skupinové
+    // hlavičce), když je vyhledávací thead skrytý. Zachovává řazení klikem.
+    function buildHistoryColumnHeaderRow() {
+      const tr = document.createElement('tr');
+      tr.className = 'text-slate-400 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold uppercase tracking-wider';
+      tr.innerHTML = `
+        <td class="pb-2 pt-1 w-8"></td>
+        <td class="pb-2 pt-1 cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('date')">${__('Datum')}</td>
+        <td class="pb-2 pt-1 cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('description')">${__('Popis')}</td>
+        <td class="pb-2 pt-1 cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('category')">${__('Kategorie')}</td>
+        <td class="pb-2 pt-1 text-right cursor-pointer hover:text-indigo-600 transition-colors" onclick="handleHistoryHeaderClick('amount')">${__('Částka')}</td>
+        <td class="pb-2 pt-1 text-right pr-2">${__('Akce')}</td>
+      `;
+      return tr;
     }
 
     // Vykreslí historii buď jako plochý seznam, nebo (při vyhledávání) rozdělenou
@@ -7677,16 +7694,25 @@
         selectAllCheckbox.checked = list.every(t => selectedTransactionIds.map(String).includes(String(t.id)));
       }
 
+      const theadEl = document.getElementById('history-thead');
       if (Array.isArray(groups)) {
+        // Popisky sloupců se přesouvají pod první skupinovou hlavičku.
+        if (theadEl) theadEl.classList.add('hidden');
+        let columnHeaderInserted = false;
         groups.forEach(group => {
           if (!group.transactions || group.transactions.length === 0) return;
           appendHistoryGroupHeader(desktopContainer, mobileContainer, group);
+          if (!columnHeaderInserted) {
+            desktopContainer.appendChild(buildHistoryColumnHeaderRow());
+            columnHeaderInserted = true;
+          }
           group.transactions.forEach(t => {
             desktopContainer.appendChild(buildHistoryRowTr(t));
             mobileContainer.appendChild(buildHistoryCardEl(t));
           });
         });
       } else {
+        if (theadEl) theadEl.classList.remove('hidden');
         list.forEach(t => {
           desktopContainer.appendChild(buildHistoryRowTr(t));
           mobileContainer.appendChild(buildHistoryCardEl(t));
