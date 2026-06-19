@@ -1207,6 +1207,9 @@
               </div>
             </div>
 
+            <!-- Souhrn za celé hledání (jen při aktivním vyhledávání) -->
+            <div id="history-search-summary" class="hidden flex items-center justify-between flex-wrap gap-2 px-3 py-2.5 mb-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40"></div>
+
             <!-- Select All Checkbox Wrapper -->
             <div class="flex items-center justify-between pb-3 text-xs text-slate-500 font-bold border-b border-slate-100 mb-2 px-1">
               <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -3026,6 +3029,7 @@
       "Výpis kategorie": { en: "Category statement", de: "Kategorie-Auszug" },
       "Vybrané období": { en: "Selected period", de: "Ausgewählter Zeitraum" },
       "Ostatní období": { en: "Other periods", de: "Andere Zeiträume" },
+      "Výsledky hledání": { en: "Search results", de: "Suchergebnisse" },
       "položek": { en: "items", de: "Einträge" },
       "Celá historie": { en: "All history", de: "Gesamte Historie" },
       "Transakce": { en: "Transactions", de: "Transaktionen" },
@@ -7443,15 +7447,28 @@
       // Při vyhledávání rozdělíme výsledky na "vybrané období" a "ostatní",
       // každou skupinu se součty. Bez hledání zůstává jeden plochý seznam.
       const isSearching = searchQuery.trim().length > 0;
+      const summaryEl = document.getElementById('history-search-summary');
       if (isSearching) {
         const periodIds = new Set(getFilteredTransactions(state.transactions).map(t => String(t.id)));
         const inPeriod = list.filter(t => periodIds.has(String(t.id)));
         const otherPeriod = list.filter(t => !periodIds.has(String(t.id)));
+
+        // Celkový souhrn za celé hledání nad tabulkou.
+        if (summaryEl) {
+          summaryEl.innerHTML = `
+            <span class="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">${__('Výsledky hledání')}</span>
+            <div class="flex items-center gap-3 text-xs">${historyGroupSummaryHtml(list)}</div>
+          `;
+          summaryEl.classList.remove('hidden');
+          if (currentLanguage !== 'cs') translatePage(currentLanguage);
+        }
+
         renderHistoryList(list, [
           { title: __('Vybrané období') + ' — ' + getCurrentPeriodLabel(), transactions: inPeriod, variant: 'primary' },
           { title: __('Ostatní období'), transactions: otherPeriod, variant: 'neutral' }
         ]);
       } else {
+        if (summaryEl) summaryEl.classList.add('hidden');
         renderHistoryList(list);
       }
 
