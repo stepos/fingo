@@ -7448,8 +7448,8 @@
         const inPeriod = list.filter(t => periodIds.has(String(t.id)));
         const otherPeriod = list.filter(t => !periodIds.has(String(t.id)));
         renderHistoryList(list, [
-          { title: __('Vybrané období') + ' — ' + getCurrentPeriodLabel(), transactions: inPeriod },
-          { title: __('Ostatní období'), transactions: otherPeriod }
+          { title: __('Vybrané období') + ' — ' + getCurrentPeriodLabel(), transactions: inPeriod, variant: 'primary' },
+          { title: __('Ostatní období'), transactions: otherPeriod, variant: 'neutral' }
         ]);
       } else {
         renderHistoryList(list);
@@ -7585,31 +7585,43 @@
       return `${n} ${word}`;
     }
 
-    // Vrátí HTML se součty skupiny (počet, příjmy, výdaje, saldo).
+    // Vrátí HTML se součty skupiny. Zobrazuje jen nenulové hodnoty a saldo
+    // jen tehdy, když skupina obsahuje příjmy i výdaje (jinak by saldo bylo
+    // shodné s jedinou zobrazenou částkou).
     function historyGroupSummaryHtml(transactions) {
       const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + (Number(t.amount) || 0), 0);
       const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + (Number(t.amount) || 0), 0);
       const net = income - expense;
-      const netClass = net >= 0 ? 'text-green-600' : 'text-rose-600';
-      const countLabel = itemCountLabel(transactions.length);
-      return `
-        <span class="text-slate-400 font-semibold">${countLabel}</span>
-        <span class="text-green-600 font-semibold">+${formatCurrency(income)}</span>
-        <span class="text-rose-600 font-semibold">-${formatCurrency(expense)}</span>
-        <span class="${netClass} font-black">${net >= 0 ? '+' : '-'}${formatCurrency(Math.abs(net))}</span>
-      `;
+
+      const parts = [`<span class="text-slate-400 font-semibold">${itemCountLabel(transactions.length)}</span>`];
+      if (income > 0) {
+        parts.push(`<span class="text-green-600 font-semibold">+${formatCurrency(income)}</span>`);
+      }
+      if (expense > 0) {
+        parts.push(`<span class="text-rose-600 font-semibold">-${formatCurrency(expense)}</span>`);
+      }
+      if (income > 0 && expense > 0) {
+        const netClass = net >= 0 ? 'text-green-600' : 'text-rose-600';
+        parts.push(`<span class="${netClass} font-black">= ${net >= 0 ? '+' : '-'}${formatCurrency(Math.abs(net))}</span>`);
+      }
+      return parts.join('');
     }
 
     // Vloží hlavičku skupiny (s názvem a součty) do tabulky i karet.
+    // Vybrané období dostane jemný indigo akcent, ostatní neutrální šedou.
     function appendHistoryGroupHeader(desktopContainer, mobileContainer, group) {
       const summary = historyGroupSummaryHtml(group.transactions);
+      const isPrimary = group.variant === 'primary';
+      const rowBg = isPrimary ? 'bg-indigo-50/70 dark:bg-indigo-950/30' : 'bg-slate-100/70 dark:bg-slate-800/40';
+      const accent = isPrimary ? 'border-indigo-400 dark:border-indigo-500' : 'border-slate-300 dark:border-slate-600';
+      const titleColor = isPrimary ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-300';
 
       const headTr = document.createElement('tr');
-      headTr.className = 'bg-slate-100/70 dark:bg-slate-800/40';
+      headTr.className = rowBg;
       headTr.innerHTML = `
-        <td colspan="6" class="py-2.5 px-3">
+        <td colspan="6" class="py-2.5 px-3 border-l-4 ${accent}">
           <div class="flex items-center justify-between flex-wrap gap-2">
-            <span class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">${escapeHtml(group.title)}</span>
+            <span class="text-xs font-black uppercase tracking-wider ${titleColor}">${escapeHtml(group.title)}</span>
             <div class="flex items-center gap-3 text-[11px]">${summary}</div>
           </div>
         </td>
@@ -7617,9 +7629,9 @@
       desktopContainer.appendChild(headTr);
 
       const headCard = document.createElement('div');
-      headCard.className = 'pt-3 pb-1';
+      headCard.className = `pt-2.5 pb-2 pl-3 mt-1 border-l-4 ${accent} ${rowBg} rounded-r-lg`;
       headCard.innerHTML = `
-        <p class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">${escapeHtml(group.title)}</p>
+        <p class="text-xs font-black uppercase tracking-wider ${titleColor} mb-1">${escapeHtml(group.title)}</p>
         <div class="flex items-center gap-3 text-[11px] flex-wrap">${summary}</div>
       `;
       mobileContainer.appendChild(headCard);
