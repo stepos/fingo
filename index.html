@@ -3025,6 +3025,9 @@
       "Sdílet výpis v PDF": { en: "Share statement as PDF", de: "Auszug als PDF teilen" },
       "Výpis kategorie": { en: "Category statement", de: "Kategorie-Auszug" },
       "Vybrané období": { en: "Selected period", de: "Ausgewählter Zeitraum" },
+      "Ostatní období": { en: "Other periods", de: "Andere Zeiträume" },
+      "položek": { en: "items", de: "Einträge" },
+      "Celá historie": { en: "All history", de: "Gesamte Historie" },
       "Transakce": { en: "Transactions", de: "Transaktionen" },
       "Rozpočty": { en: "Budgets", de: "Budgets" },
       "Spořicí cíle": { en: "Savings Goals", de: "Sparziele" },
@@ -7379,7 +7382,10 @@
       const searchQuery = searchEl ? searchEl.value.toLowerCase() : '';
       const catFilter = catEl ? catEl.value : 'all';
 
-      let list = getFilteredTransactions(state.transactions);
+      // Při vyhledávání hledáme napříč CELOU historií (ne jen vybraným obdobím),
+      // jinak by uživatel nenašel transakce z jiných měsíců.
+      const isSearching = searchQuery.trim().length > 0;
+      let list = isSearching ? (state.transactions || []).slice() : getFilteredTransactions(state.transactions);
 
       if (catFilter !== 'all') {
         list = list.filter(t => t.category === catFilter);
@@ -7434,8 +7440,21 @@
         return 0;
       });
       
-      renderHistoryList(list);
-      
+      // Při vyhledávání rozdělíme výsledky na "vybrané období" a "ostatní",
+      // každou skupinu se součty. Bez hledání zůstává jeden plochý seznam.
+      const isSearching = searchQuery.trim().length > 0;
+      if (isSearching) {
+        const periodIds = new Set(getFilteredTransactions(state.transactions).map(t => String(t.id)));
+        const inPeriod = list.filter(t => periodIds.has(String(t.id)));
+        const otherPeriod = list.filter(t => !periodIds.has(String(t.id)));
+        renderHistoryList(list, [
+          { title: __('Vybrané období') + ' — ' + getCurrentPeriodLabel(), transactions: inPeriod },
+          { title: __('Ostatní období'), transactions: otherPeriod }
+        ]);
+      } else {
+        renderHistoryList(list);
+      }
+
       // Filter and render future payments
       let futureList = getFutureRecurringPaymentsThisMonth();
       if (catFilter !== 'all') {
@@ -7460,95 +7479,191 @@
       updateHistorySortIcons();
     }
 
-    function renderHistoryList(list) {
+    // Popisek aktuálně vybraného období pro hlavičky skupin při vyhledávání.
+    function getCurrentPeriodLabel() {
+      const select = document.getElementById('global-period-select');
+      if (!select) return '';
+      const period = select.value;
+      const match = period.match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        return getMonthLabel(parseInt(match[1]), parseInt(match[2]) - 1);
+      }
+      if (period === 'all') return __('Celá historie');
+      if (period === 'custom') {
+        const s = document.getElementById('global-start-date');
+        const e = document.getElementById('global-end-date');
+        if (s && e && s.value && e.value) {
+          return `${parseDateSafe(s.value).toLocaleDateString(getAppLocale())} – ${parseDateSafe(e.value).toLocaleDateString(getAppLocale())}`;
+        }
+      }
+      // ostatní přednastavené hodnoty (this-month, last-month…) – použij text z <option>
+      const opt = select.options[select.selectedIndex];
+      return opt ? opt.textContent.trim() : '';
+    }
+
+    // Sestaví <tr> jednoho záznamu pro desktopovou tabulku historie.
+    function buildHistoryRowTr(t) {
+      const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
+      const amountSign = t.type === 'income' ? '+' : '-';
+      const amountClass = t.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
+      const isChecked = selectedTransactionIds.map(String).includes(String(t.id));
+
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50/50 transition-colors group';
+      tr.innerHTML = `
+        <td class="py-3.5 pl-1">
+          <input type="checkbox" onchange="toggleTransactionSelection('${t.id}', this.checked)" ${isChecked ? 'checked' : ''} class="transaction-checkbox w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+        </td>
+        <td class="py-3.5 font-medium text-slate-500 text-xs">${formatDateString(t.date)}</td>
+        <td class="py-3.5 font-semibold text-slate-800">${escapeHtml(t.description || '-')}</td>
+        <td class="py-3.5">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
+            <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
+            ${escapeHtml(__(cat.name))}
+          </span>
+        </td>
+        <td class="${amountClass} text-right">${amountSign}${formatCurrency(t.amount)}</td>
+        <td class="py-3.5 text-right pr-2">
+          <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+            <button onclick="promptEditTransaction('${t.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Upravit')}">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="promptDeleteTransaction('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Smazat')}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      return tr;
+    }
+
+    // Sestaví kartu jednoho záznamu pro mobilní zobrazení historie.
+    function buildHistoryCardEl(t) {
+      const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
+      const amountSign = t.type === 'income' ? '+' : '-';
+      const amountClass = t.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
+      const isChecked = selectedTransactionIds.map(String).includes(String(t.id));
+
+      const card = document.createElement('div');
+      card.className = 'flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100/50 transition-all border border-slate-100';
+      card.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0">
+          <input type="checkbox" onchange="toggleTransactionSelection('${t.id}', this.checked)" ${isChecked ? 'checked' : ''} class="transaction-checkbox w-[22px] h-[22px] text-indigo-600 border-slate-350 rounded focus:ring-indigo-500 cursor-pointer shrink-0">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background-color: ${cat.color}15; color: ${cat.color}">
+            <i data-lucide="${cat.icon || 'help-circle'}" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="font-bold text-slate-800 text-sm leading-tight truncate">${escapeHtml(t.description || '-')}</p>
+            <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
+              <span>${formatDateString(t.date)}</span>
+              <span>•</span>
+              <span style="color: ${cat.color}">${escapeHtml(__(cat.name))}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
+          <span class="${amountClass} text-sm">${amountSign}${formatCurrency(t.amount)}</span>
+          <div class="flex items-center gap-2">
+            <button onclick="promptEditTransaction('${t.id}')" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg transition-all" title="${__('Upravit')}">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="promptDeleteTransaction('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    // Skloňování počtu položek podle jazyka (1 položka / 2–4 položky / 5+ položek).
+    function itemCountLabel(n) {
+      if (currentLanguage === 'en') return `${n} ${n === 1 ? 'item' : 'items'}`;
+      if (currentLanguage === 'de') return `${n} ${n === 1 ? 'Eintrag' : 'Einträge'}`;
+      const word = n === 1 ? 'položka' : (n >= 2 && n <= 4 ? 'položky' : 'položek');
+      return `${n} ${word}`;
+    }
+
+    // Vrátí HTML se součty skupiny (počet, příjmy, výdaje, saldo).
+    function historyGroupSummaryHtml(transactions) {
+      const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + (Number(t.amount) || 0), 0);
+      const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + (Number(t.amount) || 0), 0);
+      const net = income - expense;
+      const netClass = net >= 0 ? 'text-green-600' : 'text-rose-600';
+      const countLabel = itemCountLabel(transactions.length);
+      return `
+        <span class="text-slate-400 font-semibold">${countLabel}</span>
+        <span class="text-green-600 font-semibold">+${formatCurrency(income)}</span>
+        <span class="text-rose-600 font-semibold">-${formatCurrency(expense)}</span>
+        <span class="${netClass} font-black">${net >= 0 ? '+' : '-'}${formatCurrency(Math.abs(net))}</span>
+      `;
+    }
+
+    // Vloží hlavičku skupiny (s názvem a součty) do tabulky i karet.
+    function appendHistoryGroupHeader(desktopContainer, mobileContainer, group) {
+      const summary = historyGroupSummaryHtml(group.transactions);
+
+      const headTr = document.createElement('tr');
+      headTr.className = 'bg-slate-100/70 dark:bg-slate-800/40';
+      headTr.innerHTML = `
+        <td colspan="6" class="py-2.5 px-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">${escapeHtml(group.title)}</span>
+            <div class="flex items-center gap-3 text-[11px]">${summary}</div>
+          </div>
+        </td>
+      `;
+      desktopContainer.appendChild(headTr);
+
+      const headCard = document.createElement('div');
+      headCard.className = 'pt-3 pb-1';
+      headCard.innerHTML = `
+        <p class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">${escapeHtml(group.title)}</p>
+        <div class="flex items-center gap-3 text-[11px] flex-wrap">${summary}</div>
+      `;
+      mobileContainer.appendChild(headCard);
+    }
+
+    // Vykreslí historii buď jako plochý seznam, nebo (při vyhledávání) rozdělenou
+    // do skupin se součty. `groups` je pole {title, transactions}.
+    function renderHistoryList(list, groups) {
       const desktopContainer = document.getElementById('history-transactions-list-desktop');
       const mobileContainer = document.getElementById('history-transactions-list-mobile');
       const emptyEl = document.getElementById('history-empty');
-      
+
       if (!desktopContainer || !mobileContainer) return;
-      
+
       desktopContainer.innerHTML = '';
       mobileContainer.innerHTML = '';
-      
+
       if (list.length === 0) {
         emptyEl.classList.remove('hidden');
         return;
       }
       emptyEl.classList.add('hidden');
-      
+
       const selectAllCheckbox = document.getElementById('check-all-transactions');
       if (selectAllCheckbox) {
         selectAllCheckbox.checked = list.every(t => selectedTransactionIds.map(String).includes(String(t.id)));
       }
-      
-      list.forEach(t => {
-        const cat = state.categories.find(c => c.id === t.category) || { name: 'Bez kategorie', color: '#64748b', icon: 'help-circle' };
-        const amountSign = t.type === 'income' ? '+' : '-';
-        const amountClass = t.type === 'income' ? 'text-green-600 font-bold' : 'text-rose-600 font-bold';
-        
-        const isChecked = selectedTransactionIds.map(String).includes(String(t.id));
-        
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/50 transition-colors group';
-        tr.innerHTML = `
-          <td class="py-3.5 pl-1">
-            <input type="checkbox" onchange="toggleTransactionSelection('${t.id}', this.checked)" ${isChecked ? 'checked' : ''} class="transaction-checkbox w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
-          </td>
-          <td class="py-3.5 font-medium text-slate-500 text-xs">${formatDateString(t.date)}</td>
-          <td class="py-3.5 font-semibold text-slate-800">${escapeHtml(t.description || '-')}</td>
-          <td class="py-3.5">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: ${cat.color}15; color: ${cat.color}">
-              <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-              ${escapeHtml(__(cat.name))}
-            </span>
-          </td>
-          <td class="${amountClass} text-right">${amountSign}${formatCurrency(t.amount)}</td>
-          <td class="py-3.5 text-right pr-2">
-            <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-              <button onclick="promptEditTransaction('${t.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Upravit')}">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
-              </button>
-              <button onclick="promptDeleteTransaction('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-all" title="${__('Smazat')}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </td>
-        `;
-        desktopContainer.appendChild(tr);
-        
-        const card = document.createElement('div');
-        card.className = 'flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100/50 transition-all border border-slate-100';
-        card.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0">
-            <input type="checkbox" onchange="toggleTransactionSelection('${t.id}', this.checked)" ${isChecked ? 'checked' : ''} class="transaction-checkbox w-[22px] h-[22px] text-indigo-600 border-slate-350 rounded focus:ring-indigo-500 cursor-pointer shrink-0">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background-color: ${cat.color}15; color: ${cat.color}">
-              <i data-lucide="${cat.icon || 'help-circle'}" class="w-5 h-5"></i>
-            </div>
-            <div class="min-w-0">
-              <p class="font-bold text-slate-800 text-sm leading-tight truncate">${escapeHtml(t.description || '-')}</p>
-              <div class="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
-                <span>${formatDateString(t.date)}</span>
-                <span>•</span>
-                <span style="color: ${cat.color}">${escapeHtml(__(cat.name))}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
-            <span class="${amountClass} text-sm">${amountSign}${formatCurrency(t.amount)}</span>
-            <div class="flex items-center gap-2">
-              <button onclick="promptEditTransaction('${t.id}')" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg transition-all" title="${__('Upravit')}">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
-              </button>
-              <button onclick="promptDeleteTransaction('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-all" title="${__('Smazat')}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-        `;
-        mobileContainer.appendChild(card);
-      });
-      
+
+      if (Array.isArray(groups)) {
+        groups.forEach(group => {
+          if (!group.transactions || group.transactions.length === 0) return;
+          appendHistoryGroupHeader(desktopContainer, mobileContainer, group);
+          group.transactions.forEach(t => {
+            desktopContainer.appendChild(buildHistoryRowTr(t));
+            mobileContainer.appendChild(buildHistoryCardEl(t));
+          });
+        });
+      } else {
+        list.forEach(t => {
+          desktopContainer.appendChild(buildHistoryRowTr(t));
+          mobileContainer.appendChild(buildHistoryCardEl(t));
+        });
+      }
+
       lucide.createIcons();
       updateBulkActionBar();
       if (currentLanguage !== 'cs') {
