@@ -10705,13 +10705,28 @@
         lucide.createIcons();
       });
 
-      // Auto-refresh when tab is focused (desktop mode with connected file handle)
-      window.addEventListener('focus', checkForExternalFileChanges);
-
-      // Zpracovat naplánované platby při návratu k aplikaci (např. po půlnoci
-      // dalšího dne) — bez nutnosti restartu. Stejné jako při startu, jen reaktivně.
+      // Návrat k aplikaci (přepnutí na záložku / okno). KRITICKÉ POŘADÍ:
+      //   1) nejdřív načíst případné novější změny z disku (např. z mobilu přes iCloud),
+      //   2) teprve POTOM zpracovat naplánované platby a uložit.
+      // Jinak by zpracování splátek uložilo starý stav z paměti přes novější data
+      // z jiného zařízení = ztráta dat. Oba eventy (focus i visibilitychange) jdou
+      // přes jeden handler s pojistkou proti souběžnému spuštění.
+      let foregroundSyncRunning = false;
+      async function handleReturnToForeground() {
+        if (foregroundSyncRunning) return;
+        foregroundSyncRunning = true;
+        try {
+          await checkForExternalFileChanges();  // 1) pull novějších dat z disku
+          processScheduledOnReturn();            // 2) zpracovat na čerstvém stavu
+        } catch (e) {
+          console.warn('Chyba při synchronizaci po návratu k aplikaci', e);
+        } finally {
+          foregroundSyncRunning = false;
+        }
+      }
+      window.addEventListener('focus', handleReturnToForeground);
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') processScheduledOnReturn();
+        if (document.visibilityState === 'visible') handleReturnToForeground();
       });
     });
 
