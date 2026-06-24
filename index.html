@@ -4368,9 +4368,10 @@
     // pro AKTUÁLNÍ měsíc zaúčtuje splátku, jakmile nastane den splatnosti a ještě
     // není v historii. Žádný tracker (nextPaymentDate) — existence se ověřuje podle
     // transakce, takže po smazání se splátka při dalším spuštění zase doúčtuje a
-    // nevznikají duplicity. Jistinu (remainingAmount) ZÁMĚRNĚ nemění — splátka je
-    // jen výdaj v cashflow; zbývající dluh upravuje uživatel ručně (přes „Zapsat
-    // splátku" nebo úpravu úvěru), takže opakované zaúčtování nikdy dluh nerozhází.
+    // nevznikají duplicity. Jistina se sníží o jistinovou část splátky (splátka
+    // minus úrok); tato částka se uloží do transakce (principalReduction), takže
+    // smazání splátky ji zase vrátí — zbývající dluh tak vždy odpovídá počtu
+    // skutečně zaúčtovaných splátek a opakované zaúčtování ho nerozhází.
     function processLoanPayments() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -4418,14 +4419,22 @@
         );
         if (alreadyExists) return;
 
+        // Jistinová část = splátka minus úrok ze zbývající jistiny. O ni se sníží
+        // zbývající jistina; uloží se do transakce, aby ji smazání vrátilo.
+        const interest = Number(loan.remainingAmount) * (Number(loan.interestRate || 0) / 100 / 12);
+        const principalReduction = Math.max(0, Math.min(Number(loan.remainingAmount), monthly - interest));
+
         state.transactions.push({
           id: 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
           type: 'expense',
           amount: monthly,
           category: loan.category || 'cat-uvery',
           date: transDate,
-          description: description
+          description: description,
+          loanId: loan.id,
+          principalReduction: principalReduction
         });
+        loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - principalReduction);
         processedLog.push({ name: description, type: 'expense', amount: monthly, date: transDate });
         wasModified = true;
       });
@@ -4434,6 +4443,19 @@
         saveState();
       }
       return processedLog;
+    }
+
+    // Při mazání splátky úvěru vrátí její jistinovou část zpět do zbývající jistiny,
+    // aby se dluh po smazání nerozešel. Volá se před každým odstraněním transakcí.
+    function restoreLoanPrincipalForDeleted(deletedTransactions) {
+      (deletedTransactions || []).forEach(t => {
+        if (t && t.loanId && typeof t.principalReduction === 'number') {
+          const loan = (state.loans || []).find(l => l.id === t.loanId);
+          if (loan) {
+            loan.remainingAmount = Number(loan.remainingAmount || 0) + Number(t.principalReduction);
+          }
+        }
+      });
     }
 
 
@@ -8137,6 +8159,8 @@
       
       document.getElementById('btn-confirm-delete').onclick = function() {
         if (transactionIdToDelete) {
+          const removed = state.transactions.filter(t => String(t.id) === String(transactionIdToDelete));
+          restoreLoanPrincipalForDeleted(removed);
           state.transactions = state.transactions.filter(t => String(t.id) !== String(transactionIdToDelete));
           selectedTransactionIds = selectedTransactionIds.filter(item => String(item) !== String(transactionIdToDelete));
           saveState();
@@ -8358,6 +8382,8 @@
       openModal('modal-delete-confirm');
       
       document.getElementById('btn-confirm-delete').onclick = function() {
+        const removed = state.transactions.filter(t => selectedTransactionIds.map(String).includes(String(t.id)));
+        restoreLoanPrincipalForDeleted(removed);
         state.transactions = state.transactions.filter(t => !selectedTransactionIds.map(String).includes(String(t.id)));
         saveState();
         showToast(`Úspěšně smazáno ${len} transakcí.`);
@@ -9704,21 +9730,25 @@
         return;
       }
 
-      // 1. Create transaction (expense)
+      // 1. Create transaction (expense). loanId + principalReduction umožní vrátit
+      //    jistinu, když uživatel tuto splátku později smaže.
       const transactionId = 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      const principalReduction = Math.min(paymentAmount, Number(loan.remainingAmount));
       const newTransaction = {
         id: transactionId,
         type: 'expense',
         amount: paymentAmount,
         category: loan.category || 'cat-uvery',
         date: date,
-        description: description
+        description: description,
+        loanId: loan.id,
+        principalReduction: principalReduction
       };
 
       state.transactions.push(newTransaction);
 
       // 2. An extra payment goes fully towards the principal
-      loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - paymentAmount);
+      loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - principalReduction);
 
       saveState();
       closeModal('modal-loan-payment');
