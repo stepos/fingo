@@ -3088,6 +3088,7 @@
       "Tisk výpisu (filtrované)": { en: "Print statement (filtered)", de: "Auszug drucken (gefiltert)" },
       "Výpis transakcí": { en: "Transaction statement", de: "Transaktionsauszug" },
       "Vybraný měsíc": { en: "Selected month", de: "Ausgewählter Monat" },
+      "Naplánováno": { en: "Scheduled", de: "Geplant" },
       "Součty za období": { en: "Period totals", de: "Summen für den Zeitraum" },
       "Saldo": { en: "Balance", de: "Saldo" },
       "Hledání": { en: "Search", de: "Suche" },
@@ -4363,6 +4364,13 @@
     // Per-loan progress is tracked via loan.nextPaymentDate so each month is
     // booked exactly once. Existing loans are NOT back-filled — booking starts
     // from the next upcoming due day.
+    // Automatické zaúčtování splátek úvěrů. Deterministické a idempotentní:
+    // pro AKTUÁLNÍ měsíc zaúčtuje splátku, jakmile nastane den splatnosti a ještě
+    // není v historii. Žádný tracker (nextPaymentDate) — existence se ověřuje podle
+    // transakce, takže po smazání se splátka při dalším spuštění zase doúčtuje a
+    // nevznikají duplicity. Jistinu (remainingAmount) ZÁMĚRNĚ nemění — splátka je
+    // jen výdaj v cashflow; zbývající dluh upravuje uživatel ručně (přes „Zapsat
+    // splátku" nebo úpravu úvěru), takže opakované zaúčtování nikdy dluh nerozhází.
     function processLoanPayments() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -4375,67 +4383,51 @@
         if (!monthly || monthly <= 0) return;
 
         // Den zaúčtování (1-31). startDate může být číslo dne nebo datum.
-        let bookingDay;
+        const bookingDay = String(loan.startDate).includes('-')
+          ? parseDateSafe(loan.startDate).getDate()
+          : (parseInt(loan.startDate, 10) || 15);
+
+        // Den splatnosti v aktuálním měsíci (oříznutý na poslední den měsíce).
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const dueDate = new Date(today.getFullYear(), today.getMonth(), Math.min(bookingDay, lastDay));
+        dueDate.setHours(0, 0, 0, 0);
+
+        if (dueDate > today) return; // den splatnosti tento měsíc ještě nenastal
+
+        // Nedoúčtovávat před začátkem úvěru ani po konci splácení.
         if (String(loan.startDate).includes('-')) {
-          bookingDay = parseDateSafe(loan.startDate).getDate();
-        } else {
-          bookingDay = parseInt(loan.startDate, 10) || 15;
+          const ls = parseDateSafe(loan.startDate); ls.setHours(0, 0, 0, 0);
+          if (dueDate < ls) return;
         }
-
-        // Konec splácení — po něm se už splátky negenerují.
         const endDetails = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
-        let endDateObj = null;
         if (endDetails && endDetails.endDate) {
-          endDateObj = new Date(endDetails.endDate.getTime());
-          endDateObj.setHours(0, 0, 0, 0);
+          const end = new Date(endDetails.endDate.getTime()); end.setHours(0, 0, 0, 0);
+          if (dueDate > end) return;
         }
 
-        // Inicializace bez zpětného doúčtování: nejbližší budoucí (nebo dnešní)
-        // výskyt dne zaúčtování.
-        if (!loan.nextPaymentDate) {
-          let nd = addMonthsClamped(today, 0, bookingDay);
-          nd.setHours(0, 0, 0, 0);
-          if (nd < today) {
-            nd = addMonthsClamped(nd, 1, bookingDay);
-          }
-          loan.nextPaymentDate = toLocalISODate(nd);
-          wasModified = true;
-        }
+        const transDate = toLocalISODate(dueDate);
+        const description = `Splátka úvěru: ${loan.name}`;
+        const monthKey = transDate.slice(0, 7);
 
-        let nextDateObj = parseDateSafe(loan.nextPaymentDate);
-        nextDateObj.setHours(0, 0, 0, 0);
+        // Idempotence podle MĚSÍCE — splátka za daný měsíc se zaúčtuje jen jednou.
+        const alreadyExists = state.transactions.some(t =>
+          t.type === 'expense' &&
+          (t.date || '').slice(0, 7) === monthKey &&
+          t.description === description &&
+          Math.abs(Number(t.amount) - monthly) < 0.01
+        );
+        if (alreadyExists) return;
 
-        while (nextDateObj <= today) {
-          if (endDateObj && nextDateObj > endDateObj) break;
-          if (Number(loan.remainingAmount) <= 0) break;
-
-          const transDate = toLocalISODate(nextDateObj);
-          const description = `Splátka úvěru: ${loan.name}`;
-
-          // Zabránit duplicitám (např. po synchronizaci nebo ruční splátce).
-          const alreadyExists = state.transactions.some(t =>
-            t.date === transDate &&
-            t.description === description &&
-            Math.abs(Number(t.amount) - monthly) < 0.01
-          );
-
-          if (!alreadyExists) {
-            state.transactions.push({
-              id: 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-              type: 'expense',
-              amount: monthly,
-              category: loan.category || 'cat-uvery',
-              date: transDate,
-              description: description
-            });
-            loan.remainingAmount = Math.max(0, Number(loan.remainingAmount) - monthly);
-            processedLog.push({ name: description, type: 'expense', amount: monthly, date: transDate });
-          }
-
-          nextDateObj = addMonthsClamped(nextDateObj, 1, bookingDay);
-          loan.nextPaymentDate = toLocalISODate(nextDateObj);
-          wasModified = true;
-        }
+        state.transactions.push({
+          id: 't-loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+          type: 'expense',
+          amount: monthly,
+          category: loan.category || 'cat-uvery',
+          date: transDate,
+          description: description
+        });
+        processedLog.push({ name: description, type: 'expense', amount: monthly, date: transDate });
+        wasModified = true;
       });
 
       if (wasModified) {
@@ -6188,10 +6180,10 @@
           const paymentDate = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth(), Math.min(dayNum, lastDayOfMonth));
           paymentDate.setHours(0, 0, 0, 0);
 
-          // U úvěrů bereme celý měsíc (ne jen od dneška) — nezaúčtovaná splátka,
-          // jejíž den už tento měsíc proběhl, musí jít stále zaúčtovat. Duplicitám
-          // brání filtr zaúčtovaných níže.
-          if (paymentDate >= startOfMonth && paymentDate <= endOfMonth && paymentDate >= loanStart && paymentDate <= loanEnd) {
+          // Budoucí seznam ukazuje jen nadcházející splátky (od dneška). Splátky,
+          // jejichž den už nastal, automaticky zaúčtuje processLoanPayments; filtr
+          // zaúčtovaných níže pak skryje i dnešní právě zaúčtovanou.
+          if (paymentDate >= startOfRange && paymentDate <= endOfRange && paymentDate >= loanStart && paymentDate <= loanEnd) {
             futurePayments.push({
               id: `loan-${loan.id || Math.random()}`,
               name: loan.name,
@@ -8041,9 +8033,7 @@
           </td>
           <td class="${amountClass} text-right italic">${amountSign}${formatCurrency(fp.amount)}</td>
           <td class="py-3 text-right pr-2">
-            <button onclick="bookFuturePayment(${fpRef})" class="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 rounded-lg transition-all" title="${__('Zaúčtovat transakci')}">
-              Zaúčtovat
-            </button>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide italic">${__('Naplánováno')}</span>
           </td>
         `;
         desktopContainer.appendChild(tr);
@@ -8067,9 +8057,7 @@
 
           <div class="flex flex-col items-end gap-1.5 shrink-0 ml-3">
             <span class="${amountClass} text-sm italic">${amountSign}${formatCurrency(fp.amount)}</span>
-            <button onclick="bookFuturePayment(${fpRef})" class="px-2 py-1 text-[10px] font-bold text-indigo-600 active:text-white bg-indigo-50 active:bg-indigo-600 rounded-md transition-all">
-              Zaúčtovat
-            </button>
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide italic">${__('Naplánováno')}</span>
           </div>
         `;
         mobileContainer.appendChild(card);
@@ -10689,7 +10677,26 @@
 
       // Auto-refresh when tab is focused (desktop mode with connected file handle)
       window.addEventListener('focus', checkForExternalFileChanges);
+
+      // Zpracovat naplánované platby při návratu k aplikaci (např. po půlnoci
+      // dalšího dne) — bez nutnosti restartu. Stejné jako při startu, jen reaktivně.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') processScheduledOnReturn();
+      });
     });
+
+    // Zaúčtuje naplánované platby (trvalé příkazy + splátky úvěrů), jejichž den
+    // mezitím nastal, a osvěží UI, pokud něco přibylo.
+    function processScheduledOnReturn() {
+      if (!dbConfig.name) return;
+      const recLog = processRecurringPayments() || [];
+      const loanLog = processLoanPayments() || [];
+      if (recLog.length || loanLog.length) {
+        if (typeof refreshActiveTab === 'function') refreshActiveTab();
+        updateDashboardAndData();
+        if (currentTab === 'transactions') filterHistory();
+      }
+    }
 
     function updateSmartInsights() {
       const container = document.getElementById('dashboard-insights-card');
