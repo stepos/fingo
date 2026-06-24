@@ -6184,11 +6184,14 @@
             : (parseInt(loan.startDate) || 15);
 
           // Oříznout den na poslední den měsíce (31. v dubnu by přeteklo do května)
-          const lastDayOfMonth = new Date(startOfRange.getFullYear(), startOfRange.getMonth() + 1, 0).getDate();
-          const paymentDate = new Date(startOfRange.getFullYear(), startOfRange.getMonth(), Math.min(dayNum, lastDayOfMonth));
+          const lastDayOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0).getDate();
+          const paymentDate = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth(), Math.min(dayNum, lastDayOfMonth));
           paymentDate.setHours(0, 0, 0, 0);
 
-          if (paymentDate >= startOfRange && paymentDate <= endOfRange && paymentDate >= loanStart && paymentDate <= loanEnd) {
+          // U úvěrů bereme celý měsíc (ne jen od dneška) — nezaúčtovaná splátka,
+          // jejíž den už tento měsíc proběhl, musí jít stále zaúčtovat. Duplicitám
+          // brání filtr zaúčtovaných níže.
+          if (paymentDate >= startOfMonth && paymentDate <= endOfMonth && paymentDate >= loanStart && paymentDate <= loanEnd) {
             futurePayments.push({
               id: `loan-${loan.id || Math.random()}`,
               name: loan.name,
@@ -6201,9 +6204,36 @@
           }
         }
       });
-      
-      futurePayments.sort((a, b) => new Date(a.date) - new Date(b.date));
-      return futurePayments;
+
+      // Deterministické překlopení „před splatností" → „zaplaceno": očekávanou platbu
+      // skryjeme, jakmile v historii existuje odpovídající zaúčtovaná transakce. Tím
+      // nevznikne vizuální duplikát ani možnost dvojího zaúčtování, a celkový
+      // očekávaný zůstatek se nemění (očekávaná je nahrazena reálnou stejné hodnoty).
+      const isAlreadyBooked = (fp) => {
+        const isLoan = String(fp.id).startsWith('loan-');
+        if (isLoan) {
+          // Úvěr má jednu splátku za měsíc — porovnáváme v rámci měsíce.
+          const fpMonth = (fp.date || '').slice(0, 7);
+          const desc = `Splátka úvěru: ${fp.name}`;
+          return (state.transactions || []).some(t =>
+            t.type === 'expense' &&
+            (t.date || '').slice(0, 7) === fpMonth &&
+            t.description === desc &&
+            Math.abs(Number(t.amount) - Number(fp.amount)) < 0.01
+          );
+        }
+        // Trvalá platba — porovnáváme na konkrétní den (kvůli týdenní frekvenci).
+        const desc = `Auto-platba: ${fp.name}`;
+        return (state.transactions || []).some(t =>
+          t.date === fp.date &&
+          t.description === desc &&
+          Math.abs(Number(t.amount) - Number(fp.amount)) < 0.01
+        );
+      };
+
+      const visiblePayments = futurePayments.filter(fp => !isAlreadyBooked(fp));
+      visiblePayments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return visiblePayments;
     }
 
     function toggleFuturePaymentsList(event) {
@@ -8065,8 +8095,12 @@
       const rec = isLoan ? null : state.recurring.find(r => String(r.id) === String(fp.id));
 
       // Stejný popis jako u automatického zaúčtování — motor opakovaných plateb
-      // pak pozná, že platba už existuje, a nevytvoří ji podruhé
-      const description = rec ? `Auto-platba: ${rec.name}` : (fp.name || 'Platba');
+      // i očekávané platby pak poznají, že platba už existuje, a nevytvoří/nezobrazí
+      // ji podruhé. Splátka úvěru MUSÍ mít stejný popis jako processLoanPayments,
+      // jinak vznikne duplicita (auto „Splátka úvěru: X" vs ruční „X").
+      const description = rec
+        ? `Auto-platba: ${rec.name}`
+        : (isLoan ? `Splátka úvěru: ${fp.name}` : (fp.name || 'Platba'));
 
       const alreadyExists = state.transactions.some(t =>
         t.date === fp.date && t.description === description &&
