@@ -3137,6 +3137,8 @@
       "Synchronizovat nyní": { en: "Sync Now", de: "Jetzt synchronisieren" },
       "Synchronizováno": { en: "Synced", de: "Synchronisiert" },
       "Zůstatek po měsících": { en: "Balance by month", de: "Saldo nach Monaten" },
+      "Čistý zůstatek jednotlivých měsíců · klikni na měsíc pro denní vývoj": { en: "Net balance per month · click a month for daily detail", de: "Netto-Saldo pro Monat · Monat anklicken für Tagesverlauf" },
+      "Denní vývoj v měsíci · klikni pro návrat na měsíce": { en: "Daily development · click to return to months", de: "Tagesverlauf · zum Zurückkehren klicken" },
       "Čistý zůstatek jednotlivých měsíců (od nuly, bez přenosu)": { en: "Net balance per month (from zero, no carry-over)", de: "Netto-Saldo pro Monat (von null, ohne Übertrag)" },
       "Zůstatek": { en: "Balance", de: "Saldo" },
       "Synchronizuji...": { en: "Syncing...", de: "Synchronisieren..." },
@@ -3799,6 +3801,9 @@
     let categoryChartTotalInstance = null;
     let trendChartInstance = null;
     let monthlyBalanceChartInstance = null;
+    // Když je nastaveno {year, month}, měsíční graf ukazuje denní vývoj toho měsíce
+    // (drill-down po kliknutí na měsíc). null = přehled měsíců.
+    let monthlyChartDrill = null;
 
 
 
@@ -5917,7 +5922,8 @@
     function handleGlobalPeriodChange() {
       const select = document.getElementById('global-period-select');
       const customDates = document.getElementById('global-custom-dates');
-      
+      monthlyChartDrill = null; // změna období → zpět na přehled měsíců
+
       if (select.value === 'custom') {
         customDates.classList.remove('hidden');
         const now = new Date();
@@ -7601,6 +7607,43 @@
 
     // Liniový graf čistého zůstatku napříč posledními 12 měsíci. Každý měsíc je
     // počítaný od nuly (getMonthEndBalance) — žádný přenos z minulého měsíce.
+    // Denní kumulativní zůstatek v daném měsíci (od nuly) — stejná logika jako
+    // hlavní trend graf, ale pro libovolný měsíc. Vrací {labels, values}.
+    function computeMonthlyDailyBalances(year, month) {
+      const numDays = new Date(year, month + 1, 0).getDate();
+      const dailyChanges = Array(numDays + 1).fill(0);
+
+      (state.transactions || []).forEach(t => {
+        if (!t.date) return;
+        const d = parseDateSafe(t.date);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          const day = d.getDate();
+          if (day >= 1 && day <= numDays) {
+            const amt = Number(t.amount) || 0;
+            dailyChanges[day] += (t.type === 'income') ? amt : -amt;
+          }
+        }
+      });
+
+      getFutureRecurringPaymentsForMonth(year, month).forEach(fp => {
+        const day = parseDateSafe(fp.date).getDate();
+        if (day >= 1 && day <= numDays) {
+          const amt = Number(fp.amount) || 0;
+          dailyChanges[day] += (fp.type === 'income') ? amt : -amt;
+        }
+      });
+
+      const values = [];
+      const labels = [];
+      let cum = 0;
+      for (let d = 1; d <= numDays; d++) {
+        cum += dailyChanges[d];
+        values.push(cum);
+        labels.push(`${d}. ${month + 1}.`);
+      }
+      return { labels, values };
+    }
+
     function buildMonthlyBalanceChart() {
       const emptyContainer = document.getElementById('monthly-balance-chart-empty');
       const canvas = document.getElementById('monthlyBalanceChart');
@@ -7610,6 +7653,75 @@
         monthlyBalanceChartInstance.destroy();
         monthlyBalanceChartInstance = null;
       }
+
+      const titleEl = document.getElementById('monthly-balance-chart-title');
+      const subtitleEl = document.getElementById('monthly-balance-chart-subtitle');
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+      // ===== Drill-down: denní vývoj vybraného měsíce =====
+      if (monthlyChartDrill) {
+        const { year, month } = monthlyChartDrill;
+        const { labels, values } = computeMonthlyDailyBalances(year, month);
+        const monthName = new Date(year, month, 1).toLocaleDateString('cs-CZ', { month: 'long', year: 'numeric' });
+        if (titleEl) titleEl.innerText = `${__('Očekávaný zůstatek')} – ${monthName}`;
+        if (subtitleEl) subtitleEl.innerText = __('Denní vývoj v měsíci · klikni pro návrat na měsíce');
+
+        emptyContainer.classList.add('hidden');
+        canvas.style.display = 'block';
+
+        const ctx = canvas.getContext('2d');
+        monthlyBalanceChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: __('Zůstatek'),
+              data: values,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.12)',
+              borderWidth: 3,
+              tension: 0.35,
+              fill: true,
+              pointRadius: 0,
+              pointHoverRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onHover: (e) => { if (e.native) e.native.target.style.cursor = 'pointer'; },
+            onClick: () => { monthlyChartDrill = null; buildMonthlyBalanceChart(); },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#1e293b',
+                bodyColor: isDark ? '#94a3b8' : '#64748b',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 12,
+                callbacks: {
+                  label: function(context) {
+                    return ` ${__('Zůstatek')}: ${formatCurrency(context.raw || 0)}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+              y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 11 }, callback: function(value) { return formatCurrency(value); } } }
+            }
+          }
+        });
+        return;
+      }
+
+      // ===== Přehled po měsících =====
+      if (titleEl) titleEl.innerText = __('Zůstatek po měsících');
+      if (subtitleEl) subtitleEl.innerText = __('Čistý zůstatek jednotlivých měsíců · klikni na měsíc pro denní vývoj');
 
       const now = new Date();
       const select = document.getElementById('global-period-select');
@@ -7635,6 +7747,7 @@
       const labels = [];
       const values = [];
       const highlight = [];
+      const monthsMeta = [];
       let hasData = false;
       for (let i = 11; i >= 0; i--) {
         const d = new Date(anchorYear, anchorMonth - i, 1);
@@ -7643,6 +7756,7 @@
         values.push(bal);
         labels.push(d.toLocaleDateString('cs-CZ', { month: 'short', year: '2-digit' }));
         highlight.push(`${d.getFullYear()}-${d.getMonth()}` === selKey);
+        monthsMeta.push({ year: d.getFullYear(), month: d.getMonth() });
       }
 
       if (!hasData) {
@@ -7652,10 +7766,6 @@
       }
       emptyContainer.classList.add('hidden');
       canvas.style.display = 'block';
-
-      const isDark = document.documentElement.classList.contains('dark');
-      const textColor = isDark ? '#94a3b8' : '#64748b';
-      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
 
       const pointRadius = highlight.map(h => (h ? 6 : 3));
       const pointColors = values.map((v, idx) => highlight[idx] ? '#4f46e5' : (v < 0 ? '#f43f5e' : '#6366f1'));
@@ -7682,6 +7792,19 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          onHover: (e) => { if (e.native) e.native.target.style.cursor = 'pointer'; },
+          onClick: (evt) => {
+            if (!monthlyBalanceChartInstance) return;
+            const nativeEvt = evt.native || evt;
+            const pts = monthlyBalanceChartInstance.getElementsAtEventForMode(nativeEvt, 'index', { intersect: false }, true);
+            if (pts && pts.length) {
+              const meta = monthsMeta[pts[0].index];
+              if (meta) {
+                monthlyChartDrill = { year: meta.year, month: meta.month };
+                buildMonthlyBalanceChart();
+              }
+            }
+          },
           plugins: {
             legend: { display: false },
             tooltip: {
