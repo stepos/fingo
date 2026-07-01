@@ -3141,6 +3141,7 @@
       "Denní vývoj v měsíci · klikni pro návrat na měsíce": { en: "Daily development · click to return to months", de: "Tagesverlauf · zum Zurückkehren klicken" },
       "Čistý zůstatek jednotlivých měsíců (od nuly, bez přenosu)": { en: "Net balance per month (from zero, no carry-over)", de: "Netto-Saldo pro Monat (von null, ohne Übertrag)" },
       "Zůstatek": { en: "Balance", de: "Saldo" },
+      "očekávaná": { en: "expected", de: "erwartet" },
       "Synchronizuji...": { en: "Syncing...", de: "Synchronisieren..." },
       "Chyba připojení": { en: "Connection Error", de: "Verbindungsfehler" },
       "Neaktivní": { en: "Inactive", de: "Inaktiv" },
@@ -7443,65 +7444,23 @@
       
       const year = parseInt(match[1]);
       const month = parseInt(match[2]) - 1; // 0-indexed
-      const numDays = new Date(year, month + 1, 0).getDate();
-      
-      const filteredTransactions = state.transactions.filter(t => {
-        if (!t.date) return false;
-        const tDate = parseDateSafe(t.date);
-        return tDate.getFullYear() === year && tDate.getMonth() === month;
-      });
-      
-      const futurePayments = getFutureRecurringPaymentsThisMonth();
-      
-      if (filteredTransactions.length === 0 && futurePayments.length === 0) {
+
+      // Sdílený výpočet: denní zůstatky + seznam transakcí na každý den (pro tooltip).
+      const { labels, values, items } = computeMonthlyDailyBalances(year, month);
+      const hasData = items.some(list => list.length > 0);
+      if (!hasData) {
         emptyContainer.classList.remove('hidden');
         canvas.style.display = 'none';
         return;
       }
-      
+
       emptyContainer.classList.add('hidden');
       canvas.style.display = 'block';
-      
-      const dailyChanges = Array(numDays + 1).fill(0);
-      
-      // 1. Add actual transactions
-      filteredTransactions.forEach(t => {
-        const day = parseDateSafe(t.date).getDate();
-        if (day >= 1 && day <= numDays) {
-          const amt = Number(t.amount) || 0;
-          if (t.type === 'income') {
-            dailyChanges[day] += amt;
-          } else {
-            dailyChanges[day] -= amt;
-          }
-        }
-      });
-      
-      // 2. Add future expected payments
-      futurePayments.forEach(fp => {
-        const day = parseDateSafe(fp.date).getDate();
-        if (day >= 1 && day <= numDays) {
-          const amt = Number(fp.amount) || 0;
-          if (fp.type === 'income') {
-            dailyChanges[day] += amt;
-          } else {
-            dailyChanges[day] -= amt;
-          }
-        }
-      });
-      
-      // 3. Compute cumulative daily balance
-      const dailyBalances = [];
-      const labels = [];
-      let currentCumulative = 0;
-      
-      for (let d = 1; d <= numDays; d++) {
-        currentCumulative += dailyChanges[d];
-        dailyBalances.push(currentCumulative);
-        labels.push(`${d}. ${month + 1}.`);
-      }
-      
-      // 4. Update the card header final value
+
+      const dailyBalances = values;
+      const currentCumulative = values.length ? values[values.length - 1] : 0;
+
+      // Update the card header final value
       const finalValueEl = document.getElementById('trend-chart-final-value');
       if (finalValueEl) {
         finalValueEl.innerText = formatCurrency(currentCumulative);
@@ -7597,7 +7556,8 @@
                 label: function(context) {
                   const val = context.raw || 0;
                   return ` ${__('Očekávaný zůstatek')}: ${formatCurrency(val)}`;
-                }
+                },
+                afterBody: balanceTooltipAfterBody(items)
               }
             }
           }
@@ -7608,10 +7568,18 @@
     // Liniový graf čistého zůstatku napříč posledními 12 měsíci. Každý měsíc je
     // počítaný od nuly (getMonthEndBalance) — žádný přenos z minulého měsíce.
     // Denní kumulativní zůstatek v daném měsíci (od nuly) — stejná logika jako
-    // hlavní trend graf, ale pro libovolný měsíc. Vrací {labels, values}.
+    // hlavní trend graf, ale pro libovolný měsíc. Vrací {labels, values, items},
+    // kde items[i] je seznam transakcí (i očekávaných plateb) v tom dni, které
+    // změnily zůstatek — pro detailní tooltip.
     function computeMonthlyDailyBalances(year, month) {
       const numDays = new Date(year, month + 1, 0).getDate();
       const dailyChanges = Array(numDays + 1).fill(0);
+      const dayItems = Array.from({ length: numDays + 1 }, () => []);
+
+      const catName = (id) => {
+        const c = (state.categories || []).find(c => c.id === id);
+        return c ? c.name : '';
+      };
 
       (state.transactions || []).forEach(t => {
         if (!t.date) return;
@@ -7621,6 +7589,11 @@
           if (day >= 1 && day <= numDays) {
             const amt = Number(t.amount) || 0;
             dailyChanges[day] += (t.type === 'income') ? amt : -amt;
+            dayItems[day].push({
+              label: t.description || t.notes || t.name || catName(t.category) || (t.type === 'income' ? 'Příjem' : 'Výdaj'),
+              amount: amt,
+              type: t.type
+            });
           }
         }
       });
@@ -7630,18 +7603,41 @@
         if (day >= 1 && day <= numDays) {
           const amt = Number(fp.amount) || 0;
           dailyChanges[day] += (fp.type === 'income') ? amt : -amt;
+          dayItems[day].push({
+            label: (fp.name || catName(fp.category) || 'Platba') + ' (' + __('očekávaná') + ')',
+            amount: amt,
+            type: fp.type
+          });
         }
       });
 
       const values = [];
       const labels = [];
+      const items = [];
       let cum = 0;
       for (let d = 1; d <= numDays; d++) {
         cum += dailyChanges[d];
         values.push(cum);
         labels.push(`${d}. ${month + 1}.`);
+        items.push(dayItems[d]);
       }
-      return { labels, values };
+      return { labels, values, items };
+    }
+
+    // Vrátí callback tooltipu (afterBody) vypisující transakce daného dne pod zůstatek.
+    function balanceTooltipAfterBody(items) {
+      return (ctxArr) => {
+        if (!ctxArr || !ctxArr.length) return '';
+        const list = items[ctxArr[0].dataIndex] || [];
+        if (!list.length) return '';
+        const lines = list.map(it => {
+          const sign = it.type === 'income' ? '+' : '−';
+          let lbl = it.label || '';
+          if (lbl.length > 28) lbl = lbl.slice(0, 27) + '…';
+          return `${sign}${formatCurrency(Math.abs(it.amount))}  ${lbl}`;
+        });
+        return [''].concat(lines);
+      };
     }
 
     function buildMonthlyBalanceChart() {
@@ -7663,7 +7659,7 @@
       // ===== Drill-down: denní vývoj vybraného měsíce =====
       if (monthlyChartDrill) {
         const { year, month } = monthlyChartDrill;
-        const { labels, values } = computeMonthlyDailyBalances(year, month);
+        const { labels, values, items } = computeMonthlyDailyBalances(year, month);
         const monthName = new Date(year, month, 1).toLocaleDateString('cs-CZ', { month: 'long', year: 'numeric' });
         if (titleEl) titleEl.innerText = `${__('Očekávaný zůstatek')} – ${monthName}`;
         if (subtitleEl) subtitleEl.innerText = __('Denní vývoj v měsíci · klikni pro návrat na měsíce');
@@ -7691,6 +7687,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
             onHover: (e) => { if (e.native) e.native.target.style.cursor = 'pointer'; },
             onClick: () => { monthlyChartDrill = null; buildMonthlyBalanceChart(); },
             plugins: {
@@ -7706,7 +7703,8 @@
                 callbacks: {
                   label: function(context) {
                     return ` ${__('Zůstatek')}: ${formatCurrency(context.raw || 0)}`;
-                  }
+                  },
+                  afterBody: balanceTooltipAfterBody(items)
                 }
               }
             },
