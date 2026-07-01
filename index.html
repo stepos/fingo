@@ -6138,51 +6138,53 @@
     }
 
     // Zbývající jistina úvěru ke KONCI zvoleného měsíce (po splátce toho měsíce).
-    // Minulé měsíce se rekonstruují z reálně zaúčtovaných splátek (přičte zpět
-    // jistinové části splátek zaúčtovaných po konci měsíce). Aktuální a budoucí
-    // měsíce se dopočítají amortizací (úrok z klesajícího zůstatku), aby se dluh
-    // mezi měsíci správně snižoval i pro splátky, které ještě nebyly zaúčtovány.
+    // Počítá se čistě amortizací z aktuálního zůstatku (nezávisle na tom, co je
+    // zaznamenané v transakcích): budoucí/aktuální měsíce odečítají naplánované
+    // splátky dopředu, minulé měsíce je obrácenou amortizací přičítají zpět —
+    // dluh tak klesá měsíc po měsíci.
     function getLoanRemainingAtMonthEnd(loan, selYear, selMonth) {
+      const monthly = Number(loan.monthlyPayment) || 0;
       let remaining = Number(loan.remainingAmount) || 0;
+      if (monthly <= 0) return Math.max(0, remaining);
+
+      const startOfMonth = new Date(selYear, selMonth, 1);
       const endOfSel = new Date(selYear, selMonth + 1, 0, 23, 59, 59, 999);
       const now = new Date();
-
-      if (endOfSel < now) {
-        // Minulý měsíc: přičti zpět jistinové části splátek zaúčtovaných PO jeho konci.
-        (state.transactions || []).forEach(t => {
-          if (t && t.loanId === loan.id && typeof t.principalReduction === 'number' && t.date) {
-            if (parseDateSafe(t.date) > endOfSel) remaining += Number(t.principalReduction);
-          }
-        });
-        return Math.max(0, remaining);
-      }
-
-      // Aktuální / budoucí měsíc: dopočítej amortizací naplánované splátky od
-      // nejbližší po dnešku až do konce zvoleného měsíce (už zaúčtované jsou v remaining).
-      const monthly = Number(loan.monthlyPayment) || 0;
-      if (monthly <= 0) return Math.max(0, remaining);
       const rate = Number(loan.interestRate || 0) / 100 / 12;
       const bookingDay = String(loan.startDate).includes('-')
         ? parseDateSafe(loan.startDate).getDate()
         : (parseInt(loan.startDate) || 15);
-      const loanStart = String(loan.startDate).includes('-') ? parseDateSafe(loan.startDate) : null;
       const loanEnd = loan.endDate ? parseDateSafe(loan.endDate) : null;
       const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      let iter = new Date(now.getFullYear(), now.getMonth(), 1);
-      while (iter <= endOfSel && remaining > 0) {
-        const y = iter.getFullYear();
-        const m = iter.getMonth();
+      const curStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const payDayOf = (y, m) => {
         const dim = new Date(y, m + 1, 0).getDate();
-        const payDate = new Date(y, m, Math.min(bookingDay, dim));
-        if (payDate > today0 && payDate <= endOfSel
-            && (!loanStart || payDate >= loanStart)
-            && (!loanEnd || payDate <= loanEnd)) {
-          const interest = remaining * rate;
-          const principal = Math.max(0, Math.min(remaining, monthly - interest));
-          remaining -= principal;
+        return new Date(y, m, Math.min(bookingDay, dim));
+      };
+
+      if (endOfSel >= now) {
+        // Budoucí/aktuální měsíc: odečti naplánované splátky od dneška do konce měsíce.
+        let iter = new Date(curStart);
+        while (iter <= endOfSel && remaining > 0) {
+          const pd = payDayOf(iter.getFullYear(), iter.getMonth());
+          if (pd > today0 && pd <= endOfSel && (!loanEnd || pd <= loanEnd)) {
+            const interest = remaining * rate;
+            const principal = Math.max(0, Math.min(remaining, monthly - interest));
+            remaining -= principal;
+          }
+          iter = new Date(iter.getFullYear(), iter.getMonth() + 1, 1);
         }
-        iter = new Date(y, m + 1, 1);
+      } else {
+        // Minulý měsíc: přičti zpět (obrácenou amortizací) splátky provedené PO jeho konci.
+        // Obrácení kroku „after = before*(1+rate) − monthly" ⇒ before = (after + monthly)/(1+rate).
+        let iter = new Date(curStart);
+        while (iter > startOfMonth) {
+          const pd = payDayOf(iter.getFullYear(), iter.getMonth());
+          if (pd > endOfSel && pd <= today0 && (!loanEnd || pd <= loanEnd)) {
+            remaining = (remaining + monthly) / (1 + rate);
+          }
+          iter = new Date(iter.getFullYear(), iter.getMonth() - 1, 1);
+        }
       }
       return Math.max(0, remaining);
     }
