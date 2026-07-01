@@ -6137,6 +6137,56 @@
       return net;
     }
 
+    // Zbývající jistina úvěru ke KONCI zvoleného měsíce (po splátce toho měsíce).
+    // Minulé měsíce se rekonstruují z reálně zaúčtovaných splátek (přičte zpět
+    // jistinové části splátek zaúčtovaných po konci měsíce). Aktuální a budoucí
+    // měsíce se dopočítají amortizací (úrok z klesajícího zůstatku), aby se dluh
+    // mezi měsíci správně snižoval i pro splátky, které ještě nebyly zaúčtovány.
+    function getLoanRemainingAtMonthEnd(loan, selYear, selMonth) {
+      let remaining = Number(loan.remainingAmount) || 0;
+      const endOfSel = new Date(selYear, selMonth + 1, 0, 23, 59, 59, 999);
+      const now = new Date();
+
+      if (endOfSel < now) {
+        // Minulý měsíc: přičti zpět jistinové části splátek zaúčtovaných PO jeho konci.
+        (state.transactions || []).forEach(t => {
+          if (t && t.loanId === loan.id && typeof t.principalReduction === 'number' && t.date) {
+            if (parseDateSafe(t.date) > endOfSel) remaining += Number(t.principalReduction);
+          }
+        });
+        return Math.max(0, remaining);
+      }
+
+      // Aktuální / budoucí měsíc: dopočítej amortizací naplánované splátky od
+      // nejbližší po dnešku až do konce zvoleného měsíce (už zaúčtované jsou v remaining).
+      const monthly = Number(loan.monthlyPayment) || 0;
+      if (monthly <= 0) return Math.max(0, remaining);
+      const rate = Number(loan.interestRate || 0) / 100 / 12;
+      const bookingDay = String(loan.startDate).includes('-')
+        ? parseDateSafe(loan.startDate).getDate()
+        : (parseInt(loan.startDate) || 15);
+      const loanStart = String(loan.startDate).includes('-') ? parseDateSafe(loan.startDate) : null;
+      const loanEnd = loan.endDate ? parseDateSafe(loan.endDate) : null;
+      const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      let iter = new Date(now.getFullYear(), now.getMonth(), 1);
+      while (iter <= endOfSel && remaining > 0) {
+        const y = iter.getFullYear();
+        const m = iter.getMonth();
+        const dim = new Date(y, m + 1, 0).getDate();
+        const payDate = new Date(y, m, Math.min(bookingDay, dim));
+        if (payDate > today0 && payDate <= endOfSel
+            && (!loanStart || payDate >= loanStart)
+            && (!loanEnd || payDate <= loanEnd)) {
+          const interest = remaining * rate;
+          const principal = Math.max(0, Math.min(remaining, monthly - interest));
+          remaining -= principal;
+        }
+        iter = new Date(y, m + 1, 1);
+      }
+      return Math.max(0, remaining);
+    }
+
     function getFutureRecurringPaymentsForMonth(year, month) {
       const now = new Date();
       now.setHours(0, 0, 0, 0);
@@ -6438,10 +6488,14 @@
       const match = period.match(/^(\d{4})-(\d{2})$/);
       let isFutureMonth = false;
       let isPastMonth = false;
+      let selYear = null;
+      let selMonth = null;
       const nowVal = new Date();
       if (match) {
         const year = parseInt(match[1]);
         const month = parseInt(match[2]) - 1;
+        selYear = year;
+        selMonth = month;
         if (year > nowVal.getFullYear() || (year === nowVal.getFullYear() && month > nowVal.getMonth())) {
           isFutureMonth = true;
         } else if (year < nowVal.getFullYear() || (year === nowVal.getFullYear() && month < nowVal.getMonth())) {
@@ -6472,8 +6526,12 @@
                 const details = calculateLoanEndDetails(loan.startDate, loan.duration, loan.durationUnit, loan.endDate);
                 if (!details.isExpired) {
                   totalOriginal += Number(loan.totalAmount);
-                  totalRemaining += Number(loan.remainingAmount);
-                  
+                  // Dluh ke konci vybraného měsíce (ne jen aktuální stav), aby mezi
+                  // měsíci správně klesal. Bez konkrétního měsíce = aktuální zůstatek.
+                  totalRemaining += (selYear !== null)
+                    ? getLoanRemainingAtMonthEnd(loan, selYear, selMonth)
+                    : Number(loan.remainingAmount);
+
                   const monthly = Number(loan.monthlyPayment);
                   totalMonthly += monthly;
                   
