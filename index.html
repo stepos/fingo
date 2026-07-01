@@ -1044,6 +1044,27 @@
         </div>
       </div>
 
+      <!-- Monthly Balance Trend Chart (across months) -->
+      <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h4 class="font-bold text-slate-900 text-base" id="monthly-balance-chart-title">Zůstatek po měsících</h4>
+            <p class="text-xs text-slate-400 font-medium" id="monthly-balance-chart-subtitle">Čistý zůstatek jednotlivých měsíců (od nuly, bez přenosu)</p>
+          </div>
+        </div>
+        <div class="relative">
+          <div id="monthly-balance-chart-empty" class="hidden text-center p-6">
+            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mx-auto mb-3">
+              <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm font-medium text-slate-500">Nedostatek dat pro zobrazení trendu</p>
+          </div>
+          <div class="w-full h-[240px]" id="monthly-balance-chart-container">
+            <canvas id="monthlyBalanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <!-- Costs by Categories Section -->
       <div class="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 shadow-card">
         <div class="flex items-center justify-between mb-6">
@@ -3115,6 +3136,9 @@
       "Cloud Synchronizace": { en: "Cloud Sync", de: "Cloud-Synchronisation" },
       "Synchronizovat nyní": { en: "Sync Now", de: "Jetzt synchronisieren" },
       "Synchronizováno": { en: "Synced", de: "Synchronisiert" },
+      "Zůstatek po měsících": { en: "Balance by month", de: "Saldo nach Monaten" },
+      "Čistý zůstatek jednotlivých měsíců (od nuly, bez přenosu)": { en: "Net balance per month (from zero, no carry-over)", de: "Netto-Saldo pro Monat (von null, ohne Übertrag)" },
+      "Zůstatek": { en: "Balance", de: "Saldo" },
       "Synchronizuji...": { en: "Syncing...", de: "Synchronisieren..." },
       "Chyba připojení": { en: "Connection Error", de: "Verbindungsfehler" },
       "Neaktivní": { en: "Inactive", de: "Inaktiv" },
@@ -3774,6 +3798,7 @@
     let categoryChartPaidInstance = null;
     let categoryChartTotalInstance = null;
     let trendChartInstance = null;
+    let monthlyBalanceChartInstance = null;
 
 
 
@@ -6960,6 +6985,7 @@
     function buildCharts(filteredTransactions) {
       buildCategoryChart(filteredTransactions);
       buildTrendChart();
+      buildMonthlyBalanceChart();
     }
 
     window.highlightChartSlice = function(idx) {
@@ -7506,6 +7532,124 @@
                   const val = context.raw || 0;
                   return ` ${__('Očekávaný zůstatek')}: ${formatCurrency(val)}`;
                 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Liniový graf čistého zůstatku napříč posledními 12 měsíci. Každý měsíc je
+    // počítaný od nuly (getMonthEndBalance) — žádný přenos z minulého měsíce.
+    function buildMonthlyBalanceChart() {
+      const emptyContainer = document.getElementById('monthly-balance-chart-empty');
+      const canvas = document.getElementById('monthlyBalanceChart');
+      if (!canvas || !emptyContainer) return;
+
+      if (monthlyBalanceChartInstance) {
+        monthlyBalanceChartInstance.destroy();
+        monthlyBalanceChartInstance = null;
+      }
+
+      const now = new Date();
+      const select = document.getElementById('global-period-select');
+      const period = select ? select.value : '';
+      const match = period.match(/^(\d{4})-(\d{2})$/);
+
+      // Kotva okna = pozdější z aktuálního a vybraného měsíce (kvůli budoucím měsícům),
+      // aby graf vždy odpovídal výběru v pickeru a zároveň zahrnul dění do teď.
+      let anchorYear = now.getFullYear();
+      let anchorMonth = now.getMonth();
+      let selKey = `${now.getFullYear()}-${now.getMonth()}`;
+      if (match) {
+        const y = parseInt(match[1]);
+        const m = parseInt(match[2]) - 1;
+        selKey = `${y}-${m}`;
+        const sel = new Date(y, m, 1);
+        const cur = new Date(now.getFullYear(), now.getMonth(), 1);
+        const anchor = sel > cur ? sel : cur;
+        anchorYear = anchor.getFullYear();
+        anchorMonth = anchor.getMonth();
+      }
+
+      const labels = [];
+      const values = [];
+      const highlight = [];
+      let hasData = false;
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(anchorYear, anchorMonth - i, 1);
+        const bal = getMonthEndBalance(d.getFullYear(), d.getMonth());
+        if (bal !== 0) hasData = true;
+        values.push(bal);
+        labels.push(d.toLocaleDateString('cs-CZ', { month: 'short', year: '2-digit' }));
+        highlight.push(`${d.getFullYear()}-${d.getMonth()}` === selKey);
+      }
+
+      if (!hasData) {
+        emptyContainer.classList.remove('hidden');
+        canvas.style.display = 'none';
+        return;
+      }
+      emptyContainer.classList.add('hidden');
+      canvas.style.display = 'block';
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+      const pointRadius = highlight.map(h => (h ? 6 : 3));
+      const pointColors = values.map((v, idx) => highlight[idx] ? '#4f46e5' : (v < 0 ? '#f43f5e' : '#6366f1'));
+
+      const ctx = canvas.getContext('2d');
+      monthlyBalanceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: __('Zůstatek'),
+            data: values,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+            borderWidth: 3,
+            tension: 0.35,
+            fill: true,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: pointColors,
+            pointRadius: pointRadius,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              titleColor: isDark ? '#ffffff' : '#1e293b',
+              bodyColor: isDark ? '#94a3b8' : '#64748b',
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 12,
+              callbacks: {
+                label: function(context) {
+                  return ` ${__('Zůstatek')}: ${formatCurrency(context.raw || 0)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor, drawBorder: false },
+              ticks: { color: textColor, font: { size: 11 } }
+            },
+            y: {
+              grid: { color: gridColor, drawBorder: false },
+              ticks: {
+                color: textColor,
+                font: { size: 11 },
+                callback: function(value) { return formatCurrency(value); }
               }
             }
           }
