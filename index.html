@@ -5779,6 +5779,14 @@
           pageTitle.innerText = "Správa transakcí";
           pageSubtitle.innerText = "Přidávejte a filtrujte okamžité finanční transakce";
           populateCategorySelect('trans-category');
+          // Předvyplň naposledy použitou kategorii; při prvním použití „Jídlo".
+          (function () {
+            const lastCat = safeStorage.getItem('fingo_last_category') || 'cat-jidlo';
+            const catSel = document.getElementById('trans-category');
+            if (catSel && [...catSel.options].some(o => o.value === lastCat)) {
+              catSel.value = lastCat;
+            }
+          })();
           switchTransSubTab('form');
           clearBulkSelection();
           filterHistory();
@@ -7941,7 +7949,10 @@
         showToast("Částka musí být kladné číslo", "error");
         return;
       }
-      
+
+      // Zapamatuj kategorii pro předvyplnění příští nové transakce.
+      safeStorage.setItem('fingo_last_category', category);
+
       const newTransaction = {
         id: 't-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
         type,
