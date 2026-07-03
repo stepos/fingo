@@ -831,6 +831,12 @@
             </div>
           </div>
 
+          <!-- Kumulativní stav: součet čistých (očekávaných) zůstatků všech měsíců až po vybraný měsíc (přenáší se, záporný měsíc ho sníží) -->
+          <div id="stat-cumulative-balance-wrapper" class="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] md:text-xs text-indigo-200">
+            <span>Kumulativní stav (celá historie):</span>
+            <strong id="stat-cumulative-balance" class="font-bold text-emerald-300">0,00 Kč</strong>
+          </div>
+
           <div class="mt-4 flex items-center gap-2 text-[10px] md:text-xs text-slate-400">
             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/35">
               <i data-lucide="info" class="w-3.5 h-3.5 text-slate-200"></i>
@@ -2946,7 +2952,7 @@
         <i data-lucide="info" class="w-6 h-6"></i>
       </div>
       <h3 class="text-lg font-black text-slate-900 dark:text-slate-100 mb-2">Informace o softwaru</h3>
-      
+
       <div class="space-y-4 my-6 text-xs text-slate-600 dark:text-slate-400">
         <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/60">
           <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Aplikace</span>
@@ -3165,6 +3171,7 @@
       // Dashboard Cards
       "Aktuální čistý zůstatek": { en: "Current Net Balance", de: "Aktueller Netto-Saldo" },
       "Očekávaný zůstatek (koncem měsíce):": { en: "Projected balance (end of month):", de: "Prognostizierter Saldo (Monatsende):" },
+      "Kumulativní stav (celá historie):": { en: "Cumulative balance (full history):", de: "Kumulierter Stand (gesamte Historie):" },
       "Očekávaný zůstatek": { en: "Expected Balance", de: "Erwarteter Kontostand" },
       "Kompletní bilance účtu": { en: "Complete account balance", de: "Vollständiger Kontosaldo" },
       "Příjmy": { en: "Income", de: "Einnahmen" },
@@ -6144,6 +6151,27 @@
       return net;
     }
 
+    // Kumulativní stav: součet čistých (očekávaných) zůstatků VŠECH měsíců od
+    // nejstaršího záznamu až po referenční (vybraný) měsíc. Na rozdíl od měsíčního
+    // zůstatku se PŘENÁŠÍ — záporný měsíc kumulativní stav sníží.
+    function getCumulativeBalanceUpTo(refYear, refMonth) {
+      let earliest = null;
+      (state.transactions || []).forEach(t => {
+        if (!t.date) return;
+        const d = parseDateSafe(t.date);
+        const ym = d.getFullYear() * 12 + d.getMonth();
+        if (earliest === null || ym < earliest) earliest = ym;
+      });
+      const refIndex = refYear * 12 + refMonth;
+      const startIndex = (earliest === null) ? refIndex : Math.min(earliest, refIndex);
+      let total = 0;
+      let guard = 0;
+      for (let idx = startIndex; idx <= refIndex && guard < 600; idx++, guard++) {
+        total += getMonthEndBalance(Math.floor(idx / 12), idx % 12);
+      }
+      return total;
+    }
+
     // Zbývající jistina úvěru ke KONCI zvoleného měsíce (po splátce toho měsíce).
     // Počítá se čistě amortizací z aktuálního zůstatku (nezávisle na tom, co je
     // zaznamenané v transakcích): budoucí/aktuální měsíce odečítají naplánované
@@ -6395,6 +6423,21 @@
         } else {
           projectedWrapper.classList.add('hidden');
         }
+      }
+
+      // Kumulativní stav: součet měsíční historie + očekávaný zůstatek až po
+      // vybraný měsíc (podle roletky období; jinak aktuální měsíc).
+      const cumEl = document.getElementById('stat-cumulative-balance');
+      if (cumEl) {
+        const periodSel = document.getElementById('global-period-select');
+        const periodVal = periodSel ? periodSel.value : '';
+        const periodMatch = periodVal.match(/^(\d{4})-(\d{2})$/);
+        const nowRef = new Date();
+        const refYear = periodMatch ? parseInt(periodMatch[1]) : nowRef.getFullYear();
+        const refMonth = periodMatch ? (parseInt(periodMatch[2]) - 1) : nowRef.getMonth();
+        const cumulative = getCumulativeBalanceUpTo(refYear, refMonth);
+        cumEl.innerText = formatCurrency(cumulative);
+        cumEl.className = "font-bold " + (cumulative >= 0 ? 'text-emerald-300' : 'text-rose-300');
       }
       
       // Zobrazení a naplnění informací o budoucích platbách do konce měsíce
